@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 Plataforma Bolsa de Trabajo Universitaria
 
-## Getting Started
+Este proyecto es una plataforma web construida con Next.js 15, Prisma y MySQL. Permite a estudiantes, egresados y empresas interactuar mediante vacantes, postulaciones y prácticas profesionales. Incluye autenticación por Google OAuth.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Requisitos
+
+- Node.js v18+
+- MySQL instalado (local o remoto)
+- Yarn o npm
+
+---
+
+## 🧪 Variables de entorno
+
+Crea un archivo `.env` en la raíz con lo siguiente:
+
+```env
+DATABASE_URL="mysql://usuario:contraseña@localhost:3306/bolsa_trabajo"
+
+GOOGLE_CLIENT_ID="TU_CLIENT_ID"
+GOOGLE_CLIENT_SECRET="TU_CLIENT_SECRET"
+
+NEXTAUTH_SECRET="clave_segura_generada"
+NEXTAUTH_URL="http://localhost:3000"
+```
+## Instalación del proyecto
+```
+git clone https://github.com/tu_usuario/bolsa-trabajo.git
+cd bolsa-trabajo
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Prisma migración del clienet
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Crear las tablas en la base de datos
+`npx prisma migrate dev --name init`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Generar el cliente de Prisma
+`npx prisma generate`
 
-## Learn More
+# Autenticación Google OAuth
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+El proyecto utiliza google OAuth para el login y obtención de datos.

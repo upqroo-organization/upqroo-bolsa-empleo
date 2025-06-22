@@ -1,0 +1,249 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoUsuario {
+  persona
+  empresa
+}
+
+enum TipoPersona {
+  alumno
+  egresado
+  publico
+}
+
+enum EstadoPostulacion {
+  pendiente
+  aceptada
+  rechazada
+}
+
+enum TipoEmpleo {
+  Tiempo_completo
+  Medio_tiempo
+  Remoto
+  Practicas
+  Temporal
+  Freelance
+}
+
+enum TipoDocumento {
+  propuesta
+  reporte_parcial
+  reporte_final
+  carta_aceptacion
+  carta_liberacion
+  otro
+}
+
+enum EstadoRevision {
+  pendiente
+  aprobado
+  rechazado
+}
+
+model Usuario {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  contraseña_hash String?
+  foto_url        String?          @db.VarChar(255)
+  tipo_usuario    TipoUsuario
+  esta_activo     Boolean          @default(true)
+  fecha_creacion  DateTime         @default(now())
+
+  persona         Persona?
+  empresa         Empresa?
+  administrativo  Administrativo?
+  roles           UsuarioRol[]
+  tutor_en        PracticaProfesional[] @relation("Tutor")
+  accounts        Account[]
+  sessions        Session[]
+}
+
+model Persona {
+  usuario_id     String   @id
+  nombre         String
+  apellidos      String
+  curp           String?  @db.VarChar(18)
+  telefono       String?  @db.VarChar(20)
+  tipo_persona   TipoPersona
+  cv_url         String?  @db.VarChar(255)
+
+  usuario        Usuario  @relation(fields: [usuario_id], references: [id])
+  postulaciones  Postulacion[]
+}
+
+model Administrativo {
+  usuario_id String @id
+  nombre     String
+  apellidos  String
+  telefono   String?
+  puesto     String
+
+  usuario    Usuario @relation(fields: [usuario_id], references: [id])
+}
+
+model Empresa {
+  usuario_id               String   @id
+  nombre_empresa           String
+  rfc                      String?  @db.VarChar(13)
+  sitio_web                String?  @db.VarChar(255)
+  linkedin                 String?  @db.VarChar(255)
+  direccion                String
+  ciudad                   String
+  estado                   String
+  codigo_postal            String   @db.VarChar(10)
+  contacto_nombre_completo String
+  contacto_cargo           String
+  contacto_correo          String
+  contacto_telefono        String   @db.VarChar(20)
+  anio_fundacion           Int?
+  numero_empleados         Int?
+  beneficios               String?
+  cultura_organizacional   String?
+
+  usuario                  Usuario @relation(fields: [usuario_id], references: [id])
+  vacantes                 Vacante[]
+}
+
+model Rol {
+  id         Int           @id @default(autoincrement())
+  nombre_rol String        @unique
+  usuarios   UsuarioRol[]
+}
+
+model UsuarioRol {
+  usuario_id String
+  rol_id     Int
+
+  usuario    Usuario @relation(fields: [usuario_id], references: [id])
+  rol        Rol     @relation(fields: [rol_id], references: [id])
+
+  @@id([usuario_id, rol_id])
+}
+
+model Carrera {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @unique
+  vacantes Vacante[]
+}
+
+model Vacante {
+  id                 Int              @id @default(autoincrement())
+  titulo             String
+  empresa            String
+  ubicacion          String
+  tipo_empleo        TipoEmpleo
+  rango_salarial_min Decimal?         @db.Decimal(10, 2)
+  rango_salarial_max Decimal?         @db.Decimal(10, 2)
+  descripcion        String
+  fecha_publicacion  DateTime         @default(now())
+  activo             Boolean          @default(true)
+  carrera_id         Int?
+  id_empresa         String?
+
+  carrera            Carrera?         @relation(fields: [carrera_id], references: [id])
+  empresaRef         Empresa?         @relation(fields: [id_empresa], references: [usuario_id])
+  postulaciones      Postulacion[]
+}
+
+model Postulacion {
+  id               Int                 @id @default(autoincrement())
+  persona_id       String
+  vacante_id       Int
+  fecha_postulacion DateTime          @default(now())
+  estado           EstadoPostulacion  @default(pendiente)
+  cv_url           String?            @db.VarChar(255)
+
+  persona          Persona            @relation(fields: [persona_id], references: [usuario_id])
+  vacante          Vacante            @relation(fields: [vacante_id], references: [id])
+  practica         PracticaProfesional?
+}
+
+model PracticaProfesional {
+  id               Int              @id @default(autoincrement())
+  postulacion_id   Int              @unique
+  fecha_inicio     DateTime
+  fecha_fin        DateTime
+  horas_registradas Int             @default(0)
+  supervisor_nombre String
+  supervisor_email  String?
+  tutor_id          String
+
+  postulacion       Postulacion     @relation(fields: [postulacion_id], references: [id])
+  tutor             Usuario         @relation("Tutor", fields: [tutor_id], references: [id])
+  registros_horas   RegistroHora[]
+  documentos        DocumentoPractica[]
+}
+
+model RegistroHora {
+  id          Int      @id @default(autoincrement())
+  practica_id Int
+  fecha       DateTime
+  horas       Int
+  descripcion String?
+
+  practica    PracticaProfesional @relation(fields: [practica_id], references: [id])
+}
+
+model DocumentoPractica {
+  id              Int              @id @default(autoincrement())
+  practica_id     Int
+  tipo            TipoDocumento
+  titulo          String
+  url             String
+  fecha_subida    DateTime         @default(now())
+  estado_revision EstadoRevision   @default(pendiente)
+  fecha_revision  DateTime?
+  observaciones   String?
+
+  practica        PracticaProfesional @relation(fields: [practica_id], references: [id])
+}
+
+model Account {
+  id                 String   @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  access_token       String?  @db.Text
+  refresh_token      String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user               Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
