@@ -1,28 +1,12 @@
-import NextAuth from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
+import { Adapter } from 'next-auth/adapters';
 
-// Extend the Session and User types to include 'id'
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    };
-  }
-  interface User {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  }
-}
-
-const handler = NextAuth({
-  adapter: PrismaAdapter(prisma),
+// Define la configuración de NextAuth
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma) as Adapter, // Asegura que es compatible
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -30,43 +14,61 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
+    // Este callback se ejecuta en cada login
     async signIn({ user }) {
-      // Solo permitimos registro de personas
-      await prisma.usuario.upsert({
-        where: { email: user.email! },
-        update: {}, // ya existe
-        create: {
-          email: user.email!,
-          contraseña_hash: '', // no aplica con OAuth
-          tipo_usuario: 'persona',
-          foto_url: user.image,
-          persona: {
-            create: {
-              nombre: user.name?.split(' ')[0] ?? '',
-              apellidos: user.name?.split(' ').slice(1).join(' ') ?? '',
-              tipo_persona: 'publico',
+      if (!user.email) return false;
+
+      const existingUser = await prisma.usuario.findUnique({
+        where: { email: user.email },
+        include: { persona: true },
+      });
+
+      if (!existingUser) {
+        // Usuario no existe en nuestra tabla personalizada, lo creamos
+        await prisma.usuario.create({
+          data: {
+            email: user.email,
+            contraseña_hash: '', // OAuth no usa contraseña
+            tipo_usuario: 'persona',
+            foto_url: user.image ?? null,
+            persona: {
+              create: {
+                nombre: user.name?.split(' ')[0] ?? 'Nombre',
+                apellidos: user.name?.split(' ').slice(1).join(' ') ?? 'Apellido',
+                tipo_persona: 'publico',
+              },
             },
           },
-        },
-      });
+        });
+      }
 
       return true;
     },
-    async session({ session, user }) {
-      // Puedes extender la sesión con más info si lo deseas
+
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = token.sub!;
       }
       return session;
     },
+
+    async jwt({ token, user }) {
+      // Solo se llena al momento del login
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
   },
   pages: {
-    signIn: '/login', // puedes personalizar tu login
+    signIn: '/login',
   },
   session: {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
 
+// Exporta el handler como API de Next.js (GET y POST)
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
