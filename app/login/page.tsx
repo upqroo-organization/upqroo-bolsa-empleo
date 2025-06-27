@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,14 +7,19 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Mail, Lock } from "lucide-react"
+import { signIn } from 'next-auth/react'
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 
 export default function LoginPage() {
+  const handleGoogleSignIn = async () => {
+    await signIn('google', { callbackUrl: '/redirect' })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <img src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
+          <img width={100} height={100} src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
           <p className="text-gray-600 mt-2">Bolsa de Trabajo Universitaria</p>
         </div>
 
@@ -29,9 +36,9 @@ export default function LoginPage() {
               </TabsList>
 
               <TabsContent value="student" className="space-y-4">
-                <Button className="w-full" variant="outline">
+                <Button onClick={handleGoogleSignIn} className="w-full" variant="outline">
                   <Chrome className="mr-2 h-4 w-4" />
-                  Continuar con Google Institucional
+                  Iniciar sesión
                 </Button>
                 <div className="text-center text-sm text-gray-500">Usa tu cuenta @upqroo.edu.mx</div>
               </TabsContent>

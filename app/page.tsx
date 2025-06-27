@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Users, Building2, GraduationCap, TrendingUp } from "lucide-react"
+import { Search, Users, Building2, GraduationCap, TrendingUp, LogIn } from "lucide-react"
+import Link from "next/link"
 
 export default function LandingPage() {
   return (
@@ -16,12 +17,12 @@ export default function LandingPage() {
             próxima oportunidad profesional o el talento que tu empresa necesita.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-              Buscar Empleos
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-              Publicar Vacante
-            </Button>
+            <Link href="/login">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+                <LogIn/>
+                Iniciar sesión
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
