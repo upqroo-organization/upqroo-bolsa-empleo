@@ -11,14 +11,16 @@ export default function Page() {
   useEffect(() => {
     if (status === "loading") return;
 
-    const role = "admin"; // Default role, replace with actual logic to get user role from session or database
-
-    if (role === "admin") {
-      router.replace("/admin");
-    } else if (role === "student") {
-      router.replace("/student");
-    } else {
-      router.replace("/");
+    switch (session?.user?.role) {
+      case "admin":
+        router.replace("/admin");
+        break;
+      case "student":
+        router.replace("/client");
+        break;
+      default:
+        router.replace("/");
+        break;
     }
   }, [session, status, router]);
 

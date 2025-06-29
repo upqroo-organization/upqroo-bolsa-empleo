@@ -33,7 +33,7 @@ export default function LandingPage() {
           <div className="flex gap-4 items-center">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
+              <Input name="text" placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
             </div>
             <Button size="lg">Buscar</Button>
           </div>

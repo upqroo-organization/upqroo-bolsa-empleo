@@ -1,10 +1,10 @@
-# 🧠 Plataforma Bolsa de Trabajo Universitaria
+# 🧠 UPQROO Bolsa de Trabajo Universitaria
 
-Este proyecto es una plataforma web construida con Next.js 15, Prisma y MySQL. Permite a estudiantes, egresados y empresas interactuar mediante vacantes, postulaciones y prácticas profesionales. Incluye autenticación por Google OAuth.
+This project is a web platform built with Next.js 15, Prisma, and MySQL. It enables students, graduates, and companies to interact through job postings, applications, and professional internships. Google OAuth authentication is included.
 
 ---
 
-## 🚀 Requisitos
+## 🚀 Requirements
 
 - Node.js v18+
 - MySQL instalado (local o remoto)
@@ -12,9 +12,9 @@ Este proyecto es una plataforma web construida con Next.js 15, Prisma y MySQL. P
 
 ---
 
-## 🧪 Variables de entorno
+## 🧪 Eviroment variables
 
-Crea un archivo `.env` en la raíz con lo siguiente:
+Create a `.env` file on the project root with the following information (ask to project administator for the actual variables):
 
 ```env
 DATABASE_URL="mysql://usuario:contraseña@localhost:3306/bolsa_trabajo"
@@ -25,21 +25,52 @@ GOOGLE_CLIENT_SECRET="TU_CLIENT_SECRET"
 NEXTAUTH_SECRET="clave_segura_generada"
 NEXTAUTH_URL="http://localhost:3000"
 ```
-## Instalación del proyecto
+
+## Project installation
+
 ```
 git clone https://github.com/tu_usuario/bolsa-trabajo.git
 cd bolsa-trabajo
 npm install
 ```
 
-# Prisma migración del clienet
+# Google OAuth Auth
 
-# Crear las tablas en la base de datos
-`npx prisma migrate dev --name init`
+This project is using the Google OAuth auth provided by Google Cloud Service
 
-# Generar el cliente de Prisma
-`npx prisma generate`
+# 📘 Prisma Command Reference
 
-# Autenticación Google OAuth
+This project uses [Prisma](https://www.prisma.io/) as the ORM for MySQL. Below are the most useful commands for managing the database schema, generating the client, and working with seed data.
 
-El proyecto utiliza google OAuth para el login y obtención de datos.
+- Note: Please check the available commands written on `package.json` file.
+
+---
+
+## ⚙️ Initialization & Setup (Needed to setup the project on your local machine)
+
+```bash
+npx prisma init
+npx prisma generate
+```
+
+## 🔄 Migrations & Schema Changes
+
+```bash
+npx prisma migrate dev --name your_migration_name
+npx prisma migrate reset
+npx prisma migrate deploy
+npx prisma db push
+npx prisma db pull
+```
+
+## 🔍 Database Visualization
+
+```bash
+npx prisma studio
+```
+
+## 🌱 Seeding the Database
+
+```bash
+npx prisma db seed
+```

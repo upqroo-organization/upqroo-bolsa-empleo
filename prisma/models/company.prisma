@@ -1,0 +1,32 @@
+model company {
+  id          String  @id @default(cuid())
+  name        String
+  email       String? @unique
+  password    String? // Optional: Only for company accounts that require a password
+  description String?
+  logoUrl     String?
+  websiteUrl  String?
+  rfc         String? @unique // RFC number or identifier for the company
+  // Optional: Add fields for address, contact info, etc.
+  city        String?
+  state       String?
+  country     String?
+  address     String?
+  zipCode     String?
+  phone       String?
+
+  fundationDate       DateTime? // Date when the company was founded
+  industry            String? // Industry sector the company operates
+  organizationCulture String? // Description of the company's culture
+  size                String? // Size of the company (e.g., small, medium, large
+  isApprove           Boolean   @default(false) // Indicates if the company is approved for job postings
+
+  contactName     String? // Name of the primary contact person
+  contactEmail    String? // Email of the primary contact person
+  contactPhone    String? // Phone number of the primary contact person
+  contactPosition String? // Position of the primary contact person
+  companyRole     String? // Role of the primary contact person in the company
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

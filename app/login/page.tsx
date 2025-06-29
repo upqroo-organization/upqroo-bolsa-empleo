@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Mail, Lock } from "lucide-react"
 import { signIn } from 'next-auth/react'
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function LoginPage() {
   const handleGoogleSignIn = async () => {
@@ -19,7 +21,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <img width={100} height={100} src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
+          <Image width={100} height={100} src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
           <p className="text-gray-600 mt-2">Bolsa de Trabajo Universitaria</p>
         </div>
 
@@ -71,9 +73,11 @@ export default function LoginPage() {
 
             <div className="text-center space-y-2">
               <p className="text-sm text-gray-600">¿No tienes cuenta?</p>
-              <Button variant="outline" className="w-full">
-                Registrarse
-              </Button>
+              <Link href="/signup" className="w-full">
+                <Button variant="outline" className="w-full">
+                  Registrarse
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

@@ -1,0 +1,32 @@
+-- CreateTable
+CREATE TABLE `company` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NULL,
+    `password` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NULL,
+    `logoUrl` VARCHAR(191) NULL,
+    `websiteUrl` VARCHAR(191) NULL,
+    `rfc` VARCHAR(191) NULL,
+    `city` VARCHAR(191) NULL,
+    `state` VARCHAR(191) NULL,
+    `country` VARCHAR(191) NULL,
+    `address` VARCHAR(191) NULL,
+    `zipCode` VARCHAR(191) NULL,
+    `phone` VARCHAR(191) NULL,
+    `fundationDate` DATETIME(3) NULL,
+    `industry` VARCHAR(191) NULL,
+    `organizationCulture` VARCHAR(191) NULL,
+    `size` VARCHAR(191) NULL,
+    `contactName` VARCHAR(191) NULL,
+    `contactEmail` VARCHAR(191) NULL,
+    `contactPhone` VARCHAR(191) NULL,
+    `contactPosition` VARCHAR(191) NULL,
+    `companyRole` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `company_email_key`(`email`),
+    UNIQUE INDEX `company_rfc_key`(`rfc`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
