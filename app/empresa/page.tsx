@@ -1,3 +1,4 @@
+'use client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,8 +18,10 @@ import {
   BarChart3,
   Target,
 } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 export default function CompanyDashboard() {
+  const { data: user } = useSession();
   const stats = [
     {
       icon: FileText,
@@ -127,14 +130,10 @@ export default function CompanyDashboard() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">Dashboard Empresa</h1>
-            <p className="text-muted-foreground">TechCorp México - Bienvenido de vuelta</p>
+            <p className="text-muted-foreground">{user?.user.name} - Bienvenido de vuelta</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <BarChart3 className="mr-2 h-4 w-4" />
-            Reportes
-          </Button>
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Publicar Vacante

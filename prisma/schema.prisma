@@ -86,7 +86,8 @@ model Authenticator {
 }
 
 model role {
-  id    String @id @default(cuid())
-  name  String @unique
-  users User[]
+  id      String    @id @default(cuid())
+  name    String    @unique
+  users   User[]
+  company company[]
 }

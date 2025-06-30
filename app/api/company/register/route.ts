@@ -8,6 +8,9 @@ export async function POST(req: Request) {
 
   // Verifica si ya existe
   const existing = await prisma.company.findUnique({ where: { email } });
+  const defaultRole = await prisma.role.findUnique({
+    where: { name: "company" },
+  });
   if (existing) {
     return NextResponse.json({ error: "Ya existe una empresa con ese correo" }, { status: 400 });
   }
@@ -20,6 +23,9 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
+      role: {
+        connect: { id: defaultRole?.id || "" }, // Asegura que el rol se asigne correctamente
+      },
     },
   });
 

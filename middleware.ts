@@ -14,6 +14,12 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith(path)
   );
 
+  // console.log(token);
+
+  if(pathname === "/login" && token) {
+    return NextResponse.redirect(new URL("/redirect", req.url));
+  }
+
   if (isProtected && !token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }

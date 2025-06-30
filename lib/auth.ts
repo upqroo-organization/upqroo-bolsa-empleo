@@ -36,6 +36,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         const company = await prisma.company.findUnique({
           where: { email: credentials?.email },
+          include: { role: true }
         });
 
         if (!company) {
@@ -55,10 +56,9 @@ export const authOptions: NextAuthOptions = {
           id: company.id,
           name: company.name,
           email: company.email,
-          role: "company",
-          tipo: "company",
+          role: company.role?.name,
         };
-      },
+      }
     }),
   ],
   session: {
@@ -95,17 +95,28 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user?.id) {
-        const dbUser = await prisma.user.findUnique({
+      // Try to get role from User table
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { role: true }
+      });
+
+      if (dbUser?.role?.name) {
+        token.role = dbUser.role.name;
+      } else {
+        // If not found in User, try Company
+        const dbCompany = await prisma.company.findUnique({
           where: { id: user.id },
-          include: { role: true }, // 👈 Traer el rol del usuario
+          include: { role: true }
         });
 
-        if (dbUser?.role?.name) {
-          token.role = dbUser.role.name;
+        if (dbCompany?.role?.name) {
+          token.role = dbCompany.role.name;
         }
       }
+    }
 
-      return token;
+    return token;
     },
 
     async session({ session, token }) {

@@ -7,6 +7,8 @@ model company {
   logoUrl     String?
   websiteUrl  String?
   rfc         String? @unique // RFC number or identifier for the company
+  role        role?   @relation(fields: [roleId], references: [id])
+  roleId      String? // Optional: If the company has a specific role in the system
   // Optional: Add fields for address, contact info, etc.
   city        String?
   state       String?

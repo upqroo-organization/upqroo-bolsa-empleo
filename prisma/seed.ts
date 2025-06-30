@@ -8,6 +8,7 @@ async function main() {
     'external',
     'coordinator',
     'admin',
+    'company',
   ]
 
   for (const name of roles) {

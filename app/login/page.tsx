@@ -11,12 +11,44 @@ import { signIn } from 'next-auth/react'
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 
 export default function LoginPage() {
+  const [companyData, setCompanyData] = useState({
+    email: '',
+    password: ''
+  })
+
+  const handleCompanyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setCompanyData(prevData => ({
+      ...prevData,
+      [name]: value
+    }))
+  }
   const handleGoogleSignIn = async () => {
     await signIn('google', { callbackUrl: '/redirect' })
   }
 
+  const handleCompanySignIn = async () => {
+    if (!companyData.email || !companyData.password) {
+      alert('Por favor, completa todos los campos.')
+      return
+    }
+    try {
+      const res = await signIn('credentials', {
+        email: companyData.email,
+        password: companyData.password,
+        callbackUrl: '/redirect'
+      })
+      if(res?.status === 401) {
+        alert('Credenciales incorrectas. Por favor, verifica tu correo y contraseña.')
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error)
+      alert('Error al iniciar sesión. Por favor, verifica tus credenciales.')
+    }
+  }
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
@@ -50,17 +82,17 @@ export default function LoginPage() {
                   <Label htmlFor="email">Correo Electrónico</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input id="email" type="email" placeholder="empresa@ejemplo.com" className="pl-10" />
+                    <Input value={companyData.email} onChange={handleCompanyInputChange} id="email" name="email" type="email" placeholder="empresa@ejemplo.com" className="pl-10" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Contraseña</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input id="password" type="password" placeholder="••••••••" className="pl-10" />
+                    <Input value={companyData.password} onChange={handleCompanyInputChange} id="password" name="password" type="password" placeholder="••••••••" className="pl-10" />
                   </div>
                 </div>
-                <Button className="w-full">Iniciar Sesión</Button>
+                <Button onClick={handleCompanySignIn} className="w-full">Iniciar Sesión</Button>
                 <div className="text-center">
                   <Button variant="link" className="text-sm">
                     ¿Olvidaste tu contraseña?

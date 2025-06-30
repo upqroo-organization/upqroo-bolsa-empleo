@@ -8,15 +8,18 @@ export default function Page() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
+  
   useEffect(() => {
     if (status === "loading") return;
-
-    switch (session?.user?.role) {
+    switch (session?.user.role) {
       case "admin":
         router.replace("/admin");
         break;
       case "student":
         router.replace("/client");
+        break;
+      case "company":
+        router.replace("/empresa");
         break;
       default:
         router.replace("/");
