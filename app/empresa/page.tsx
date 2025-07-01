@@ -19,6 +19,7 @@ import {
   Target,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
+import Link from "next/link"
 
 export default function CompanyDashboard() {
   const { data: user } = useSession();
@@ -134,10 +135,12 @@ export default function CompanyDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Publicar Vacante
-          </Button>
+          <Link href="/empresa/publicar-vacante">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Publicar Vacante
+            </Button>
+          </Link>
         </div>
       </div>
 

@@ -1,0 +1,26 @@
+model Vacante {
+  id                String  @id @default(cuid())
+  title             String
+  summary           String
+  description       String
+  responsibilities  String
+  location          String?
+  salaryMin         Int?
+  salaryMax         Int?
+  department        String? // e.g., Engineering, Marketing, Sales
+  type              String? // e.g., Full-time, Part-time, Internship
+  modality          String? // e.g., Remote, On-site, Hybrid
+  experienceLevel   String? // e.g., Entry-level, Mid-level, Senior
+  numberOfPositions Int? // Number of positions available
+  companyId         String
+  isMock            Boolean @default(false) // Indicates if the job is a mock job for testing purposes
+  company           company @relation(fields: [companyId], references: [id])
+  aplicants         User[]  @relation("VacanteApplicants")
+
+  // Optional: Add fields for application process, deadline, etc.
+  applicationProcess String?
+  deadline           DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

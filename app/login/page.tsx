@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Mail, Lock } from "lucide-react"
 import { signIn } from 'next-auth/react'
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
-import Image from "next/image"
+// import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -53,7 +53,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <Image width={100} height={100} src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
+          {/* eslint-disable-next-line @next/next/no-img-element*/}
+          <img src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
           <p className="text-gray-600 mt-2">Bolsa de Trabajo Universitaria</p>
         </div>
 

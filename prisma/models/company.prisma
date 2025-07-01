@@ -29,6 +29,8 @@ model company {
   contactPosition String? // Position of the primary contact person
   companyRole     String? // Role of the primary contact person in the company
 
+  vacantes Vacante[] // Relation to Vacante model
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

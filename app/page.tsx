@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Users, Building2, GraduationCap, TrendingUp, MapPin, Clock, DollarSign } from "lucide-react"
+import { Search, Users, Building2, GraduationCap, TrendingUp, MapPin, Clock, DollarSign, LogIn } from "lucide-react"
+import Link from "next/link"
 // import Link from "next/link"
 
 const featuredJobs = [
@@ -82,18 +83,12 @@ export default function LandingPage() {
               próxima oportunidad profesional o el talento que tu empresa necesita.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8">
-                <Search className="mr-2 h-5 w-5" />
-                Buscar Empleos
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-primary h-12 px-8"
-              >
-                <Building2 className="mr-2 h-5 w-5" />
-                Publicar Vacante
-              </Button>
+              <Link href="/login">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8">
+                  <LogIn/>
+                  Iniciar Sesión
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

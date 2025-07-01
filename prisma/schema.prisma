@@ -17,6 +17,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   role          role?           @relation(fields: [roleId], references: [id])
+  vacantes      Vacante[]       @relation("VacanteApplicants")
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 

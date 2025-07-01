@@ -23,6 +23,7 @@ const perfilByRole:Record<string, string> = {
   admin: '/admin/perfil',
   user: '/client/perfil',
   company: '/empresa/perfil',
+  student: '/client/perfil',
 };
 const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   admin: [
@@ -32,6 +33,10 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   user: [
     { name: 'Inicio', href: '/' },
     { name: 'Perfil', href: '/profile' },
+  ],
+  student: [
+    { name: 'Mis Postulaciones', href: '/client/mis-postulaciones' },
+    { name: 'Mis Prácticas', href: '/client/practicas-profesionales' }
   ],
   company: [
     { name: 'Dashboard', href: '/empresa' },
