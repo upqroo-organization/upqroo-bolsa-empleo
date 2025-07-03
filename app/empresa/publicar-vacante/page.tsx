@@ -120,10 +120,6 @@ export default function PostJob() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline">
-            <Eye className="mr-2 h-4 w-4" />
-            Vista Previa
-          </Button>
-          <Button variant="outline">
             <Save className="mr-2 h-4 w-4" />
             Guardar Borrador
           </Button>
@@ -173,6 +169,7 @@ export default function PostJob() {
                   placeholder="Ej: Desarrollador Frontend React Jr"
                   className="text-lg font-medium"
                   onChange={handleChange}
+                  value={formData.title}
                   name="title"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -183,7 +180,7 @@ export default function PostJob() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">Departamento</Label>
-                  <Select onValueChange={(val) => handleSelectChange("department", val)}>
+                  <Select onValueChange={(val) => handleSelectChange("department", val)}  value={formData.department}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar departamento" />
                     </SelectTrigger>
@@ -199,7 +196,7 @@ export default function PostJob() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="jobType">Tipo de Empleo *</Label>
-                  <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time">
+                  <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time"  value={formData.type}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
@@ -216,7 +213,7 @@ export default function PostJob() {
 
               <div className="space-y-3">
                 <Label>Modalidad de Trabajo *</Label>
-                <RadioGroup onValueChange={(val) => handleSelectChange("modality", val)} defaultValue="hybrid" className="flex flex-col space-y-2">
+                <RadioGroup onValueChange={(val) => handleSelectChange("modality", val)} defaultValue="hybrid" className="flex flex-col space-y-2"  value={formData.modality}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="onsite" id="onsite" />
                     <Label htmlFor="onsite" className="flex items-center gap-2">
@@ -244,11 +241,16 @@ export default function PostJob() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="location">Ubicación *</Label>
-                  <Input onChange={handleChange} name="location" id="location" placeholder="Ej: Cancún, Quintana Roo" />
+                  <Input 
+                    onChange={handleChange} 
+                    name="location" 
+                    id="location" 
+                    placeholder="Ej: Cancún, Quintana Roo" value={formData.location} />
+                
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="positions">Número de Vacantes</Label>
-                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1">
+                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1"  value={formData.numberOfPositions}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -271,6 +273,7 @@ export default function PostJob() {
                   name="summary"
                   onChange={handleChange}
                   placeholder="Breve descripción del puesto y lo que buscas en un candidato..."
+                  value={formData.summary}
                 />
                 <p className="text-xs text-muted-foreground">Este resumen aparecerá en los resultados de búsqueda.</p>
               </div>
@@ -297,6 +300,7 @@ export default function PostJob() {
                   rows={6}
                   name="description"
                   placeholder="Describe detalladamente el puesto, las responsabilidades principales, el ambiente de trabajo, oportunidades de crecimiento..."
+                  value={formData.description}
                 />
               </div>
 
@@ -308,6 +312,7 @@ export default function PostJob() {
                   name="responsibilities"
                   onChange={handleChange}
                   placeholder="• Desarrollar interfaces web responsivas&#10;• Colaborar con el equipo de diseño&#10;• Mantener código limpio y documentado&#10;• Participar en revisiones de código"
+                  value={formData.responsibilities}
                 />
                 <p className="text-xs text-muted-foreground">
                   Usa viñetas (•) para listar las responsabilidades principales.
@@ -317,7 +322,7 @@ export default function PostJob() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="experience">Nivel de Experiencia</Label>
-                  <Select onValueChange={(val) => handleSelectChange("experienceLevel", val)}>
+                  <Select onValueChange={(val) => handleSelectChange("experienceLevel", val)}  value={formData.experienceLevel}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar nivel" />
                     </SelectTrigger>
@@ -331,7 +336,11 @@ export default function PostJob() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="schedule">Horario de Trabajo</Label>
-                  <Input onChange={handleChange} name="schedule" id="schedule" placeholder="Ej: Lunes a Viernes 9:00 - 18:00" />
+                  <Input onChange={handleChange} 
+                    name="schedule" 
+                    id="schedule"
+                     placeholder="Ej: Lunes a Viernes 9:00 - 18:00" value={formData.schedule}/>
+
                 </div>
               </div>
 
@@ -343,11 +352,21 @@ export default function PostJob() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="salaryMin">Salario Mínimo (MXN)</Label>
-                    <Input onChange={handleChange} name="salaryMin" id="salaryMin" type="number" placeholder="15000" />
+                    <Input onChange={handleChange} 
+                      name="salaryMin" 
+                      id="salaryMin" 
+                      type="number" 
+                      placeholder="15000" value={formData.salaryMin} />
+                    
+
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="salaryMax">Salario Máximo (MXN)</Label>
-                    <Input onChange={handleChange} name="salaryMax" id="salaryMax" type="number" placeholder="25000" />
+                    <Input onChange={handleChange} 
+                      name="salaryMax" 
+                      id="salaryMax" 
+                      type="number" 
+                      placeholder="25000"  value={formData.salaryMax} />
                   </div>
                 </div>
               </div>
