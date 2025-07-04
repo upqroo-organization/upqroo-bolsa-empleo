@@ -1,6 +1,6 @@
 'use client';
 
-import { signOut, useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useMemo } from 'react';
 import { LogOut } from 'lucide-react';
 import logoUperoo from '../assets/logo_upqroo.svg';
+import { Button } from './ui/button';
 
 // Define this elsewhere in your project and import it
 const perfilByRole:Record<string, string> = {
@@ -53,6 +54,10 @@ export default function Navbar() {
   const role = session?.user.role || ''; // ajusta según cómo guardas el rol
   const navLinks = useMemo(() => navLinksByRole[role] || [], [role]);
 
+  const handleGoogleSignIn = async () => {
+    await signIn('google', { callbackUrl: '/vacantes' })
+  }
+
   const userInitial = user?.name?.charAt(0).toUpperCase() || '?';
 
   return (
@@ -75,7 +80,7 @@ export default function Navbar() {
           ))}
 
           {/* Avatar con dropdown */}
-          <DropdownMenu>
+          {user ? <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer background-gray-800">
                 <AvatarImage src={user?.image || ''} />
@@ -88,12 +93,17 @@ export default function Navbar() {
               <DropdownMenuItem asChild>
                 <Link href={perfilByRole[role]}>Perfil</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href='/weather'>
+                  Pronostico del tiempo
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => signOut()}>
                 <LogOut color='red'/>
                 Cerrar sesión
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> : <Button onClick={handleGoogleSignIn} className='text-white'>Iniciar sesión</Button>}
         </ul>
       </div>
     </nav>

@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Search, Calendar, Building2, MapPin, Eye, MessageSquare, X, Clock, FileText, Users } from "lucide-react"
-import Navbar from "@/components/Navbar"
 export default function MyApplications() {
   const applications = [
     {
@@ -122,7 +121,6 @@ export default function MyApplications() {
 
   return (
     <div className="p-6 space-y-8">
-      <Navbar/>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Mis Postulaciones</h1>
