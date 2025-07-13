@@ -36,6 +36,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  console.log(empresa)
+
   const handleChange = (field: string, value: string | number) => {
     setCompanyData({ ...empresa, [field]: value })
   }
@@ -76,14 +78,14 @@ export default function RegisterPage() {
           state: empresa.state
         }),
       })
-  
+
       const data = await res.json()
       setLoading(false)
-  
+
       if (!res.ok) {
         return setError(data.error || "Error al registrar empresa")
       }
-  
+
       router.push("/login?empresa=1")
     } catch (err) {
       setLoading(false)
@@ -157,7 +159,7 @@ export default function RegisterPage() {
                     <Input id="email" type="email" value={empresa.email} onChange={e => handleChange("email", e.target.value)} />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-1">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Teléfono *</Label>
                       <Input id="phone" value={empresa.telefono} onChange={e => handleChange("telefono", e.target.value)} />
@@ -180,9 +182,9 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <StateSelect value={empresa.state} onChange={(id)=> handleChange("state", id)} />
+                  <StateSelect className="mb-1" value={empresa.state} onChange={(id) => handleChange("state", id)} />
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 mb-1">
                     <Label htmlFor="address">Dirección Completa</Label>
                     <Textarea id="address" value={empresa.direccion} onChange={e => handleChange("direccion", e.target.value)} />
                   </div>

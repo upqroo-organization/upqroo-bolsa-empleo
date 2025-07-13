@@ -30,6 +30,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
+import { useFetch } from "@/hooks/useFetch"
 
 export default function PostJob() {
   const { data: user } = useSession()
@@ -40,7 +41,6 @@ export default function PostJob() {
     description: '',
     responsibilities: '',
     location: '',
-    schedule: '',
     salaryMin: '',
     salaryMax: '',
     department: '',
@@ -50,9 +50,11 @@ export default function PostJob() {
     numberOfPositions: '1',
     companyId: '',
     isMock: false,
-    applicationProcess: 'open'
+    applicationProcess: 'open',
+    state: undefined
   })
   const [loading, setLoading] = useState(false)
+  const { data, loading: stateLoading } = useFetch('/api/states')
 
   useEffect(() => {
     if (user?.user?.id) {
@@ -93,20 +95,20 @@ export default function PostJob() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-    .then(res => res.status === 201 ? res.json() : Promise.reject(res.status))
-    .then(data => {
-      console.log("Vacante creada:", data)
-      alert("Vacante publicada correctamente")
-    })
-    .catch(err => {
-      const errorMsg = (err instanceof Error) ? err.message : String(err)
-      console.log(err)
-      alert("Ocurrió un error al publicar: " + errorMsg)
-      console.error(err)
-    })
-    .finally(() => {
-      setLoading(false)
-    })
+      .then(res => res.status === 201 ? res.json() : Promise.reject(res.status))
+      .then(data => {
+        console.log("Vacante creada:", data)
+        alert("Vacante publicada correctamente")
+      })
+      .catch(err => {
+        const errorMsg = (err instanceof Error) ? err.message : String(err)
+        console.log(err)
+        alert("Ocurrió un error al publicar: " + errorMsg)
+        console.error(err)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
@@ -179,7 +181,7 @@ export default function PostJob() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="department">Departamento</Label>
-                  <Select onValueChange={(val) => handleSelectChange("department", val)}  value={formData.department}>
+                  <Select onValueChange={(val) => handleSelectChange("department", val)} value={formData.department}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar departamento" />
                     </SelectTrigger>
@@ -195,7 +197,7 @@ export default function PostJob() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="jobType">Tipo de Empleo *</Label>
-                  <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time"  value={formData.type}>
+                  <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time" value={formData.type}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
@@ -212,7 +214,7 @@ export default function PostJob() {
 
               <div className="space-y-3">
                 <Label>Modalidad de Trabajo *</Label>
-                <RadioGroup onValueChange={(val) => handleSelectChange("modality", val)} defaultValue="hybrid" className="flex flex-col space-y-2"  value={formData.modality}>
+                <RadioGroup onValueChange={(val) => handleSelectChange("modality", val)} defaultValue="hybrid" className="flex flex-col space-y-2" value={formData.modality}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="onsite" id="onsite" />
                     <Label htmlFor="onsite" className="flex items-center gap-2">
@@ -237,20 +239,31 @@ export default function PostJob() {
                 </RadioGroup>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="location">Ubicación *</Label>
-                  <Input 
-                    onChange={handleChange} 
-                    name="location" 
-                    id="location" 
+                  <Input
+                    onChange={handleChange}
+                    name="location"
+                    id="location"
                     placeholder="Ej: Cancún, Quintana Roo" value={formData.location} />
-                
+
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="positions">Estado</Label>
+                  <Select onValueChange={(val) => handleSelectChange("state", val)} value={formData.state}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue className="w-full" placeholder="Selecciona el estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(data) && data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="positions">Número de Vacantes</Label>
-                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1"  value={formData.numberOfPositions}>
-                    <SelectTrigger>
+                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1" value={formData.numberOfPositions}>
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -318,31 +331,6 @@ export default function PostJob() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="experience">Nivel de Experiencia</Label>
-                  <Select onValueChange={(val) => handleSelectChange("experienceLevel", val)}  value={formData.experienceLevel}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar nivel" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="entry">Sin experiencia / Recién egresado</SelectItem>
-                      <SelectItem value="junior">Junior (0-2 años)</SelectItem>
-                      <SelectItem value="mid">Intermedio (2-5 años)</SelectItem>
-                      <SelectItem value="senior">Senior (5+ años)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="schedule">Horario de Trabajo</Label>
-                  <Input onChange={handleChange} 
-                    name="schedule" 
-                    id="schedule"
-                     placeholder="Ej: Lunes a Viernes 9:00 - 18:00" value={formData.schedule}/>
-
-                </div>
-              </div>
-
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
@@ -351,21 +339,21 @@ export default function PostJob() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="salaryMin">Salario Mínimo (MXN)</Label>
-                    <Input onChange={handleChange} 
-                      name="salaryMin" 
-                      id="salaryMin" 
-                      type="number" 
+                    <Input onChange={handleChange}
+                      name="salaryMin"
+                      id="salaryMin"
+                      type="number"
                       placeholder="15000" value={formData.salaryMin} />
-                    
+
 
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="salaryMax">Salario Máximo (MXN)</Label>
-                    <Input onChange={handleChange} 
-                      name="salaryMax" 
-                      id="salaryMax" 
-                      type="number" 
-                      placeholder="25000"  value={formData.salaryMax} />
+                    <Input onChange={handleChange}
+                      name="salaryMax"
+                      id="salaryMax"
+                      type="number"
+                      placeholder="25000" value={formData.salaryMax} />
                   </div>
                 </div>
               </div>

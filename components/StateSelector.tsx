@@ -25,9 +25,11 @@ type State = {
 export default function StateSelect({
   value,
   onChange,
+  className
 }: {
-  value?: string;
-  onChange?: (name: string) => void;
+  value?: number;
+  onChange?: (name: number) => void;
+  className?: string
 }) {
   const [states, setStates] = useState<State[]>([]);
   const [open, setOpen] = useState(false);
@@ -41,14 +43,14 @@ export default function StateSelect({
 
   useEffect(() => {
     if (value && states.length > 0) {
-      const found = states.find((s) => s.name === value) ?? null;
+      const found = states.find((s) => s.id === value) ?? null;
       setSelectedState(found);
     }
   }, [value, states]);
 
   const handleSelect = (state: State) => {
     setSelectedState(state);
-    onChange?.(state.name);
+    onChange?.(state.id);
     setOpen(false);
   };
 
@@ -59,7 +61,7 @@ export default function StateSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={"w-full justify-between " + className}
         >
           {selectedState ? selectedState.name : 'Selecciona un estado'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

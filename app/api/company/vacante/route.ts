@@ -16,12 +16,12 @@ export async function POST(req: Request) {
       department,
       type,
       modality,
-      experienceLevel,
       numberOfPositions,
       companyId,
       isMock,
       applicationProcess,
       deadline,
+      state
     } = data
 
     if (!title || !summary || !description || !responsibilities || !companyId) {
@@ -44,12 +44,16 @@ export async function POST(req: Request) {
         department,
         type,
         modality,
-        experienceLevel,
         numberOfPositions,
-        companyId,
         isMock: isMock ?? false,
         applicationProcess,
         deadline: deadline ? new Date(deadline) : undefined,
+        state: {
+          connect: { id: state }
+        },
+        company: {
+          connect: { id: companyId }
+        }
       },
     })
 

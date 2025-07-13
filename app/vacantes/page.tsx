@@ -25,10 +25,6 @@ export default function JobSearch() {
           <p className="text-gray-600">Encuentra tu próxima oportunidad profesional</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filtros Avanzados
-          </Button>
         </div>
       </div>
 
@@ -40,19 +36,19 @@ export default function JobSearch() {
               <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input 
-                  onChange={(e) => {handleFilters(e.target.name, e.target.value)}} 
+                <Input
+                  onChange={(e) => { handleFilters(e.target.name, e.target.value) }}
                   name="title"
                   value={filters.title}
-                  type="text" 
-                  placeholder="Ej: Desarrollador, Analista, Diseñador..." 
+                  type="text"
+                  placeholder="Ej: Desarrollador, Analista, Diseñador..."
                   className="pl-10"
                 />
               </div>
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">Ubicación</label>
-              <StateSelect value={filters.state} onChange={(name) => handleFilters("state", name)}/>
+              <StateSelect value={filters.state} onChange={(name) => handleFilters("state", name)} />
             </div>
             <Button size="lg">
               <Search className="mr-2 h-4 w-4" />
@@ -75,9 +71,9 @@ export default function JobSearch() {
                 <div className="space-y-2">
                   {["Tiempo Completo", "Medio Tiempo", "Prácticas Profesionales", "Freelance"].map((type) => (
                     <div key={type} className="flex items-center space-x-2">
-                      <Checkbox 
+                      <Checkbox
                         checked={filters.type.includes(type)}
-                        id={type} 
+                        id={type}
                         onCheckedChange={(checked) =>
                           handleCheckboxChange("type", type, !!checked)
                         }
@@ -98,8 +94,8 @@ export default function JobSearch() {
                   {["Presencial", "Remoto", "Híbrido"].map((mode) => (
                     <div key={mode} className="flex items-center space-x-2">
                       <Checkbox checked={filters.modality.includes(mode)} id={mode} onCheckedChange={(checked) =>
-                          handleCheckboxChange("modality", mode, !!checked)
-                        } />
+                        handleCheckboxChange("modality", mode, !!checked)
+                      } />
                       <label htmlFor={mode} className="text-sm">
                         {mode}
                       </label>
@@ -133,7 +129,7 @@ export default function JobSearch() {
                 <Select onValueChange={(value) => {
                   const values = value.split("-");
                   console.log(values.length)
-                  if(values.length > 1) {
+                  if (values.length > 1) {
                     handleFilters("salaryMax", values[1])
                     handleFilters("salaryMin", values[0])
                   } else {
@@ -176,9 +172,9 @@ export default function JobSearch() {
             </Select>
           </div>
 
-          {isLoading 
-            ? <div className="w-full flex justify-center"><Spinner/></div>
-            : vacantes.map((item, i) => (<VacanteCard key={i} vacante={item}/>))}
+          {isLoading
+            ? <div className="w-full flex justify-center"><Spinner /></div>
+            : vacantes.map((item, i) => (<VacanteCard key={i} vacante={item} />))}
 
           {/* Pagination */}
           <div className="w-full flex justify-center">

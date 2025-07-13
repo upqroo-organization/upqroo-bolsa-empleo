@@ -29,7 +29,9 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
-      state: state, // Ajusta el valor según los valores permitidos en tu modelo Prisma
+      state: {
+        connect: { id: state }
+      }, // Ajusta el valor según los valores permitidos en tu modelo Prisma
       role: {
         connect: { id: defaultRole?.id || "" }, // Asegura que el rol se asigne correctamente
       },
