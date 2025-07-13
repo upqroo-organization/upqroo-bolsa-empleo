@@ -1,26 +1,106 @@
 import { VacanteInterface } from "@/types/vacantes";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react"
+import { useDebounce } from "../useDebounce";
+
+export interface FiltersInterface {
+  state: string,
+  type: string[],
+  career: string,
+  modality: string[],
+  salaryMax: string,
+  salaryMin: string
+}
+
+const FILTER_INITIAL_STATE = {
+    state: "",
+    career: "",
+    type: [],
+    modality: [],
+    salaryMax: "",
+    salaryMin: ""
+  }
 
 export default function useVacantes() {
+  const searchParams = useSearchParams();
   const [vacantes, setVacantes] = useState<VacanteInterface[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState<number|null|undefined>(0);
+  const [titleSearch, setTitleSearch] = useState<string>("")
+  const [filters, setFilters] = useState<FiltersInterface>({
+    state: searchParams.get("estado") || "",
+    career: "",
+    type: [],
+    modality: [],
+    salaryMax: "",
+    salaryMin: ""
+  })
+  const debouncedValue = useDebounce(titleSearch, 500);
 
-  console.log(vacantes);
+  function resetFilters() {
+    setFilters(FILTER_INITIAL_STATE)
+  }
+
+  function handleFilters(key: string, value: string | [string, string]): void {
+    if(key === "title" && typeof value === "string") {
+      setTitleSearch(value);
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        [key]: value
+      }))
+    }
+  }
+
+  function handleCheckboxChange(key: string, value: string, checked: boolean) {
+    if(key === 'type' || key === 'modality') {
+      setFilters((prev: FiltersInterface) => {
+        const prevChecked = prev[key];
+        let newChecked = []
+        if(checked) {
+          newChecked = [...prevChecked, value]
+        } else {
+          newChecked = prevChecked.filter((val: string) => val !== value)
+        }
+        return {
+          ...prev,
+          [key]: newChecked
+        }
+      })
+    }
+  }
+
+  function fetchData() {}
+
+  useEffect(() => {
+    
+  }, [debouncedValue])
   
   useEffect(() => {
-    fetch('/api/vacantes')
+    const queryString = new URLSearchParams(filters as unknown as Record<string, string>).toString();
+    setIsLoading(true)
+
+    fetch(`/api/vacantes?${queryString}`)
       .then(res => res.json())
       .then(val => {
-        setVacantes(val.data)
-        setTotal(val?.total)
+        if(Array.isArray(val.data)) {
+          setVacantes(val.data)
+          setTotal(val?.total)
+        }
       })
       .catch(() => {
         console.log('Error')
       })
-  }, [])
+      .finally(() => setIsLoading(false))
+  }, [filters, debouncedValue])
 
   return {
     vacantes,
-    total
+    total,
+    filters,
+    handleFilters,
+    handleCheckboxChange,
+    resetFilters,
+    isLoading
   }
 }

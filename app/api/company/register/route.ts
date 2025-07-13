@@ -1,10 +1,16 @@
-// Ejemplo: /app/api/register-empresa/route.ts
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { name, email, password } = await req.json();
+  const { name, email, password, state } = await req.json();
+
+  if(!name || !email || !password || !state) {
+    return NextResponse.json(
+      { error: "missing data" },
+      { status: 400 }
+    );
+  }
 
   // Verifica si ya existe
   const existing = await prisma.company.findUnique({ where: { email } });
@@ -23,6 +29,7 @@ export async function POST(req: Request) {
       name,
       email,
       password: hashedPassword,
+      state: state, // Ajusta el valor según los valores permitidos en tu modelo Prisma
       role: {
         connect: { id: defaultRole?.id || "" }, // Asegura que el rol se asigne correctamente
       },

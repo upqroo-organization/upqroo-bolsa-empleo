@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Clock, DollarSign, Heart, MapPin, Share } from "lucide-react"
+import { Building2, Clock, DollarSign, MapPin, Share } from "lucide-react"
 import { Button } from "./ui/button"
 import { VacanteInterface } from "@/types/vacantes"
 import { Badge } from "@/components/ui/badge"
@@ -43,9 +43,6 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm">
-              <Heart className="h-4 w-4" />
-            </Button>
             <Button variant="ghost" size="sm">
               <Share className="h-4 w-4" />
             </Button>

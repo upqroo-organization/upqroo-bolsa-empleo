@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Users, Building2, GraduationCap, TrendingUp, MapPin, Clock, DollarSign, LogIn } from "lucide-react"
 import Link from "next/link"
+import StateSelectServerSide from "@/components/StateSelectorServerSide"
 // import Link from "next/link"
 
 const featuredJobs = [
@@ -99,26 +100,22 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <Card className="max-w-4xl mx-auto">
             <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row gap-4 items-end">
+              <form action="/vacantes" method="get" className="flex flex-col md:flex-row gap-4 items-end">
                 <div className="flex-1 space-y-2">
                   <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
+                    <Search className="absolute left-3 top-3 h-4 wmercad-4 text-muted-foreground" />
+                    <Input name="vacante" type="text" placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
                   </div>
                 </div>
                 <div className="flex-1 space-y-2">
-                  <label className="text-sm font-medium">Ubicación</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Ciudad, estado o remoto" className="pl-10 h-12" />
-                  </div>
+                  <StateSelectServerSide name="estado"/>
                 </div>
-                <Button size="lg" className="h-12 px-8">
+                <Button type="submit" size="lg" className="h-12 px-8">
                   <Search className="mr-2 h-4 w-4" />
                   Buscar
                 </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
         </div>

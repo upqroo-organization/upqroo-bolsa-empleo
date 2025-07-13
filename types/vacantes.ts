@@ -7,11 +7,10 @@ export interface VacanteInterface {
   location: string | null
   salaryMin: number | null
   salaryMax: number | null
-  department: string | null
-  type: string | null
-  modality: string | null
-  experienceLevel: string | null
-  numberOfPositions: number | null
+  department: string | null // e.g., Engineering, Marketing, Sales
+  type: string | null // e.g., Full-time, Part-time, Internship
+  modality: string | null // e.g., Remote, On-site, Hybrid
+  numberOfPositions: number | null // Number of positions available
   companyId: string
   isMock: boolean
   applicationProcess: string | null
@@ -22,4 +21,33 @@ export interface VacanteInterface {
     name: string
     logoUrl: string | null
   }
+}
+
+export enum VacanteTypeEnum {
+  fullTime = "Tiempo completo",
+  partTime = "Tiempo parcial",
+  intership = "Becario"
+}
+
+export enum VacanteModalityEnum {
+  remote = "Remoto",
+  onSite = "Presencial",
+  Hybrid = "Híbrido"
+}
+
+export enum VacanteDepartamentEnum {
+  engineer = "Ingenieria",
+  sales = "Ventas",
+  customerService = "Servicio al cliente",
+}
+
+export enum Careers {
+  software = "Ingeniería en software",
+  tics = "Ingenniería en tecnologías de la información e innovación digital",
+  therapy = "Terapia física",
+  biotecnologie = "Ingeniería en biotecnología",
+  biomedic = "Ingeniería en biomédica",
+  finance = "Ingeniería financiera",
+  administation = "Administración",
+  civil = "Ingenieria Civil"
 }

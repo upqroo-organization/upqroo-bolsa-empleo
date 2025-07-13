@@ -1,17 +1,16 @@
 model company {
   id          String  @id @default(cuid())
   name        String
-  email       String? @unique
-  password    String? // Optional: Only for company accounts that require a password
+  email       String  @unique
+  password    String // Optional: Only for company accounts that require a password
   description String?
   logoUrl     String?
   websiteUrl  String?
   rfc         String? @unique // RFC number or identifier for the company
-  role        role?   @relation(fields: [roleId], references: [id])
-  roleId      String? // Optional: If the company has a specific role in the system
+  role        role    @relation(fields: [roleId], references: [id])
+  roleId      String // Optional: If the company has a specific role in the system
   // Optional: Add fields for address, contact info, etc.
   city        String?
-  state       String?
   country     String?
   address     String?
   zipCode     String?
@@ -28,6 +27,9 @@ model company {
   contactPhone    String? // Phone number of the primary contact person
   contactPosition String? // Position of the primary contact person
   companyRole     String? // Role of the primary contact person in the company
+
+  stateId Int?
+  state   State? @relation(fields: [stateId], references: [id])
 
   vacantes Vacante[] // Relation to Vacante model
 

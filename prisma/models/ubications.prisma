@@ -1,0 +1,6 @@
+model State {
+  id        Int       @id @default(autoincrement())
+  name      String
+  companies company[]
+  vacante   Vacante[]
+}

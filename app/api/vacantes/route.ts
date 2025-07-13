@@ -8,19 +8,19 @@ export async function GET(request: Request) {
   const title = searchParams.get('title') || undefined
   const type = searchParams.get('type') || undefined
   const modality = searchParams.get('modality') || undefined
-  const experienceLevel = searchParams.get('experienceLevel') || undefined
   const department = searchParams.get('department') || undefined
+  const career = searchParams.get('career') || undefined
   const isMock = searchParams.get('isMock') === 'true' ? true : undefined
 
   const offset = parseInt(searchParams.get('offset') || '0', 10)
   const limit = parseInt(searchParams.get('limit') || '10', 10)
 
   const filters = {
-    title: title ? { contains: title, mode: 'insensitive' } : undefined,
+    title: title ? { contains: title } : undefined,
     type,
     modality,
-    experienceLevel,
     department,
+    career,
     isMock,
   }
 

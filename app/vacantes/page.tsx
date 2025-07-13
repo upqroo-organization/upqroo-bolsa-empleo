@@ -5,13 +5,16 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { Search, MapPin, Filter, Heart } from "lucide-react"
+import { Search, Filter } from "lucide-react"
 import useVacantes from "@/hooks/vacantes/useVacantes"
 import VacanteCard from "@/components/VacanteCard"
+import StateSelect from "@/components/StateSelector"
+import { Pagination } from "@/components/Pagination"
+import { Spinner } from "@/components/Spinner"
 
 export default function JobSearch() {
-  const { vacantes, total } = useVacantes();
-  console.log(vacantes);
+  const { vacantes, total, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
+  // const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   return (
     <div className="p-6 space-y-6">
@@ -22,10 +25,6 @@ export default function JobSearch() {
           <p className="text-gray-600">Encuentra tu próxima oportunidad profesional</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Heart className="mr-2 h-4 w-4" />
-            Favoritos
-          </Button>
           <Button variant="outline">
             <Filter className="mr-2 h-4 w-4" />
             Filtros Avanzados
@@ -41,15 +40,19 @@ export default function JobSearch() {
               <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input placeholder="Ej: Desarrollador, Analista, Diseñador..." className="pl-10" />
+                <Input 
+                  onChange={(e) => {handleFilters(e.target.name, e.target.value)}} 
+                  name="title"
+                  value={filters.title}
+                  type="text" 
+                  placeholder="Ej: Desarrollador, Analista, Diseñador..." 
+                  className="pl-10"
+                />
               </div>
             </div>
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">Ubicación</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input placeholder="Ciudad, estado o remoto" className="pl-10" />
-              </div>
+              <StateSelect value={filters.state} onChange={(name) => handleFilters("state", name)}/>
             </div>
             <Button size="lg">
               <Search className="mr-2 h-4 w-4" />
@@ -72,7 +75,13 @@ export default function JobSearch() {
                 <div className="space-y-2">
                   {["Tiempo Completo", "Medio Tiempo", "Prácticas Profesionales", "Freelance"].map((type) => (
                     <div key={type} className="flex items-center space-x-2">
-                      <Checkbox id={type} />
+                      <Checkbox 
+                        checked={filters.type.includes(type)}
+                        id={type} 
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange("type", type, !!checked)
+                        }
+                      />
                       <label htmlFor={type} className="text-sm">
                         {type}
                       </label>
@@ -88,7 +97,9 @@ export default function JobSearch() {
                 <div className="space-y-2">
                   {["Presencial", "Remoto", "Híbrido"].map((mode) => (
                     <div key={mode} className="flex items-center space-x-2">
-                      <Checkbox id={mode} />
+                      <Checkbox checked={filters.modality.includes(mode)} id={mode} onCheckedChange={(checked) =>
+                          handleCheckboxChange("modality", mode, !!checked)
+                        } />
                       <label htmlFor={mode} className="text-sm">
                         {mode}
                       </label>
@@ -101,7 +112,7 @@ export default function JobSearch() {
 
               <div className="space-y-3">
                 <label className="text-sm font-medium">Carrera</label>
-                <Select>
+                <Select value={filters.career} onValueChange={(value) => handleFilters("career", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar carrera" />
                   </SelectTrigger>
@@ -110,6 +121,7 @@ export default function JobSearch() {
                     <SelectItem value="systems">Ingeniería en Sistemas</SelectItem>
                     <SelectItem value="industrial">Ingeniería Industrial</SelectItem>
                     <SelectItem value="business">Administración</SelectItem>
+                    <SelectItem value="therapy">Terapia física</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -118,7 +130,16 @@ export default function JobSearch() {
 
               <div className="space-y-3">
                 <label className="text-sm font-medium">Rango Salarial</label>
-                <Select>
+                <Select onValueChange={(value) => {
+                  const values = value.split("-");
+                  console.log(values.length)
+                  if(values.length > 1) {
+                    handleFilters("salaryMax", values[1])
+                    handleFilters("salaryMin", values[0])
+                  } else {
+                    handleFilters("salaryMin", values[0])
+                  }
+                }}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar rango" />
                   </SelectTrigger>
@@ -127,12 +148,12 @@ export default function JobSearch() {
                     <SelectItem value="10-20">$10,000 - $20,000</SelectItem>
                     <SelectItem value="20-30">$20,000 - $30,000</SelectItem>
                     <SelectItem value="30-40">$30,000 - $40,000</SelectItem>
-                    <SelectItem value="40+">$40,000+</SelectItem>
+                    <SelectItem value="40">$40,000+</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button variant="outline" className="w-full">
+              <Button onClick={resetFilters} variant="outline" className="w-full cursor-pointer">
                 Limpiar Filtros
               </Button>
             </CardContent>
@@ -155,17 +176,18 @@ export default function JobSearch() {
             </Select>
           </div>
 
-          {vacantes.map((item, i) => (<VacanteCard key={i} vacante={item}/>))}
+          {isLoading 
+            ? <div className="w-full flex justify-center"><Spinner/></div>
+            : vacantes.map((item, i) => (<VacanteCard key={i} vacante={item}/>))}
 
           {/* Pagination */}
-          <div className="flex items-center justify-center gap-2 pt-6">
-            <Button variant="outline" disabled>
-              Anterior
-            </Button>
-            <Button variant="default">1</Button>
-            <Button variant="outline">2</Button>
-            <Button variant="outline">3</Button>
-            <Button variant="outline">Siguiente</Button>
+          <div className="w-full flex justify-center">
+            <Pagination
+              currentPage={1}
+              totalPages={20}
+              onPageChange={(p) => console.log(p)}
+              maxVisiblePages={5}
+            />
           </div>
         </div>
       </div>

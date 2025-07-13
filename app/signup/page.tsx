@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Building2, GraduationCap } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
+import StateSelect from "@/components/StateSelector"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -28,13 +29,14 @@ export default function RegisterPage() {
     contactoPuesto: "",
     password: "",
     confirmPassword: "",
+    state: undefined
   })
 
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | number) => {
     setCompanyData({ ...empresa, [field]: value })
   }
 
@@ -48,6 +50,10 @@ export default function RegisterPage() {
 
     if (empresa.password !== empresa.confirmPassword) {
       return setError("Las contraseñas no coinciden.")
+    }
+
+    if (!empresa.state) {
+      return setError("El estado es requerido")
     }
 
     setLoading(true)
@@ -67,6 +73,7 @@ export default function RegisterPage() {
           description: empresa.descripcion,
           contactName: empresa.contactoNombre,
           contactPosition: empresa.contactoPuesto,
+          state: empresa.state
         }),
       })
   
@@ -172,6 +179,8 @@ export default function RegisterPage() {
                       </Select>
                     </div>
                   </div>
+
+                  <StateSelect value={empresa.state} onChange={(id)=> handleChange("state", id)} />
 
                   <div className="space-y-2">
                     <Label htmlFor="address">Dirección Completa</Label>

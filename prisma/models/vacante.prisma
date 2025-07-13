@@ -7,13 +7,15 @@ model Vacante {
   location          String?
   salaryMin         Int?
   salaryMax         Int?
+  career            String? // e. g., Ing Software, Lic Terapia fisicia
   department        String? // e.g., Engineering, Marketing, Sales
   type              String? // e.g., Full-time, Part-time, Internship
   modality          String? // e.g., Remote, On-site, Hybrid
-  experienceLevel   String? // e.g., Entry-level, Mid-level, Senior
   numberOfPositions Int? // Number of positions available
   companyId         String
   isMock            Boolean @default(false) // Indicates if the job is a mock job for testing purposes
+  stateId           Int?
+  state             State?  @relation(fields: [stateId], references: [id])
   company           company @relation(fields: [companyId], references: [id])
   aplicants         User[]  @relation("VacanteApplicants")
 
