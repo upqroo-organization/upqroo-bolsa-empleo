@@ -20,7 +20,7 @@ import logoUperoo from '../assets/logo_upqroo.svg';
 import { Button } from './ui/button';
 
 // Define this elsewhere in your project and import it
-const perfilByRole:Record<string, string> = {
+const perfilByRole: Record<string, string> = {
   admin: '/admin/perfil',
   user: '/client/perfil',
   company: '/empresa/perfil',
@@ -65,7 +65,9 @@ export default function Navbar() {
       <div className="w-full mx-auto flex justify-between items-center max-w-[1720px]">
         {/* Logo y nombre del sitio */}
         <div className="flex items-center space-x-1">
-          <Image src={logoUperoo} alt="Logo" className='rounded-sm' width={140} height={140} />
+          <Link href="/">
+            <Image src={logoUperoo} alt="Logo" className='rounded-sm' width={140} height={140} />
+          </Link>
           {role && <Badge variant="secondary" className="ml-2">{role.toUpperCase()}</Badge>}
         </div>
 
@@ -99,7 +101,7 @@ export default function Navbar() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut color='red'/>
+                <LogOut color='red' />
                 Cerrar sesión
               </DropdownMenuItem>
             </DropdownMenuContent>

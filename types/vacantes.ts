@@ -18,7 +18,10 @@ export interface VacanteInterface {
   deadline: string | null // o Date si la parseas
   createdAt: string // o Date si la parseas
   updatedAt: string // o Date si la parseas
-  state: string | number | null,
+  state: {
+    id: string | number,
+    name: string | null
+  } | null,
   company: {
     name: string
     logoUrl: string | null
@@ -44,6 +47,7 @@ export enum VacanteDepartamentEnum {
 }
 
 export enum Careers {
+  todos = "Sin especificar",
   software = "Ingeniería en software",
   tics = "Ingenniería en tecnologías de la información e innovación digital",
   therapy = "Terapia física",
@@ -51,5 +55,5 @@ export enum Careers {
   biomedic = "Ingeniería en biomédica",
   finance = "Ingeniería financiera",
   administation = "Administración",
-  civil = "Ingenieria Civil"
+  civil = "Ingenieria Civil",
 }

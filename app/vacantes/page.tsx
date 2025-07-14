@@ -11,6 +11,7 @@ import VacanteCard from "@/components/VacanteCard"
 import StateSelect from "@/components/StateSelector"
 import { Pagination } from "@/components/Pagination"
 import { Spinner } from "@/components/Spinner"
+import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 
 export default function JobSearch() {
   const { vacantes, total, titleSearch, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
@@ -69,17 +70,17 @@ export default function JobSearch() {
               <div className="space-y-3">
                 <label className="text-sm font-medium">Tipo de Empleo</label>
                 <div className="space-y-2">
-                  {["Tiempo Completo", "Medio Tiempo", "Prácticas Profesionales", "Freelance"].map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
+                  {Object.entries(VacanteTypeEnum).map(([key, label]) => (
+                    <div key={key} className="flex items-center space-x-2">
                       <Checkbox
-                        checked={filters.type.includes(type)}
-                        id={type}
+                        checked={filters.type.includes(key)}
+                        id={key}
                         onCheckedChange={(checked) =>
-                          handleCheckboxChange("type", type, !!checked)
+                          handleCheckboxChange("type", key, !!checked)
                         }
                       />
-                      <label htmlFor={type} className="text-sm">
-                        {type}
+                      <label htmlFor={key} className="text-sm">
+                        {label}
                       </label>
                     </div>
                   ))}
@@ -91,13 +92,17 @@ export default function JobSearch() {
               <div className="space-y-3">
                 <label className="text-sm font-medium">Modalidad</label>
                 <div className="space-y-2">
-                  {["Presencial", "Remoto", "Híbrido"].map((mode) => (
-                    <div key={mode} className="flex items-center space-x-2">
-                      <Checkbox checked={filters.modality.includes(mode)} id={mode} onCheckedChange={(checked) =>
-                        handleCheckboxChange("modality", mode, !!checked)
-                      } />
-                      <label htmlFor={mode} className="text-sm">
-                        {mode}
+                  {Object.entries(VacanteModalityEnum).map(([key, label]) => (
+                    <div key={key} className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={filters.modality.includes(key)}
+                        id={key}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange("modality", key, !!checked)
+                        }
+                      />
+                      <label htmlFor={key} className="text-sm">
+                        {label}
                       </label>
                     </div>
                   ))}
@@ -113,17 +118,16 @@ export default function JobSearch() {
                     <SelectValue placeholder="Seleccionar carrera" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="software">Ingeniería en Software</SelectItem>
-                    <SelectItem value="systems">Ingeniería en Sistemas</SelectItem>
-                    <SelectItem value="industrial">Ingeniería Industrial</SelectItem>
-                    <SelectItem value="business">Administración</SelectItem>
-                    <SelectItem value="therapy">Terapia física</SelectItem>
+                    {Object.entries(Careers).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <Separator />
+              {/* <Separator />
 
               <div className="space-y-3">
                 <label className="text-sm font-medium">Rango Salarial</label>
@@ -148,7 +152,7 @@ export default function JobSearch() {
                     <SelectItem value="40">$40,000+</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               <Button onClick={resetFilters} variant="outline" className="w-full cursor-pointer">
                 Limpiar Filtros
@@ -161,7 +165,7 @@ export default function JobSearch() {
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">Mostrando {total} empleos de 47 resultados</p>
-            <Select defaultValue="recent">
+            {/* <Select defaultValue="recent">
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -170,7 +174,7 @@ export default function JobSearch() {
                 <SelectItem value="salary">Mejor Salario</SelectItem>
                 <SelectItem value="relevance">Más Relevantes</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
 
           {isLoading

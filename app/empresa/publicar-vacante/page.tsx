@@ -31,6 +31,7 @@ import { useSession } from "next-auth/react"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useFetch } from "@/hooks/useFetch"
+import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 
 export default function PostJob() {
   const { data: user } = useSession()
@@ -47,6 +48,7 @@ export default function PostJob() {
     type: '',
     modality: 'hybrid',
     numberOfPositions: '1',
+    career: '',
     companyId: '',
     isMock: false,
     applicationProcess: 'open',
@@ -54,7 +56,7 @@ export default function PostJob() {
   })
   const [loading, setLoading] = useState(false)
   const { data, loading: stateLoading } = useFetch('/api/states')
-
+  console.log(formData)
   useEffect(() => {
     if (user?.user?.id) {
       setFormData(prev => ({
@@ -179,18 +181,17 @@ export default function PostJob() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="department">Departamento</Label>
-                  <Select onValueChange={(val) => handleSelectChange("department", val)} value={formData.department}>
+                  <Label htmlFor="career">Carrera dirigida</Label>
+                  <Select onValueChange={(val) => handleSelectChange("career", val)} value={formData.career}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar departamento" />
+                      <SelectValue placeholder="Seleccionar carrera" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="it">Tecnología</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="sales">Ventas</SelectItem>
-                      <SelectItem value="hr">Recursos Humanos</SelectItem>
-                      <SelectItem value="finance">Finanzas</SelectItem>
-                      <SelectItem value="operations">Operaciones</SelectItem>
+                      {Object.entries(Careers).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -201,11 +202,11 @@ export default function PostJob() {
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="full-time">Tiempo Completo</SelectItem>
-                      <SelectItem value="part-time">Medio Tiempo</SelectItem>
-                      <SelectItem value="internship">Prácticas Profesionales</SelectItem>
-                      <SelectItem value="contract">Por Contrato</SelectItem>
-                      <SelectItem value="freelance">Freelance</SelectItem>
+                      {Object.entries(VacanteTypeEnum).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -213,28 +214,30 @@ export default function PostJob() {
 
               <div className="space-y-3">
                 <Label>Modalidad de Trabajo *</Label>
-                <RadioGroup onValueChange={(val) => handleSelectChange("modality", val)} defaultValue="hybrid" className="flex flex-col space-y-2" value={formData.modality}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="onsite" id="onsite" />
-                    <Label htmlFor="onsite" className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Presencial
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="remote" id="remote" />
-                    <Label htmlFor="remote" className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Remoto
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hybrid" id="hybrid" />
-                    <Label htmlFor="hybrid" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Híbrido
-                    </Label>
-                  </div>
+                <RadioGroup
+                  onValueChange={(val) => handleSelectChange("modality", val)}
+                  defaultValue="Hybrid"
+                  className="flex flex-col space-y-2"
+                  value={formData.modality}
+                >
+                  {Object.entries(VacanteModalityEnum).map(([key, label]) => {
+                    const Icon =
+                      key === "onSite"
+                        ? MapPin
+                        : key === "remote"
+                          ? Clock
+                          : Users;
+
+                    return (
+                      <div key={key} className="flex items-center space-x-2">
+                        <RadioGroupItem value={key} id={key} />
+                        <Label htmlFor={key} className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          {label}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </RadioGroup>
               </div>
 

@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Building2, Clock, DollarSign, MapPin, Share } from "lucide-react"
 import { Button } from "./ui/button"
-import { VacanteInterface } from "@/types/vacantes"
+import { Careers, VacanteInterface, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 import { Badge } from "@/components/ui/badge"
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/es';
+import { getEnumLabelSafe } from "@/utils"
 
 dayjs.extend(relativeTime);
 dayjs.locale('es');
@@ -34,7 +35,7 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                {vacante.location} - {vacante.state}
+                {vacante.location} - {vacante?.state?.name || ''}
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
@@ -52,19 +53,23 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center gap-4">
-            <Badge variant="secondary">{vacante.type}</Badge>
+            {vacante.type && (
+              <Badge variant="secondary">
+                {getEnumLabelSafe(VacanteTypeEnum, vacante.type)}
+              </Badge>
+            )}
             <div className="flex items-center gap-1 text-green-600 font-semibold">
               <DollarSign className="h-4 w-4" />
               {vacante.salaryMin} - {vacante.salaryMax}
             </div>
-            {vacante.type && (
+            {vacante.modality && (
               <Badge variant="outline" className="text-blue-600 border-blue-600">
-                Remoto
+                {getEnumLabelSafe(VacanteModalityEnum, vacante.modality)}
               </Badge>
             )}
             {vacante.career && (
               <Badge variant="outline" className="text-blue-600 border-blue-600">
-                {vacante.career}
+                {getEnumLabelSafe(Careers, vacante.career)}
               </Badge>
             )}
           </div>
