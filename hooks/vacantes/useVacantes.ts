@@ -2,9 +2,11 @@ import { VacanteInterface } from "@/types/vacantes";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react"
 import { useDebounce } from "../useDebounce";
+import { toQueryString } from "@/utils/params";
 
 export interface FiltersInterface {
-  state: string,
+  [key: string]: string | string[] | number;
+  state: number,
   type: string[],
   career: string,
   modality: string[],
@@ -13,7 +15,7 @@ export interface FiltersInterface {
 }
 
 const FILTER_INITIAL_STATE = {
-    state: "",
+    state: 0,
     career: "",
     type: [],
     modality: [],
@@ -28,7 +30,7 @@ export default function useVacantes() {
   const [total, setTotal] = useState<number|null|undefined>(0);
   const [titleSearch, setTitleSearch] = useState<string>("")
   const [filters, setFilters] = useState<FiltersInterface>({
-    state: searchParams.get("estado") || "",
+    state: !Number.isNaN(searchParams.get("estado")) ? Number(searchParams.get("estado")) : 0,
     career: "",
     type: [],
     modality: [],
@@ -41,7 +43,8 @@ export default function useVacantes() {
     setFilters(FILTER_INITIAL_STATE)
   }
 
-  function handleFilters(key: string, value: string | [string, string]): void {
+  function handleFilters(key: string, val: string | number | [string, string]): void {
+    const value = val === "todos" ? "" : val;
     if(key === "title" && typeof value === "string") {
       setTitleSearch(value);
     } else {
@@ -69,15 +72,9 @@ export default function useVacantes() {
       })
     }
   }
-
-  function fetchData() {}
-
-  useEffect(() => {
-    
-  }, [debouncedValue])
   
   useEffect(() => {
-    const queryString = new URLSearchParams(filters as unknown as Record<string, string>).toString();
+    const queryString = toQueryString({...filters, state: filters.state || undefined, title: debouncedValue}, { arrayFormat: 'brackets' });
     setIsLoading(true)
 
     fetch(`/api/vacantes?${queryString}`)
@@ -98,6 +95,7 @@ export default function useVacantes() {
     vacantes,
     total,
     filters,
+    titleSearch,
     handleFilters,
     handleCheckboxChange,
     resetFilters,

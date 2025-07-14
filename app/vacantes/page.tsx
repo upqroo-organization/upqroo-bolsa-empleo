@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import { Search, Filter } from "lucide-react"
+import { Search } from "lucide-react"
 import useVacantes from "@/hooks/vacantes/useVacantes"
 import VacanteCard from "@/components/VacanteCard"
 import StateSelect from "@/components/StateSelector"
@@ -13,7 +13,7 @@ import { Pagination } from "@/components/Pagination"
 import { Spinner } from "@/components/Spinner"
 
 export default function JobSearch() {
-  const { vacantes, total, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
+  const { vacantes, total, titleSearch, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
   // const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
 
   return (
@@ -39,7 +39,7 @@ export default function JobSearch() {
                 <Input
                   onChange={(e) => { handleFilters(e.target.name, e.target.value) }}
                   name="title"
-                  value={filters.title}
+                  value={titleSearch}
                   type="text"
                   placeholder="Ej: Desarrollador, Analista, Diseñador..."
                   className="pl-10"
@@ -47,8 +47,8 @@ export default function JobSearch() {
               </div>
             </div>
             <div className="flex-1 space-y-2">
-              <label className="text-sm font-medium">Ubicación</label>
-              <StateSelect value={filters.state} onChange={(name) => handleFilters("state", name)} />
+              <label className="text-sm font-medium">Estado</label>
+              <StateSelect value={filters.state} onChange={(stateId) => handleFilters("state", stateId)} />
             </div>
             <Button size="lg">
               <Search className="mr-2 h-4 w-4" />
@@ -113,6 +113,7 @@ export default function JobSearch() {
                     <SelectValue placeholder="Seleccionar carrera" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
                     <SelectItem value="software">Ingeniería en Software</SelectItem>
                     <SelectItem value="systems">Ingeniería en Sistemas</SelectItem>
                     <SelectItem value="industrial">Ingeniería Industrial</SelectItem>

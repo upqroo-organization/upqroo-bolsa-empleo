@@ -46,7 +46,6 @@ export default function PostJob() {
     department: '',
     type: '',
     modality: 'hybrid',
-    experienceLevel: '',
     numberOfPositions: '1',
     companyId: '',
     isMock: false,
@@ -90,7 +89,7 @@ export default function PostJob() {
       isMock: isMock || false,
       deadline: date ? new Date(date) : null,
     }
-    fetch('/api/company/vacante', {
+    fetch('/api/vacantes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

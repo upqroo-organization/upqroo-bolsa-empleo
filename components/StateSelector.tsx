@@ -71,7 +71,18 @@ export default function StateSelect({
         <Command>
           <CommandInput placeholder="Search state..." />
           <CommandEmpty>No se encontraron estados.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className='max-h-[350px] overflow-auto'>
+            <CommandItem
+                onSelect={() => handleSelect({id: 0, name: "Todos"})}
+              >
+              <Check
+                className={cn(
+                  'mr-2 h-4 w-4',
+                  selectedState?.id === 0 ? 'opacity-100' : 'opacity-0'
+                )}
+              />
+              Todos
+              </CommandItem>
             {states.map((state) => (
               <CommandItem
                 key={state.id}

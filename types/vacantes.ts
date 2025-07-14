@@ -2,6 +2,7 @@ export interface VacanteInterface {
   id: string
   title: string
   summary: string
+  career: string
   description: string
   responsibilities: string
   location: string | null
@@ -17,6 +18,7 @@ export interface VacanteInterface {
   deadline: string | null // o Date si la parseas
   createdAt: string // o Date si la parseas
   updatedAt: string // o Date si la parseas
+  state: string | number | null,
   company: {
     name: string
     logoUrl: string | null

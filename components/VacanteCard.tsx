@@ -34,7 +34,7 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
-                {vacante.location}
+                {vacante.location} - {vacante.state}
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
@@ -60,6 +60,11 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
             {vacante.type && (
               <Badge variant="outline" className="text-blue-600 border-blue-600">
                 Remoto
+              </Badge>
+            )}
+            {vacante.career && (
+              <Badge variant="outline" className="text-blue-600 border-blue-600">
+                {vacante.career}
               </Badge>
             )}
           </div>
