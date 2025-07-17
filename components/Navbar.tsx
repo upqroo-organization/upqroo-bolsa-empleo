@@ -25,6 +25,7 @@ const perfilByRole: Record<string, string> = {
   user: '/client/perfil',
   company: '/empresa/perfil',
   student: '/client/perfil',
+  coordinator: '/coordinator',
 };
 const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   admin: [
@@ -44,6 +45,12 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Vacantes', href: '/empresa/gestionar-vacante' },
     { name: 'Encuestas', href: '/empresa/encuesta' },
     { name: 'Postulantes', href: '/empresa/postulantes' },
+  ],
+  coordinator: [
+    { name: 'Dashboard', href: '/' },
+    { name: 'Validar Empresa', href: '/coordinador/validar-empresa' },
+    // { name: 'Encuestas', href: '/empresa/encuesta' },
+    // { name: 'Postulantes', href: '/empresa/postulantes' },
   ]
 };
 

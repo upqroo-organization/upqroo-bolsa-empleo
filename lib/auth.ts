@@ -95,28 +95,29 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user?.id) {
-      // Try to get role from User table
-      const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        include: { role: true }
-      });
-
-      if (dbUser?.role?.name) {
-        token.role = dbUser.role.name;
-      } else {
-        // If not found in User, try Company
-        const dbCompany = await prisma.company.findUnique({
+        // Try to get role from User table
+        const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           include: { role: true }
         });
 
-        if (dbCompany?.role?.name) {
-          token.role = dbCompany.role.name;
+        if (dbUser?.role?.name) {
+          token.role = dbUser.role.name;
+        } else {
+          // If not found in User, try Company
+          const dbCompany = await prisma.company.findUnique({
+            where: { id: user.id },
+            include: { role: true }
+          });
+
+          if (dbCompany?.role?.name) {
+            token.role = dbCompany.role.name;
+            token.isApproved = dbCompany.isApprove; // Add approval status to token
+          }
         }
       }
-    }
 
-    return token;
+      return token;
     },
 
     async session({ session, token }) {
