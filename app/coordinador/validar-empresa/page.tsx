@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { toast } from "sonner"
 import {
   Dialog,
   DialogContent,
@@ -147,13 +148,22 @@ export default function ValidateCompanies() {
         await fetchCompanies()
         setValidationDialog(false)
         setComments('')
-        alert(data.message)
+        toast.success(data.message, {
+          description: action === 'approve' ? 'La empresa ha sido aprobada exitosamente' : 'La empresa ha sido rechazada',
+          duration: 5000
+        })
       } else {
-        alert(data.error || 'Error al procesar la solicitud')
+        toast.error(data.error || 'Error al procesar la solicitud', {
+          description: 'No se pudo completar la acción. Intente nuevamente.',
+          duration: 5000
+        })
       }
     } catch (error) {
       console.error('Error validating company:', error)
-      alert('Error de conexión')
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifique su conexión a internet.',
+        duration: 5000
+      })
     } finally {
       setValidating(false)
     }
