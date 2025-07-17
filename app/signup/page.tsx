@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Building2, GraduationCap } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import StateSelect from "@/components/StateSelector"
+import Link from "next/link"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -219,7 +220,7 @@ export default function RegisterPage() {
                   <div className="flex items-center space-x-2">
                     <Checkbox id="terms" checked={aceptaTerminos} onCheckedChange={() => setAceptaTerminos(!aceptaTerminos)} />
                     <Label htmlFor="terms" className="text-sm">
-                      Acepto los términos y condiciones y la política de privacidad
+                      Acepto los<Link href="/terms" target="__blank">términos y condiciones y la política de privacidad</Link>
                     </Label>
                   </div>
 

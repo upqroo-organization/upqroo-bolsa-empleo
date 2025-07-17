@@ -14,6 +14,7 @@ model User {
   email         String?         @unique
   emailVerified DateTime?
   image         String?
+  cvUrl         String? // URL to the user's CV PDF file
   accounts      Account[]
   sessions      Session[]
   role          role?           @relation(fields: [roleId], references: [id])

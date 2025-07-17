@@ -48,3 +48,7 @@ prisma/dev.sqlite
 prisma/migrations/dev_*
 generated/
 app/generated/
+
+# CV uploads - keep local only
+/uploads/
+uploads/

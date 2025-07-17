@@ -49,6 +49,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
 
 export default function Navbar() {
   const { data: session } = useSession();
+  console.log(session);
 
   const user = session?.user;
   const role = session?.user.role || ''; // ajusta según cómo guardas el rol
