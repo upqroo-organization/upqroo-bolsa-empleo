@@ -1,6 +1,7 @@
 'use client'
-import Navbar from "@/components/Navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 import { SessionProvider } from "next-auth/react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -9,7 +10,7 @@ export default function RootLayout({
   return (
    <main>
     <SessionProvider>
-      <Navbar/>
+      <ConditionalNavbar />
       {children}   
     </SessionProvider>
    </main>        

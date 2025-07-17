@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 export default function WaitingApprovalPage() {
   const { data: session, status } = useSession();
@@ -140,7 +140,7 @@ export default function WaitingApprovalPage() {
                 }) : 'Cargando...'}</p>
                 <p>Tiempo estimado de respuesta: 1-2 días hábiles</p>
               </div>
-              <Button variant="outline" onClick={() => router.push('/login')}>
+              <Button variant="outline" onClick={() => signOut()}>
                 Cerrar Sesión
               </Button>
             </div>
@@ -149,7 +149,7 @@ export default function WaitingApprovalPage() {
           <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600 mt-4">
             <p>
               Si tienes alguna pregunta o necesitas actualizar la información de tu empresa, 
-              por favor contáctanos a <a href="mailto:coordinacion@upqroo.edu.mx" className="text-blue-600 hover:underline">coordinacion@upqroo.edu.mx</a>
+              por favor contáctanos a <a href="mailto:gestionempresarial@upqroo.edu.mx" className="text-blue-600 hover:underline">gestionempresarial@upqroo.edu.mx</a>
             </p>
           </div>
         </CardContent>
