@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Search, Calendar, Building2, MapPin, Eye, MessageSquare, X, Clock, FileText, Users } from "lucide-react"
+import Link from "next/link"
 export default function MyApplications() {
   const applications = [
     {
@@ -126,10 +127,12 @@ export default function MyApplications() {
           <h1 className="text-3xl font-bold">Mis Postulaciones</h1>
           <p className="text-muted-foreground">Seguimiento de todas tus aplicaciones laborales</p>
         </div>
-        <Button>
-          <Search className="mr-2 h-4 w-4" />
-          Buscar Más Empleos
-        </Button>
+        <Link href={"/vacantes"} className="cursor-pointer">
+          <Button>
+            <Search className="mr-2 h-4 w-4" />
+            Buscar Vacantes
+          </Button>
+        </Link>
       </div>
 
       {/* Stats Cards */}

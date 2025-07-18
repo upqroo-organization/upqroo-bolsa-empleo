@@ -121,10 +121,6 @@ export default function PostJob() {
           <p className="text-muted-foreground">Crea una nueva oportunidad laboral para estudiantes de UPQROO</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <Save className="mr-2 h-4 w-4" />
-            Guardar Borrador
-          </Button>
           <Button disabled={loading} onClick={() => handleSubmit()}>
             <Send className="mr-2 h-4 w-4" />
             Publicar Vacante
@@ -395,10 +391,6 @@ export default function PostJob() {
 
       <div className="flex justify-end gap-4 pt-6">
         <Button variant="outline">Cancelar</Button>
-        <Button onClick={() => handleSubmit(true)} variant="outline">
-          <Save className="mr-2 h-4 w-4" />
-          Guardar Borrador
-        </Button>
         <Button disabled={loading} onClick={() => handleSubmit()}>
           <Send className="mr-2 h-4 w-4" />
           Publicar Vacante

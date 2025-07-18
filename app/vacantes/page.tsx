@@ -7,15 +7,86 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Search } from "lucide-react"
 import useVacantes from "@/hooks/vacantes/useVacantes"
+import useVacante from "@/hooks/vacantes/useVacante"
 import VacanteCard from "@/components/VacanteCard"
 import StateSelect from "@/components/StateSelector"
 import { Pagination } from "@/components/Pagination"
 import { Spinner } from "@/components/Spinner"
-import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
+import JobDetailsDrawer from "@/components/JobDetailsDrawer"
+import { Careers, VacanteInterface, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 
 export default function JobSearch() {
   const { vacantes, total, titleSearch, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
-  // const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [selectedVacante, setSelectedVacante] = useState<VacanteInterface | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get shared job ID from URL
+  const sharedJobId = searchParams.get('job');
+  
+  // Fetch shared job data
+  const { vacante: sharedVacante, isLoading: isLoadingSharedJob, error: sharedJobError } = useVacante(sharedJobId);
+
+  // Handle URL sharing - check for shared job on mount and when shared job data loads
+  useEffect(() => {
+    if (sharedJobId && sharedVacante && !isLoadingSharedJob) {
+      setSelectedVacante(sharedVacante);
+      setIsDrawerOpen(true);
+    } else if (sharedJobId && sharedJobError) {
+      toast.error("No se pudo cargar la vacante compartida");
+      // Remove invalid job parameter from URL
+      const params = new URLSearchParams(searchParams);
+      params.delete('job');
+      const newUrl = params.toString() ? `?${params.toString()}` : '/vacantes';
+      router.replace(newUrl, { scroll: false });
+    }
+  }, [sharedJobId, sharedVacante, isLoadingSharedJob, sharedJobError, searchParams, router]);
+
+  const handleViewDetails = (vacante: VacanteInterface) => {
+    setSelectedVacante(vacante);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedVacante(null);
+    // Remove job parameter from URL when closing drawer
+    const params = new URLSearchParams(searchParams);
+    params.delete('job');
+    const newUrl = params.toString() ? `?${params.toString()}` : '/vacantes';
+    router.replace(newUrl, { scroll: false });
+  };
+
+  const handleApply = (vacanteId: string) => {
+    // TODO: Implement application logic
+    toast.success("¡Aplicación enviada exitosamente!");
+    console.log("Applying to job:", vacanteId);
+  };
+
+  const handleShare = (vacante: VacanteInterface) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('job', vacante.id);
+    const shareUrl = `${window.location.origin}/vacantes?${params.toString()}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: `${vacante.title} - ${vacante.company.name}`,
+        text: `Mira esta oportunidad laboral: ${vacante.title} en ${vacante.company.name}`,
+        url: shareUrl,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast.success("¡Enlace copiado al portapapeles!");
+      }).catch(() => {
+        toast.error("Error al copiar el enlace");
+      });
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -127,33 +198,6 @@ export default function JobSearch() {
                 </Select>
               </div>
 
-              {/* <Separator />
-
-              <div className="space-y-3">
-                <label className="text-sm font-medium">Rango Salarial</label>
-                <Select onValueChange={(value) => {
-                  const values = value.split("-");
-                  console.log(values.length)
-                  if (values.length > 1) {
-                    handleFilters("salaryMax", values[1])
-                    handleFilters("salaryMin", values[0])
-                  } else {
-                    handleFilters("salaryMin", values[0])
-                  }
-                }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar rango" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0-10">$0 - $10,000</SelectItem>
-                    <SelectItem value="10-20">$10,000 - $20,000</SelectItem>
-                    <SelectItem value="20-30">$20,000 - $30,000</SelectItem>
-                    <SelectItem value="30-40">$30,000 - $40,000</SelectItem>
-                    <SelectItem value="40">$40,000+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div> */}
-
               <Button onClick={resetFilters} variant="outline" className="w-full cursor-pointer">
                 Limpiar Filtros
               </Button>
@@ -165,21 +209,19 @@ export default function JobSearch() {
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">Mostrando {total} empleos de 47 resultados</p>
-            {/* <Select defaultValue="recent">
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Más Recientes</SelectItem>
-                <SelectItem value="salary">Mejor Salario</SelectItem>
-                <SelectItem value="relevance">Más Relevantes</SelectItem>
-              </SelectContent>
-            </Select> */}
           </div>
 
           {isLoading
             ? <div className="w-full flex justify-center"><Spinner /></div>
-            : vacantes.map((item, i) => (<VacanteCard key={i} vacante={item} />))}
+            : vacantes.map((item, i) => (
+                <VacanteCard 
+                  key={i} 
+                  vacante={item} 
+                  onViewDetails={handleViewDetails}
+                  onApply={handleApply}
+                  onShare={handleShare}
+                />
+              ))}
 
           {/* Pagination */}
           <div className="w-full flex justify-center">
@@ -192,6 +234,25 @@ export default function JobSearch() {
           </div>
         </div>
       </div>
+
+      {/* Job Details Drawer */}
+      <JobDetailsDrawer
+        vacante={selectedVacante}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        onApply={handleApply}
+        onShare={handleShare}
+      />
+
+      {/* Loading indicator for shared job */}
+      {isLoadingSharedJob && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg flex items-center gap-3">
+            <Spinner />
+            <span>Cargando vacante...</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

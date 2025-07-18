@@ -13,9 +13,12 @@ dayjs.locale('es');
 
 type VacanteCardProps = {
   vacante: VacanteInterface
+  onViewDetails?: (vacante: VacanteInterface) => void
+  onApply?: (vacanteId: string) => void
+  onShare?: (vacante: VacanteInterface) => void
 }
 
-export default function VacanteCard({ vacante }: VacanteCardProps) {
+export default function VacanteCard({ vacante, onViewDetails, onApply, onShare }: VacanteCardProps) {
   return (
     <Card
       key={vacante.id}
@@ -44,7 +47,11 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => onShare?.(vacante)}
+            >
               <Share className="h-4 w-4" />
             </Button>
           </div>
@@ -85,8 +92,18 @@ export default function VacanteCard({ vacante }: VacanteCardProps) {
           </div> */}
 
           <div className="flex gap-2 pt-2">
-            <Button className="flex-1">Postularme</Button>
-            <Button variant="outline">Ver Detalles</Button>
+            <Button 
+              className="flex-1"
+              onClick={() => onApply?.(vacante.id)}
+            >
+              Postularme
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => onViewDetails?.(vacante)}
+            >
+              Ver Detalles
+            </Button>
           </div>
         </div>
       </CardContent>
