@@ -13,18 +13,25 @@ import StateSelect from "@/components/StateSelector"
 import { Pagination } from "@/components/Pagination"
 import { Spinner } from "@/components/Spinner"
 import JobDetailsDrawer from "@/components/JobDetailsDrawer"
+import JobApplicationModal from "@/components/JobApplicationModal"
 import { Careers, VacanteInterface, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { toast } from "sonner"
 
 export default function JobSearch() {
   const { vacantes, total, titleSearch, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
   const [selectedVacante, setSelectedVacante] = useState<VacanteInterface | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [applicationVacante, setApplicationVacante] = useState<VacanteInterface | null>(null);
   
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const { user, isAuthenticated } = useCurrentUser();
   
   // Get shared job ID from URL
   const sharedJobId = searchParams.get('job');
@@ -63,9 +70,27 @@ export default function JobSearch() {
   };
 
   const handleApply = (vacanteId: string) => {
-    // TODO: Implement application logic
+    if (!session || !isAuthenticated) {
+      toast.error("Debes iniciar sesión para aplicar a una vacante", {
+        action: {
+          label: "Iniciar Sesión",
+          onClick: () => router.push("/login")
+        }
+      });
+      return;
+    }
+
+    const vacante = vacantes.find(v => v.id === vacanteId);
+    if (vacante) {
+      setApplicationVacante(vacante);
+      setIsApplicationModalOpen(true);
+    }
+  };
+
+  const handleApplicationSuccess = () => {
+    // Refresh the vacantes list or update the specific vacante
+    // You could also update local state to show "Applied" status
     toast.success("¡Aplicación enviada exitosamente!");
-    console.log("Applying to job:", vacanteId);
   };
 
   const handleShare = (vacante: VacanteInterface) => {
@@ -242,6 +267,18 @@ export default function JobSearch() {
         onClose={handleCloseDrawer}
         onApply={handleApply}
         onShare={handleShare}
+      />
+
+      {/* Job Application Modal */}
+      <JobApplicationModal
+        vacante={applicationVacante}
+        user={user}
+        isOpen={isApplicationModalOpen}
+        onClose={() => {
+          setIsApplicationModalOpen(false);
+          setApplicationVacante(null);
+        }}
+        onApplicationSuccess={handleApplicationSuccess}
       />
 
       {/* Loading indicator for shared job */}

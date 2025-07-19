@@ -1,0 +1,14 @@
+model Application {
+  id        String   @id @default(cuid())
+  userId    String
+  vacanteId String
+  status    String   @default("pending") // pending, accepted, rejected
+  appliedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacante Vacante @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, vacanteId]) // Prevent duplicate applications
+  @@index([userId])
+  @@index([vacanteId])
+}
