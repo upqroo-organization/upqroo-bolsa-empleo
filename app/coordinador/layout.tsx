@@ -13,7 +13,7 @@ export default function RootLayout({
     <SessionProvider>
       <Navbar></Navbar>
       {children}
-      <Toaster />
+      <Toaster richColors />
     </SessionProvider>
    </main>        
   );

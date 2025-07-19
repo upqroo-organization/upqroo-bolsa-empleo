@@ -45,7 +45,10 @@ export default function JobSearch() {
       setSelectedVacante(sharedVacante);
       setIsDrawerOpen(true);
     } else if (sharedJobId && sharedJobError) {
-      toast.error("No se pudo cargar la vacante compartida");
+      toast.error("Vacante no encontrada", {
+        description: "No se pudo cargar la vacante compartida. Es posible que haya sido eliminada.",
+        duration: 5000
+      });
       // Remove invalid job parameter from URL
       const params = new URLSearchParams(searchParams);
       params.delete('job');
@@ -71,7 +74,9 @@ export default function JobSearch() {
 
   const handleApply = (vacanteId: string) => {
     if (!session || !isAuthenticated) {
-      toast.error("Debes iniciar sesión para aplicar a una vacante", {
+      toast.error("Inicia sesión para aplicar", {
+        description: "Debes iniciar sesión para poder postularte a las vacantes",
+        duration: 4000,
         action: {
           label: "Iniciar Sesión",
           onClick: () => router.push("/login")
@@ -90,7 +95,10 @@ export default function JobSearch() {
   const handleApplicationSuccess = () => {
     // Refresh the vacantes list or update the specific vacante
     // You could also update local state to show "Applied" status
-    toast.success("¡Aplicación enviada exitosamente!");
+    toast.success("¡Aplicación procesada!", {
+      description: "Tu aplicación ha sido enviada correctamente",
+      duration: 4000
+    });
   };
 
   const handleShare = (vacante: VacanteInterface) => {
@@ -106,9 +114,15 @@ export default function JobSearch() {
       }).catch(console.error);
     } else {
       navigator.clipboard.writeText(shareUrl).then(() => {
-        toast.success("¡Enlace copiado al portapapeles!");
+        toast.success("¡Enlace copiado!", {
+          description: "El enlace de la vacante ha sido copiado al portapapeles",
+          duration: 3000
+        });
       }).catch(() => {
-        toast.error("Error al copiar el enlace");
+        toast.error("Error al copiar", {
+          description: "No se pudo copiar el enlace al portapapeles",
+          duration: 4000
+        });
       });
     }
   };

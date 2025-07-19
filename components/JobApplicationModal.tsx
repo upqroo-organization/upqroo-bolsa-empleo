@@ -31,16 +31,46 @@ export default function JobApplicationModal({
 
   const handleApply = async () => {
     if (!user) {
-      toast.error("Debes iniciar sesión para aplicar")
+      toast.error("Debes iniciar sesión para aplicar", {
+        description: "Inicia sesión para poder postularte a esta vacante",
+        duration: 4000,
+        style: {
+          background: '#fef2f2',
+          borderColor: '#fecaca',
+          color: '#dc2626'
+        }
+      })
       return
     }
 
     if (!user.cvUrl) {
-      toast.error("Debes subir tu CV antes de aplicar a una vacante")
+      toast.error("CV requerido", {
+        description: "Debes subir tu CV antes de aplicar a una vacante",
+        duration: 5000,
+        style: {
+          background: '#fef2f2',
+          borderColor: '#fecaca',
+          color: '#dc2626'
+        },
+        action: {
+          label: "Subir CV",
+          onClick: () => window.open('/client/perfil', '_blank')
+        }
+      })
       return
     }
 
     setIsSubmitting(true)
+
+    // Show loading toast
+    const loadingToast = toast.loading("Enviando aplicación...", {
+      description: "Procesando tu aplicación, por favor espera",
+      style: {
+        background: '#f0f9ff',
+        borderColor: '#bae6fd',
+        color: '#0369a1'
+      }
+    })
 
     try {
       const response = await fetch('/api/applications', {
@@ -55,17 +85,60 @@ export default function JobApplicationModal({
 
       const data = await response.json()
 
+      // Dismiss loading toast
+      toast.dismiss(loadingToast)
+
       if (!response.ok) {
-        toast.error(data.error || 'Error al enviar la aplicación')
+        if (response.status === 400 && data.error?.includes('Ya has aplicado')) {
+          toast.warning("Ya aplicaste a esta vacante", {
+            description: "No puedes aplicar múltiples veces a la misma vacante",
+            duration: 4000,
+            style: {
+              background: '#fffbeb',
+              borderColor: '#fed7aa',
+              color: '#d97706'
+            }
+          })
+        } else {
+          toast.error("Error al enviar aplicación", {
+            description: data.details || data.error || 'No se pudo procesar tu aplicación',
+            duration: 5000,
+            style: {
+              background: '#fef2f2',
+              borderColor: '#fecaca',
+              color: '#dc2626'
+            }
+          })
+        }
         return
       }
 
-      toast.success('¡Aplicación enviada exitosamente!')
+      toast.success("¡Aplicación enviada exitosamente!", {
+        description: data.details || `Tu aplicación para ${vacante.title} en ${vacante.company.name} ha sido enviada`,
+        duration: 6000,
+        style: {
+          background: '#f0fdf4',
+          borderColor: '#bbf7d0',
+          color: '#16a34a'
+        }
+      })
+      
       onApplicationSuccess()
       onClose()
     } catch (error) {
       console.error('Error applying to job:', error)
-      toast.error('Error de conexión. Intenta nuevamente.')
+      // Dismiss loading toast
+      toast.dismiss(loadingToast)
+      
+      toast.error("Error de conexión", {
+        description: "No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.",
+        duration: 5000,
+        style: {
+          background: '#fef2f2',
+          borderColor: '#fecaca',
+          color: '#dc2626'
+        }
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -160,7 +233,7 @@ export default function JobApplicationModal({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(user.cvUrl!, '_blank')}
+                    onClick={() => window.open('api/' + user.cvUrl!, '_blank')}
                   >
                     Ver CV
                   </Button>

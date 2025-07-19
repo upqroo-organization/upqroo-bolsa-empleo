@@ -18,6 +18,7 @@ import {
   GraduationCap,
   Target,
 } from "lucide-react"
+import Link from "next/link"
 
 export default function StudentDashboard() {
   const quickStats = [
@@ -130,10 +131,12 @@ export default function StudentDashboard() {
           <Button variant="outline" size="icon">
             <Bell className="h-4 w-4" />
           </Button>
-          <Button>
-            <Search className="mr-2 h-4 w-4" />
-            Buscar Empleos
-          </Button>
+          <Link href="/vacantes">
+            <Button className="cursor-pointer">
+              <Search className="mr-2 h-4 w-4" />
+              Buscar Empleos
+            </Button>
+          </Link>
         </div>
       </div>
 

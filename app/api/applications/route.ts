@@ -9,7 +9,10 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.id) {
       return NextResponse.json(
-        { error: 'No autorizado. Debes iniciar sesión para aplicar.' },
+        { 
+          error: 'No autorizado',
+          details: 'Debes iniciar sesión para aplicar a una vacante'
+        },
         { status: 401 }
       );
     }
@@ -18,7 +21,10 @@ export async function POST(request: NextRequest) {
 
     if (!vacanteId) {
       return NextResponse.json(
-        { error: 'ID de vacante requerido' },
+        { 
+          error: 'Datos incompletos',
+          details: 'ID de vacante requerido para procesar la aplicación'
+        },
         { status: 400 }
       );
     }
@@ -35,7 +41,10 @@ export async function POST(request: NextRequest) {
 
     if (existingApplication) {
       return NextResponse.json(
-        { error: 'Ya has aplicado a esta vacante' },
+        { 
+          error: 'Ya has aplicado a esta vacante',
+          details: 'No puedes aplicar múltiples veces a la misma vacante'
+        },
         { status: 400 }
       );
     }
@@ -48,7 +57,10 @@ export async function POST(request: NextRequest) {
 
     if (!vacante) {
       return NextResponse.json(
-        { error: 'Vacante no encontrada' },
+        { 
+          error: 'Vacante no encontrada',
+          details: 'La vacante solicitada no existe o ha sido eliminada'
+        },
         { status: 404 }
       );
     }
@@ -86,13 +98,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: application,
-      message: 'Aplicación enviada exitosamente'
+      message: 'Aplicación enviada exitosamente',
+      details: `Tu aplicación para ${vacante.title} en ${vacante.company.name} ha sido procesada correctamente`
     });
 
   } catch (error) {
     console.error('Error creating application:', error);
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { 
+        error: 'Error interno del servidor',
+        details: 'No se pudo procesar tu aplicación. Intenta nuevamente en unos momentos.'
+      },
       { status: 500 }
     );
   }
