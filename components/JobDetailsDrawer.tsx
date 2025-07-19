@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Building2, MapPin, Clock, DollarSign, Share2, Calendar, Users } from "lucide-react"
+import { Building2, MapPin, Clock, DollarSign, Share2, Calendar, Users, CheckCircle } from "lucide-react"
 import { getEnumLabelSafe } from "@/utils"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -14,6 +14,8 @@ dayjs.locale('es')
 
 interface JobDetailsDrawerProps {
   vacante: VacanteInterface | null
+  hasApplied?: boolean
+  isAuthenticated?: boolean
   isOpen: boolean
   onClose: () => void
   onApply: (vacanteId: string) => void
@@ -22,6 +24,8 @@ interface JobDetailsDrawerProps {
 
 export default function JobDetailsDrawer({ 
   vacante, 
+  hasApplied = false,
+  isAuthenticated = false,
   isOpen, 
   onClose, 
   onApply, 
@@ -150,12 +154,23 @@ export default function JobDetailsDrawer({
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
-            <Button 
-              className="flex-1" 
-              onClick={() => onApply(vacante.id)}
-            >
-              Postularme
-            </Button>
+            {isAuthenticated && hasApplied ? (
+              <Button 
+                className="flex-1"
+                variant="outline"
+                disabled
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Ya aplicaste
+              </Button>
+            ) : (
+              <Button 
+                className="flex-1" 
+                onClick={() => onApply(vacante.id)}
+              >
+                Postularme
+              </Button>
+            )}
             <Button 
               variant="outline" 
               onClick={() => onShare(vacante)}

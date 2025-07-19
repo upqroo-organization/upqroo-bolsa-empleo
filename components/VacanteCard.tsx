@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, Clock, DollarSign, MapPin, Share } from "lucide-react"
+import { Building2, Clock, DollarSign, MapPin, Share, CheckCircle } from "lucide-react"
 import { Button } from "./ui/button"
 import { Careers, VacanteInterface, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 import { Badge } from "@/components/ui/badge"
@@ -13,12 +13,14 @@ dayjs.locale('es');
 
 type VacanteCardProps = {
   vacante: VacanteInterface
+  hasApplied?: boolean
+  isAuthenticated?: boolean
   onViewDetails?: (vacante: VacanteInterface) => void
   onApply?: (vacanteId: string) => void
   onShare?: (vacante: VacanteInterface) => void
 }
 
-export default function VacanteCard({ vacante, onViewDetails, onApply, onShare }: VacanteCardProps) {
+export default function VacanteCard({ vacante, hasApplied = false, isAuthenticated = false, onViewDetails, onApply, onShare }: VacanteCardProps) {
   return (
     <Card
       key={vacante.id}
@@ -29,7 +31,12 @@ export default function VacanteCard({ vacante, onViewDetails, onApply, onShare }
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <CardTitle className="text-lg">{vacante.title}</CardTitle>
-              {/* <Badge className="bg-blue-100 text-blue-800">Destacado</Badge> */}
+              {isAuthenticated && hasApplied && (
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Aplicado
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
@@ -92,12 +99,23 @@ export default function VacanteCard({ vacante, onViewDetails, onApply, onShare }
           </div> */}
 
           <div className="flex gap-2 pt-2">
-            <Button 
-              className="flex-1"
-              onClick={() => onApply?.(vacante.id)}
-            >
-              Postularme
-            </Button>
+            {isAuthenticated && hasApplied ? (
+              <Button 
+                className="flex-1"
+                variant="outline"
+                disabled
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Ya aplicaste
+              </Button>
+            ) : (
+              <Button 
+                className="flex-1"
+                onClick={() => onApply?.(vacante.id)}
+              >
+                Postularme
+              </Button>
+            )}
             <Button 
               variant="outline"
               onClick={() => onViewDetails?.(vacante)}

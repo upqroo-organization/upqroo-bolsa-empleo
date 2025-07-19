@@ -19,6 +19,7 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useCurrentUser } from "@/hooks/useCurrentUser"
+import { useUserApplications } from "@/hooks/useUserApplications"
 import { toast } from "sonner"
 
 export default function JobSearch() {
@@ -32,6 +33,7 @@ export default function JobSearch() {
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { user, isAuthenticated } = useCurrentUser();
+  const { hasAppliedToJob, addAppliedJob } = useUserApplications();
   
   // Get shared job ID from URL
   const sharedJobId = searchParams.get('job');
@@ -93,11 +95,19 @@ export default function JobSearch() {
   };
 
   const handleApplicationSuccess = () => {
-    // Refresh the vacantes list or update the specific vacante
-    // You could also update local state to show "Applied" status
+    // Add the job to the applied jobs list
+    if (applicationVacante) {
+      addAppliedJob(applicationVacante.id);
+    }
+    
     toast.success("¡Aplicación procesada!", {
       description: "Tu aplicación ha sido enviada correctamente",
-      duration: 4000
+      duration: 4000,
+      style: {
+        background: '#f0fdf4',
+        borderColor: '#bbf7d0',
+        color: '#16a34a'
+      }
     });
   };
 
@@ -255,7 +265,9 @@ export default function JobSearch() {
             : vacantes.map((item, i) => (
                 <VacanteCard 
                   key={i} 
-                  vacante={item} 
+                  vacante={item}
+                  hasApplied={hasAppliedToJob(item.id)}
+                  isAuthenticated={isAuthenticated}
                   onViewDetails={handleViewDetails}
                   onApply={handleApply}
                   onShare={handleShare}
@@ -277,6 +289,8 @@ export default function JobSearch() {
       {/* Job Details Drawer */}
       <JobDetailsDrawer
         vacante={selectedVacante}
+        hasApplied={selectedVacante ? hasAppliedToJob(selectedVacante.id) : false}
+        isAuthenticated={isAuthenticated}
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         onApply={handleApply}
