@@ -35,7 +35,7 @@ export default function JobDetailsDrawer({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:w-[540px] max-w-[90vw] overflow-y-auto">
+      <SheetContent className="w-full !sm:w-[540px] !max-w-[70vw] overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-xl">{vacante.title}</SheetTitle>
           <SheetDescription>

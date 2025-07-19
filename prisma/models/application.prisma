@@ -2,8 +2,9 @@ model Application {
   id        String   @id @default(cuid())
   userId    String
   vacanteId String
-  status    String   @default("pending") // pending, accepted, rejected
+  status    String   @default("pending") // pending, interview, rejected, hired
   appliedAt DateTime @default(now())
+  cvViewed  Boolean  @default(false) // Track if CV has been viewed by company
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   vacante Vacante @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
