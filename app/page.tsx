@@ -2,70 +2,90 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Users, Building2, GraduationCap, TrendingUp, MapPin, Clock, DollarSign, LogIn } from "lucide-react"
+import { Search, Users, Building2, GraduationCap, TrendingUp, MapPin, Clock, DollarSign, LogIn, Briefcase } from "lucide-react"
 import Link from "next/link"
 import StateSelectServerSide from "@/components/StateSelectorServerSide"
-// import Link from "next/link"
+import { getFeaturedJobs, getJobsStats, FeaturedJob } from "@/lib/featured-jobs"
+import { Careers, VacanteTypeEnum, VacanteModalityEnum } from "@/types/vacantes"
+import { getEnumLabelSafe } from "@/utils/index"
 
-const featuredJobs = [
-    {
-      title: "Desarrollador Frontend React",
-      company: "TechCorp México",
-      location: "Cancún, Q.Roo",
-      type: "Tiempo Completo",
-      salary: "$25,000 - $35,000",
-      tags: ["React", "JavaScript", "CSS"],
-    },
-    {
-      title: "Analista de Datos",
-      company: "DataSolutions",
-      location: "Playa del Carmen",
-      type: "Prácticas",
-      salary: "$8,000 - $12,000",
-      tags: ["Python", "SQL", "Excel"],
-    },
-    {
-      title: "Ingeniero de Software",
-      company: "Innovation Labs",
-      location: "Remoto",
-      type: "Tiempo Completo",
-      salary: "$30,000 - $45,000",
-      tags: ["Java", "Spring", "AWS"],
-    },
-  ]
+// Helper function to format salary
+function formatSalary(min: number | null, max: number | null): string {
+  if (min && max) {
+    return `$${min.toLocaleString()} - $${max.toLocaleString()}`
+  } else if (min) {
+    return `Desde $${min.toLocaleString()}`
+  } else if (max) {
+    return `Hasta $${max.toLocaleString()}`
+  }
+  return "Salario a convenir"
+}
+
+// Helper function to get job tags
+function getJobTags(job: FeaturedJob): string[] {
+  const tags: string[] = []
+  
+  if (job.career) {
+    const careerLabel = getEnumLabelSafe(Careers, job.career)
+    if (careerLabel !== job.career) {
+      tags.push(careerLabel)
+    }
+  }
+  
+  if (job.type) {
+    const typeLabel = getEnumLabelSafe(VacanteTypeEnum, job.type)
+    if (typeLabel !== job.type) {
+      tags.push(typeLabel)
+    }
+  }
+  
+  if (job.modality) {
+    const modalityLabel = getEnumLabelSafe(VacanteModalityEnum, job.modality)
+    if (modalityLabel !== job.modality) {
+      tags.push(modalityLabel)
+    }
+  }
+  
+  return tags.slice(0, 3) // Limit to 3 tags
+}
+
+export default async function LandingPage() {
+  // Fetch real data
+  const [featuredJobs, jobsStats] = await Promise.all([
+    getFeaturedJobs(6),
+    getJobsStats()
+  ])
 
   const stats = [
     {
       icon: Users,
-      value: "1,200+",
+      value: jobsStats.totalUsers > 0 ? `${jobsStats.totalUsers.toLocaleString()}+` : "0",
       label: "Estudiantes Registrados",
       color: "text-blue-600",
       bgColor: "bg-blue-100",
     },
     {
       icon: Building2,
-      value: "150+",
+      value: jobsStats.totalCompanies > 0 ? `${jobsStats.totalCompanies.toLocaleString()}+` : "0",
       label: "Empresas Activas",
       color: "text-green-600",
       bgColor: "bg-green-100",
     },
     {
       icon: GraduationCap,
-      value: "300+",
+      value: jobsStats.totalJobs > 0 ? `${jobsStats.totalJobs.toLocaleString()}+` : "0",
       label: "Vacantes Publicadas",
       color: "text-purple-600",
       bgColor: "bg-purple-100",
     },
     {
       icon: TrendingUp,
-      value: "85%",
+      value: `${jobsStats.placementRate}%`,
       label: "Tasa de Colocación",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
     },
   ]
-
-export default function LandingPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -158,48 +178,92 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Vacantes Destacadas</h2>
             <p className="text-xl text-muted-foreground">Oportunidades perfectas para tu perfil profesional</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredJobs.map((job, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <CardHeader>
-                  <CardTitle className="text-lg">{job.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-1">
-                    <Building2 className="h-4 w-4" />
-                    {job.company}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      {job.type}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
-                      <DollarSign className="h-4 w-4" />
-                      {job.salary}
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {job.tags.map((tag, tagIndex) => (
-                      <Badge key={tagIndex} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  <Button className="w-full">Ver Detalles</Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Ver Todas las Vacantes
-            </Button>
-          </div>
+          
+          {featuredJobs.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="max-w-md mx-auto">
+                <Briefcase className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
+                <h3 className="text-2xl font-semibold mb-4">No hay vacantes disponibles</h3>
+                <p className="text-muted-foreground mb-8">
+                  Actualmente no hay vacantes publicadas. Te invitamos a registrarte para recibir notificaciones 
+                  cuando se publiquen nuevas oportunidades.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/login">
+                    <Button size="lg">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Registrarse
+                    </Button>
+                  </Link>
+                  <Link href="/vacantes">
+                    <Button variant="outline" size="lg">
+                      <Search className="mr-2 h-4 w-4" />
+                      Explorar Vacantes
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredJobs.map((job) => (
+                  <Card key={job.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <CardHeader>
+                      <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
+                      <CardDescription className="flex items-center gap-1">
+                        <Building2 className="h-4 w-4" />
+                        {job.company.name}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          {job.location} {job.state && `- ${job.state.name}`}
+                        </div>
+                        {job.type && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            {getEnumLabelSafe(VacanteTypeEnum, job.type)}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
+                          <DollarSign className="h-4 w-4" />
+                          {formatSalary(job.salaryMin, job.salaryMax)}
+                        </div>
+                      </div>
+                      
+                      {job.summary && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {job.summary}
+                        </p>
+                      )}
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {getJobTags(job).map((tag, tagIndex) => (
+                          <Badge key={tagIndex} variant="secondary" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                      
+                      <Link href={`/vacantes?job=${job.id}`}>
+                        <Button className="w-full">Ver Detalles</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="text-center mt-12">
+                <Link href="/vacantes">
+                  <Button variant="outline" size="lg">
+                    Ver Todas las Vacantes
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -212,18 +276,22 @@ export default function LandingPage() {
               Únete a nuestra comunidad y conecta con las mejores oportunidades laborales en Quintana Roo
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8 cursor-pointer">
-                <GraduationCap className="mr-2 h-5 w-5" />
-                Registrarse como Estudiante
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-primary hover:bg-white hover:text-primary h-12 px-8 cursor-pointer"
-              >
-                <Building2 className="mr-2 h-5 w-5" />
-                Registrar Empresa
-              </Button>
+              <Link href="/login">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8">
+                  <GraduationCap className="mr-2 h-5 w-5" />
+                  Registrarse como Estudiante
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-primary h-12 px-8"
+                >
+                  <Building2 className="mr-2 h-5 w-5" />
+                  Registrar Empresa
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
