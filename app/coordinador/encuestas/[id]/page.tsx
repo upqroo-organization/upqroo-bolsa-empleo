@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { Survey, SurveyResponse, RATING_LABELS } from '@/types/survey';
 import { Button } from '@/components/ui/button';
@@ -14,13 +14,7 @@ export default function SurveyDetailsPage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchSurvey();
-    }
-  }, [params.id]);
-
-  const fetchSurvey = async () => {
+  const fetchSurvey = useCallback(async () => {
     try {
       const response = await fetch(`/api/coordinador/surveys/${params.id}`);
       if (response.ok) {
@@ -32,7 +26,14 @@ export default function SurveyDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (params.id) {
+      fetchSurvey();
+    }
+  }, [fetchSurvey, params.id]);
+
 
   const calculateQuestionStats = (questionId: string) => {
     if (!survey?.responses) return null;
@@ -66,11 +67,8 @@ export default function SurveyDetailsPage() {
     return <div className="p-6">Encuesta no encontrada</div>;
   }
 
-  const isActive = () => {
-    const now = new Date();
-    return survey.isActive && 
-           new Date(survey.startDate) <= now && 
-           new Date(survey.endDate) >= now;
+  const getSurveyStatus = () => {
+    return survey?.isActive ? 'Activa' : 'Inactiva';
   };
 
   return (
@@ -82,8 +80,8 @@ export default function SurveyDetailsPage() {
           </Button>
         </Link>
         <h1 className="text-2xl font-bold">{survey.title}</h1>
-        <Badge variant={isActive() ? 'default' : 'secondary'}>
-          {isActive() ? 'Activa' : 'Inactiva'}
+        <Badge variant={survey.isActive ? 'default' : 'secondary'}>
+          {getSurveyStatus()}
         </Badge>
       </div>
 
@@ -100,7 +98,11 @@ export default function SurveyDetailsPage() {
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {new Date(survey.startDate).toLocaleDateString()} - {new Date(survey.endDate).toLocaleDateString()}
+                Disponible {survey.daysAfterHiring} días después de contratación
+              </div>
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                Duración: {survey.surveyDuration} días
               </div>
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />

@@ -3,14 +3,15 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const data = await request.json();
 
     const question = await prisma.surveyQuestion.create({
       data: {
-        surveyId: params.id,
+        surveyId: id,
         question: data.question,
         order: data.order,
         isRequired: data.isRequired ?? true
@@ -29,9 +30,10 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { questions } = await request.json();
 
     // Update questions in a transaction
@@ -49,7 +51,7 @@ export async function PUT(
     );
 
     const updatedQuestions = await prisma.surveyQuestion.findMany({
-      where: { surveyId: params.id },
+      where: { surveyId: id },
       orderBy: { order: 'asc' }
     });
 

@@ -62,7 +62,10 @@ export async function PATCH(
 
     const updatedApplication = await prisma.application.update({
       where: { id: applicationId },
-      data: { status },
+      data: { 
+        status,
+        hiredAt: status === 'hired' ? new Date() : null
+      },
       include: {
         user: {
           select: {

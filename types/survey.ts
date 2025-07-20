@@ -3,8 +3,8 @@ export interface Survey {
   title: string;
   description?: string;
   isActive: boolean;
-  startDate: Date;
-  endDate: Date;
+  daysAfterHiring: number; // Days after hiring when survey becomes available
+  surveyDuration: number; // How many days the survey stays available
   questions: SurveyQuestion[];
   responses?: SurveyResponse[];
   createdAt: Date;
@@ -57,8 +57,8 @@ export interface SurveyAnswer {
 export interface CreateSurveyData {
   title: string;
   description?: string;
-  startDate: Date;
-  endDate: Date;
+  daysAfterHiring: number;
+  surveyDuration: number;
   questions: CreateSurveyQuestionData[];
 }
 

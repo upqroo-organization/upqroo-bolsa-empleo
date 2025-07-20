@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Survey } from '@/types/survey';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Users, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+
+interface ExtendedUser {
+  id?: string;
+  companyId?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+}
 
 interface CompanySurveyData {
   surveys: (Survey & {
@@ -32,16 +40,16 @@ export default function EmpresaEncuestasPage() {
   const [surveyData, setSurveyData] = useState<CompanySurveyData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (session?.user) {
-      fetchSurveys();
-    }
-  }, [session]);
-
-  const fetchSurveys = async () => {
+  const fetchSurveys = useCallback(async () => {
     try {
-      // Assuming we have company ID in session or need to get it
-      const companyId = (session?.user as any)?.companyId || 'company-id'; // You'll need to adjust this
+      // Get company ID from session - adjust this based on your auth setup
+      const user = session?.user as ExtendedUser;
+      const companyId = user?.id || user?.companyId;
+      
+      if (!companyId) {
+        console.error('No company ID found in session');
+        return;
+      }
       
       const response = await fetch(`/api/empresa/surveys?companyId=${companyId}`);
       if (response.ok) {
@@ -53,7 +61,14 @@ export default function EmpresaEncuestasPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user]);
+  
+  useEffect(() => {
+    if (session?.user) {
+      fetchSurveys();
+    }
+  }, [fetchSurveys, session]);
+
 
   if (loading) {
     return <div className="p-6">Cargando encuestas...</div>;
@@ -115,7 +130,11 @@ export default function EmpresaEncuestasPage() {
               <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {new Date(survey.startDate).toLocaleDateString()} - {new Date(survey.endDate).toLocaleDateString()}
+                  Disponible {survey.daysAfterHiring} días después de contratación
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  Duración: {survey.surveyDuration} días
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />

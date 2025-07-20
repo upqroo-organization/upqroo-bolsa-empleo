@@ -65,11 +65,8 @@ export default function EncuestasPage() {
     }
   };
 
-  const isActive = (survey: Survey) => {
-    const now = new Date();
-    return survey.isActive && 
-           new Date(survey.startDate) <= now && 
-           new Date(survey.endDate) >= now;
+  const getSurveyStatus = (survey: Survey) => {
+    return survey.isActive ? 'Activa' : 'Inactiva';
   };
 
   if (loading) {
@@ -96,8 +93,8 @@ export default function EncuestasPage() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     {survey.title}
-                    <Badge variant={isActive(survey) ? 'default' : 'secondary'}>
-                      {isActive(survey) ? 'Activa' : 'Inactiva'}
+                    <Badge variant={survey.isActive ? 'default' : 'secondary'}>
+                      {getSurveyStatus(survey)}
                     </Badge>
                   </CardTitle>
                   {survey.description && (
@@ -138,7 +135,11 @@ export default function EncuestasPage() {
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  {new Date(survey.startDate).toLocaleDateString()} - {new Date(survey.endDate).toLocaleDateString()}
+                  Disponible {survey.daysAfterHiring} días después de contratación
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  Duración: {survey.surveyDuration} días
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
@@ -146,7 +147,7 @@ export default function EncuestasPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
-                  {(survey as any)._count?.responses || 0} respuestas
+                  {(survey as unknown)._count?.responses || 0} respuestas
                 </div>
               </div>
             </CardContent>

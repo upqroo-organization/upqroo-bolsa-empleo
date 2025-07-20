@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Survey, RATING_LABELS, RatingValue } from '@/types/survey';
@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ArrowLeft, User } from 'lucide-react';
 import Link from 'next/link';
+import { SURVEY_LIMITS } from '@/constants/survey';
 
 interface StudentSurveyData {
   survey: Survey;
@@ -36,15 +37,10 @@ export default function CompletarEncuestaPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (params.id && session?.user) {
-      fetchSurveyData();
-    }
-  }, [params.id, session]);
-
-  const fetchSurveyData = async () => {
+  const fetchSurveyData = useCallback(async () => {
     try {
-      const companyId = (session?.user as any)?.companyId || 'company-id'; // Adjust this
+      console.log(session?.user)
+      const companyId = (session?.user as any)?.id || 'company-id'; // Adjust this
       
       const [surveyResponse, responsesResponse] = await Promise.all([
         fetch(`/api/empresa/surveys?companyId=${companyId}`),
@@ -73,7 +69,14 @@ export default function CompletarEncuestaPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, session?.user]);
+  
+  useEffect(() => {
+    if (params.id && session?.user) {
+      fetchSurveyData();
+    }
+  }, [fetchSurveyData, params.id, session]);
+
 
   const handleAnswerChange = (questionId: string, rating: number) => {
     setAnswers(prev => ({
@@ -89,7 +92,7 @@ export default function CompletarEncuestaPage() {
     setSubmitting(true);
 
     try {
-      const companyId = (session?.user as any)?.companyId || 'company-id'; // Adjust this
+      const companyId = (session?.user as unknown)?.id || 'company-id'; // Adjust this
       
       const response = await fetch(`/api/empresa/surveys/${params.id}/responses`, {
         method: 'POST',
@@ -243,8 +246,12 @@ export default function CompletarEncuestaPage() {
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Comparte cualquier comentario adicional sobre el desempeño del estudiante..."
+                  maxLength={SURVEY_LIMITS.COMMENTS_MAX_LENGTH}
                   rows={4}
                 />
+                <div className="flex justify-end text-xs text-gray-500 mt-1">
+                  <span>{comments.length}/{SURVEY_LIMITS.COMMENTS_MAX_LENGTH}</span>
+                </div>
               </CardContent>
             </Card>
 

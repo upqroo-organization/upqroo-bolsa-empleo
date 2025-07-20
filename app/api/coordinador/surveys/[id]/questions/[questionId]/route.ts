@@ -3,11 +3,12 @@ import { prisma } from '@/lib/prisma';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; questionId: string } }
+  { params }: { params: Promise<{ id: string; questionId: string }> }
 ) {
   try {
+    const { questionId } = await params;
     await prisma.surveyQuestion.delete({
-      where: { id: params.questionId }
+      where: { id: questionId }
     });
 
     return NextResponse.json({ success: true });

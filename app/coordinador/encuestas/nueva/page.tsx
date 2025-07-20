@@ -10,15 +10,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { CreateSurveyData, CreateSurveyQuestionData } from '@/types/survey';
+import { SURVEY_LIMITS, SURVEY_VALIDATION_MESSAGES } from '@/constants/survey';
 
 export default function NuevaEncuestaPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    startDate: '',
-    endDate: ''
+    daysAfterHiring: 30,
+    surveyDuration: 30
   });
   const [questions, setQuestions] = useState<CreateSurveyQuestionData[]>([
     { question: '', order: 1, isRequired: true }
@@ -43,22 +45,70 @@ export default function NuevaEncuestaPage() {
     }
   };
 
-  const updateQuestion = (index: number, field: keyof CreateSurveyQuestionData, value: any) => {
+  const updateQuestion = (index: number, field: keyof CreateSurveyQuestionData, value: unknown) => {
     const newQuestions = [...questions];
     newQuestions[index] = { ...newQuestions[index], [field]: value };
     setQuestions(newQuestions);
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate title
+    if (!formData.title.trim()) {
+      newErrors.title = SURVEY_VALIDATION_MESSAGES.TITLE_REQUIRED;
+    } else if (formData.title.length > SURVEY_LIMITS.TITLE_MAX_LENGTH) {
+      newErrors.title = SURVEY_VALIDATION_MESSAGES.TITLE_TOO_LONG;
+    }
+
+    // Validate description
+    if (formData.description && formData.description.length > SURVEY_LIMITS.DESCRIPTION_MAX_LENGTH) {
+      newErrors.description = SURVEY_VALIDATION_MESSAGES.DESCRIPTION_TOO_LONG;
+    }
+
+    // Validate timing
+    if (formData.daysAfterHiring < SURVEY_LIMITS.MIN_DAYS_AFTER_HIRING || formData.daysAfterHiring > SURVEY_LIMITS.MAX_DAYS_AFTER_HIRING) {
+      newErrors.daysAfterHiring = SURVEY_VALIDATION_MESSAGES.DAYS_AFTER_HIRING_INVALID;
+    }
+
+    if (formData.surveyDuration < SURVEY_LIMITS.MIN_SURVEY_DURATION || formData.surveyDuration > SURVEY_LIMITS.MAX_SURVEY_DURATION) {
+      newErrors.surveyDuration = SURVEY_VALIDATION_MESSAGES.SURVEY_DURATION_INVALID;
+    }
+
+    // Validate questions
+    const validQuestions = questions.filter(q => q.question.trim() !== '');
+    if (validQuestions.length < SURVEY_LIMITS.MIN_QUESTIONS) {
+      newErrors.questions = SURVEY_VALIDATION_MESSAGES.MIN_QUESTIONS_REQUIRED;
+    } else if (validQuestions.length > SURVEY_LIMITS.MAX_QUESTIONS) {
+      newErrors.questions = SURVEY_VALIDATION_MESSAGES.MAX_QUESTIONS_EXCEEDED;
+    }
+
+    // Validate individual questions
+    questions.forEach((question, index) => {
+      if (question.question.trim() && question.question.length > SURVEY_LIMITS.QUESTION_MAX_LENGTH) {
+        newErrors[`question_${index}`] = SURVEY_VALIDATION_MESSAGES.QUESTION_TOO_LONG;
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
       const surveyData: CreateSurveyData = {
-        title: formData.title,
-        description: formData.description || undefined,
-        startDate: new Date(formData.startDate),
-        endDate: new Date(formData.endDate),
+        title: formData.title.trim(),
+        description: formData.description.trim() || undefined,
+        daysAfterHiring: formData.daysAfterHiring,
+        surveyDuration: formData.surveyDuration,
         questions: questions.filter(q => q.question.trim() !== '')
       };
 
@@ -71,7 +121,8 @@ export default function NuevaEncuestaPage() {
       if (response.ok) {
         router.push('/coordinador/encuestas');
       } else {
-        alert('Error al crear la encuesta');
+        const errorData = await response.json();
+        alert(`Error al crear la encuesta: ${errorData.error || 'Error desconocido'}`);
       }
     } catch (error) {
       console.error('Error creating survey:', error);
@@ -104,8 +155,13 @@ export default function NuevaEncuestaPage() {
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                maxLength={SURVEY_LIMITS.TITLE_MAX_LENGTH}
                 required
               />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>{errors.title && <span className="text-red-500">{errors.title}</span>}</span>
+                <span>{formData.title.length}/{SURVEY_LIMITS.TITLE_MAX_LENGTH}</span>
+              </div>
             </div>
             <div>
               <Label htmlFor="description">Descripción</Label>
@@ -113,29 +169,56 @@ export default function NuevaEncuestaPage() {
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                maxLength={SURVEY_LIMITS.DESCRIPTION_MAX_LENGTH}
                 rows={3}
               />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>{errors.description && <span className="text-red-500">{errors.description}</span>}</span>
+                <span>{formData.description.length}/{SURVEY_LIMITS.DESCRIPTION_MAX_LENGTH}</span>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="startDate">Fecha de Inicio *</Label>
+                <Label htmlFor="daysAfterHiring">Días después de contratación *</Label>
                 <Input
-                  id="startDate"
-                  type="datetime-local"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  id="daysAfterHiring"
+                  type="number"
+                  min={SURVEY_LIMITS.MIN_DAYS_AFTER_HIRING}
+                  max={SURVEY_LIMITS.MAX_DAYS_AFTER_HIRING}
+                  value={formData.daysAfterHiring}
+                  onChange={(e) => setFormData({ ...formData, daysAfterHiring: parseInt(e.target.value) || 0 })}
                   required
                 />
+                <div className="text-xs mt-1">
+                  {errors.daysAfterHiring ? (
+                    <span className="text-red-500">{errors.daysAfterHiring}</span>
+                  ) : (
+                    <span className="text-gray-500">
+                      La encuesta estará disponible después de este número de días desde que el estudiante fue contratado
+                    </span>
+                  )}
+                </div>
               </div>
               <div>
-                <Label htmlFor="endDate">Fecha de Fin *</Label>
+                <Label htmlFor="surveyDuration">Duración de la encuesta (días) *</Label>
                 <Input
-                  id="endDate"
-                  type="datetime-local"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  id="surveyDuration"
+                  type="number"
+                  min={SURVEY_LIMITS.MIN_SURVEY_DURATION}
+                  max={SURVEY_LIMITS.MAX_SURVEY_DURATION}
+                  value={formData.surveyDuration}
+                  onChange={(e) => setFormData({ ...formData, surveyDuration: parseInt(e.target.value) || 30 })}
                   required
                 />
+                <div className="text-xs mt-1">
+                  {errors.surveyDuration ? (
+                    <span className="text-red-500">{errors.surveyDuration}</span>
+                  ) : (
+                    <span className="text-gray-500">
+                      Por cuántos días estará disponible la encuesta una vez que se active
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>
@@ -152,6 +235,9 @@ export default function NuevaEncuestaPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {errors.questions && (
+              <div className="text-red-500 text-sm">{errors.questions}</div>
+            )}
             {questions.map((question, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
@@ -171,11 +257,23 @@ export default function NuevaEncuestaPage() {
                   value={question.question}
                   onChange={(e) => updateQuestion(index, 'question', e.target.value)}
                   placeholder="Escribe tu pregunta aquí..."
+                  maxLength={SURVEY_LIMITS.QUESTION_MAX_LENGTH}
                   required
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  Las respuestas serán calificadas del 0 al 5: Muy Bien (5), Bien (4), Regular (3), Mal (2), Pésimo (1), No aplica (0)
-                </p>
+                <div className="flex justify-between text-xs mt-2">
+                  <div>
+                    {errors[`question_${index}`] ? (
+                      <span className="text-red-500">{errors[`question_${index}`]}</span>
+                    ) : (
+                      <span className="text-gray-500">
+                        Las respuestas serán calificadas del 0 al 5: Muy Bien (5), Bien (4), Regular (3), Mal (2), Pésimo (1), No aplica (0)
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-gray-500">
+                    {question.question.length}/{SURVEY_LIMITS.QUESTION_MAX_LENGTH}
+                  </span>
+                </div>
               </div>
             ))}
           </CardContent>

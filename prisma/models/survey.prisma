@@ -1,10 +1,12 @@
 model Survey {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  isActive    Boolean  @default(true)
-  startDate   DateTime
-  endDate     DateTime
+  id          String  @id @default(cuid())
+  title       String  @db.VarChar(200) // Max 200 characters for title
+  description String? @db.Text // Use TEXT for longer descriptions
+  isActive    Boolean @default(true)
+
+  // Survey timing configuration
+  daysAfterHiring Int @default(30) // Days after hiring when survey becomes available
+  surveyDuration  Int @default(30) // How many days the survey stays available
 
   // Survey questions
   questions SurveyQuestion[]
@@ -17,7 +19,7 @@ model Survey {
 model SurveyQuestion {
   id         String  @id @default(cuid())
   surveyId   String
-  question   String
+  question   String  @db.Text // Use TEXT for longer questions
   order      Int // Order of the question in the survey
   isRequired Boolean @default(true)
 
@@ -36,7 +38,7 @@ model SurveyResponse {
   companyId   String
   studentId   String // The student being evaluated
   isCompleted Boolean @default(false)
-  comments    String? // Optional final comments
+  comments    String? @db.Text // Use TEXT for longer comments
 
   survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   company company        @relation(fields: [companyId], references: [id], onDelete: Cascade)

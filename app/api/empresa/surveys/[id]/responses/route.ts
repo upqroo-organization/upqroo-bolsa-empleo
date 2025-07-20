@@ -4,9 +4,10 @@ import { SurveyFormData } from '@/types/survey';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { companyId, studentId, answers, comments }: {
       companyId: string;
       studentId: string;
@@ -18,7 +19,7 @@ export async function POST(
     const existingResponse = await prisma.surveyResponse.findUnique({
       where: {
         surveyId_companyId_studentId: {
-          surveyId: params.id,
+          surveyId: id,
           companyId,
           studentId
         }
@@ -35,7 +36,7 @@ export async function POST(
     // Create response with answers
     const response = await prisma.surveyResponse.create({
       data: {
-        surveyId: params.id,
+        surveyId: id,
         companyId,
         studentId,
         isCompleted: true,
@@ -71,9 +72,10 @@ export async function POST(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const companyId = searchParams.get('companyId');
 
@@ -86,7 +88,7 @@ export async function GET(
 
     const responses = await prisma.surveyResponse.findMany({
       where: {
-        surveyId: params.id,
+        surveyId: id,
         companyId
       },
       include: {

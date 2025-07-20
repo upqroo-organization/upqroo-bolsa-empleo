@@ -8,7 +8,9 @@ Este sistema permite a los coordinadores crear encuestas de evaluación de desem
 
 ### Para Coordinadores
 
-- **Crear Encuestas**: Crear nuevas encuestas con título, descripción y período de vigencia
+- **Crear Encuestas**: Crear nuevas encuestas con configuración de tiempo basada en contratación
+- **Configurar Timing**: Definir cuántos días después de la contratación estará disponible la encuesta
+- **Duración Configurable**: Establecer por cuántos días estará disponible cada encuesta
 - **Gestionar Preguntas**: Agregar, editar y eliminar preguntas de las encuestas
 - **Activar/Desactivar**: Controlar cuándo las encuestas están disponibles para las empresas
 - **Ver Estadísticas**: Analizar las respuestas y generar reportes de desempeño
@@ -16,9 +18,10 @@ Este sistema permite a los coordinadores crear encuestas de evaluación de desem
 
 ### Para Empresas
 
-- **Ver Encuestas Pendientes**: Indicador visual de encuestas que requieren atención
-- **Evaluar Estudiantes**: Completar evaluaciones para estudiantes con los que han trabajado
+- **Encuestas Automáticas**: Las encuestas aparecen automáticamente después del período configurado post-contratación
+- **Evaluar Estudiantes Contratados**: Solo evaluar estudiantes que fueron efectivamente contratados
 - **Sistema de Calificación**: Escala de 0-5 (Muy Bien, Bien, Regular, Mal, Pésimo, No aplica)
+- **Ventana de Tiempo**: Período limitado para completar cada encuesta
 - **Comentarios Adicionales**: Opción de agregar comentarios detallados
 - **Notificaciones**: Alertas sobre encuestas pendientes
 
@@ -109,13 +112,35 @@ npx prisma generate
 
 Revisar el archivo `prisma/migrations/add_survey_tables.sql` para referencia SQL.
 
+## Sistema de Timing Basado en Contratación
+
+### Configuración de Encuestas
+
+- **Días después de contratación**: Define cuándo se activa la encuesta para cada estudiante contratado
+- **Duración de encuesta**: Establece por cuántos días estará disponible la encuesta una vez activada
+
+### Ejemplo de Funcionamiento
+
+1. Estudiante es contratado el 1 de enero
+2. Encuesta configurada para activarse 30 días después de contratación
+3. Encuesta estará disponible del 31 de enero al 30 de febrero (si duración es 30 días)
+4. Empresa puede completar la evaluación solo durante este período
+
+### Ventajas
+
+- **Timing Relevante**: Las evaluaciones se realizan cuando la experiencia está fresca
+- **Automatización**: No requiere intervención manual para activar encuestas
+- **Flexibilidad**: Diferentes encuestas pueden tener diferentes configuraciones de tiempo
+
 ## Flujo de Trabajo
 
-1. **Coordinador crea encuesta** con preguntas y período de vigencia
-2. **Sistema identifica estudiantes** que han trabajado con cada empresa
-3. **Empresas reciben notificaciones** de encuestas pendientes
-4. **Empresas completan evaluaciones** para cada estudiante
-5. **Coordinador revisa estadísticas** y genera reportes
+1. **Coordinador crea encuesta** con configuración de timing y preguntas
+2. **Estudiante es contratado** por una empresa (se registra fecha de contratación)
+3. **Sistema calcula disponibilidad** basado en fecha de contratación + configuración
+4. **Encuesta se activa automáticamente** en el período configurado
+5. **Empresa recibe notificación** de encuesta pendiente
+6. **Empresa completa evaluación** dentro del período disponible
+7. **Coordinador revisa estadísticas** y genera reportes
 
 ## Consideraciones de Seguridad
 
