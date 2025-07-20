@@ -31,7 +31,8 @@ model company {
   stateId Int?
   state   State? @relation(fields: [stateId], references: [id])
 
-  vacantes Vacante[] // Relation to Vacante model
+  vacantes        Vacante[] // Relation to Vacante model
+  surveyResponses SurveyResponse[] // Relation to survey responses
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
