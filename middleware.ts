@@ -27,7 +27,7 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith("/admin") && token?.role !== "admin") {
     return NextResponse.redirect(new URL("/redirect", req.url));
   }
-  if (pathname.startsWith("/client") && token?.role !== "student") {
+  if (pathname.startsWith("/client") && token?.role !== "student" && token?.role !== "external") {
     return NextResponse.redirect(new URL("/redirect", req.url));
   }
   if (pathname.startsWith("/empresa")) {
