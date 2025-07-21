@@ -1,9 +1,14 @@
-// Dashboard de aplicantes a vacantes
+"use client"
+
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Bell,
   Search,
@@ -11,7 +16,6 @@ import {
   Calendar,
   TrendingUp,
   MapPin,
-  Clock,
   DollarSign,
   User,
   Briefcase,
@@ -20,78 +24,142 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+interface DashboardData {
+  user: {
+    name: string
+    email: string
+    image: string
+    profileCompletion: number
+  }
+  statistics: {
+    applications: number
+    interviews: number
+    profileCompletion: string
+  }
+  recentApplications: Array<{
+    id: string
+    title: string
+    company: string
+    companyLogo?: string
+    status: string
+    appliedAt: string
+    location?: string
+    state?: string
+  }>
+  recommendedJobs: Array<{
+    id: string
+    title: string
+    company: string
+    companyLogo?: string
+    location?: string
+    salaryMin?: number
+    salaryMax?: number
+    type?: string
+    modality?: string
+    state?: string
+    applicationsCount: number
+    createdAt: string
+  }>
+  applicationStats: {
+    total: number
+    pending: number
+    interview: number
+    hired: number
+    rejected: number
+  }
+}
+
 export default function StudentDashboard() {
-  const quickStats = [
-    {
-      icon: FileText,
-      value: "12",
-      label: "Postulaciones",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      icon: Calendar,
-      value: "3",
-      label: "Entrevistas",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      icon: TrendingUp,
-      value: "85%",
-      label: "Perfil Completo",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-    {
-      icon: Clock,
-      value: "240",
-      label: "Horas Prácticas",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-    },
-  ]
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const recentApplications = [
-    {
-      title: "Desarrollador Frontend React",
-      company: "TechCorp México",
-      status: "En revisión",
-      date: "Hace 2 días",
-      statusColor: "bg-yellow-100 text-yellow-800",
-    },
-    {
-      title: "Analista de Sistemas",
-      company: "DataSolutions",
-      status: "Entrevista programada",
-      date: "Hace 5 días",
-      statusColor: "bg-blue-100 text-blue-800",
-    },
-    {
-      title: "Ingeniero de Software Jr",
-      company: "Innovation Labs",
-      status: "Rechazada",
-      date: "Hace 1 semana",
-      statusColor: "bg-red-100 text-red-800",
-    },
-  ]
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+      return
+    }
 
-  const recommendedJobs = [
-    {
-      title: "Desarrollador Full Stack",
-      company: "StartupTech",
-      location: "Cancún",
-      salary: "$25,000 - $35,000",
-      type: "Tiempo Completo",
-    },
-    {
-      title: "Practicante de Desarrollo",
-      company: "MegaCorp",
-      location: "Playa del Carmen",
-      salary: "$8,000 - $12,000",
-      type: "Prácticas",
-    },
-  ]
+    if (status === "authenticated") {
+      fetchDashboardData()
+    }
+  }, [status, router])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/client/dashboard")
+      
+      if (!response.ok) {
+        throw new Error("Error al cargar los datos del dashboard")
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setDashboardData(result.data)
+      } else {
+        setError(result.error || "Error desconocido")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar los datos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Helper functions
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'interview':
+        return 'bg-blue-100 text-blue-800'
+      case 'hired':
+        return 'bg-green-100 text-green-800'
+      case 'rejected':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'En revisión'
+      case 'interview':
+        return 'Entrevista programada'
+      case 'hired':
+        return 'Contratado'
+      case 'rejected':
+        return 'Rechazada'
+      default:
+        return status
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 1) return 'Hace 1 día'
+    if (diffDays < 7) return `Hace ${diffDays} días`
+    if (diffDays < 14) return 'Hace 1 semana'
+    return `Hace ${Math.ceil(diffDays / 7)} semanas`
+  }
+
+  const formatSalary = (min?: number, max?: number) => {
+    if (!min && !max) return 'Salario a negociar'
+    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`
+    if (min) return `Desde $${min.toLocaleString()}`
+    if (max) return `Hasta $${max.toLocaleString()}`
+    return 'Salario a negociar'
+  }
 
   const upcomingEvents = [
     {
@@ -110,20 +178,99 @@ export default function StudentDashboard() {
     },
   ]
 
+  if (loading) {
+    return (
+      <div className="p-6 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="h-12 w-12 rounded-lg" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchDashboardData}>Reintentar</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!dashboardData) {
+    return null
+  }
+
+  const quickStats = [
+    {
+      icon: FileText,
+      value: dashboardData.statistics.applications.toString(),
+      label: "Postulaciones",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      icon: Calendar,
+      value: dashboardData.statistics.interviews.toString(),
+      label: "Entrevistas",
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      icon: TrendingUp,
+      value: dashboardData.statistics.profileCompletion,
+      label: "Perfil Completo",
+      color: "text-purple-600",
+      bgColor: "bg-purple-100",
+    },
+  ]
+
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
-            <AvatarImage src="/placeholder.svg?height=64&width=64" />
-            <AvatarFallback className="text-lg">JP</AvatarFallback>
+            <AvatarImage src={dashboardData.user.image || "/placeholder.svg?height=64&width=64"} />
+            <AvatarFallback className="text-lg">
+              {dashboardData.user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+            </AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-3xl font-bold">¡Hola, Juan Pérez!</h1>
+            <h1 className="text-3xl font-bold">¡Hola, {dashboardData.user.name || 'Usuario'}!</h1>
             <p className="text-muted-foreground flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
-              Ingeniería en Software - 8vo Semestre
+              Estudiante UPQROO
             </p>
           </div>
         </div>
@@ -132,7 +279,7 @@ export default function StudentDashboard() {
             <Bell className="h-4 w-4" />
           </Button>
           <Link href="/vacantes">
-            <Button className="cursor-pointer">
+            <Button>
               <Search className="mr-2 h-4 w-4" />
               Buscar Empleos
             </Button>
@@ -141,7 +288,7 @@ export default function StudentDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quickStats.map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -178,9 +325,9 @@ export default function StudentDashboard() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Progreso del perfil</span>
-                  <span className="text-sm font-bold">85%</span>
+                  <span className="text-sm font-bold">{dashboardData.user.profileCompletion}%</span>
                 </div>
-                <Progress value={85} className="h-3" />
+                <Progress value={dashboardData.user.profileCompletion} className="h-3" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
@@ -222,19 +369,29 @@ export default function StudentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentApplications.map((application, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{application.title}</h4>
-                      <p className="text-sm text-muted-foreground">{application.company}</p>
-                      <p className="text-xs text-muted-foreground">{application.date}</p>
+                {dashboardData.recentApplications.length > 0 ? (
+                  dashboardData.recentApplications.map((application) => (
+                    <div
+                      key={application.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{application.title}</h4>
+                        <p className="text-sm text-muted-foreground">{application.company}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(application.appliedAt)}</p>
+                      </div>
+                      <Badge className={getStatusColor(application.status)}>
+                        {getStatusLabel(application.status)}
+                      </Badge>
                     </div>
-                    <Badge className={application.statusColor}>{application.status}</Badge>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No has aplicado a ninguna vacante aún</p>
+                    <p className="text-sm">¡Comienza explorando las oportunidades disponibles!</p>
                   </div>
-                ))}
+                )}
               </div>
               <Button variant="outline" className="w-full mt-6">
                 Ver Todas las Postulaciones
@@ -253,26 +410,40 @@ export default function StudentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recommendedJobs.map((job, index) => (
-                  <div key={index} className="p-4 border rounded-lg space-y-3 hover:shadow-sm transition-shadow">
-                    <h4 className="font-semibold text-sm">{job.title}</h4>
-                    <p className="text-xs text-muted-foreground">{job.company}</p>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {job.location}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
-                      <DollarSign className="h-3 w-3" />
-                      {job.salary}
-                    </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {job.type}
-                    </Badge>
+                {dashboardData.recommendedJobs.length > 0 ? (
+                  dashboardData.recommendedJobs.map((job) => (
+                    <Link key={job.id} href={`/vacantes/${job.id}`}>
+                      <div className="p-4 border rounded-lg space-y-3 hover:shadow-sm transition-shadow cursor-pointer">
+                        <h4 className="font-semibold text-sm">{job.title}</h4>
+                        <p className="text-xs text-muted-foreground">{job.company}</p>
+                        {job.location && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="h-3 w-3" />
+                            {job.location}
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                          <DollarSign className="h-3 w-3" />
+                          {formatSalary(job.salaryMin, job.salaryMax)}
+                        </div>
+                        {job.type && (
+                          <Badge variant="secondary" className="text-xs">
+                            {job.type}
+                          </Badge>
+                        )}
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No hay empleos disponibles</p>
+                    <p className="text-sm">Revisa más tarde para nuevas oportunidades</p>
                   </div>
-                ))}
+                )}
               </div>
               <Button variant="outline" className="w-full mt-6">
-                Ver Más Empleos
+                <Link href="/vacantes">Ver Más Empleos</Link>
               </Button>
             </CardContent>
           </Card>
