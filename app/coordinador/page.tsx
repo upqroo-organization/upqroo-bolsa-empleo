@@ -1,9 +1,13 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Users,
   Building2,
@@ -20,146 +24,201 @@ import {
   MoreHorizontal,
 } from "lucide-react"
 
+interface DashboardData {
+  statistics: {
+    totalStudents: { value: number; growth: number }
+    approvedCompanies: { value: number; growth: number }
+    totalVacantes: { value: number; growth: number }
+    successfulPlacements: { value: number; growth: number }
+  }
+  pendingCompanies: Array<{
+    id: string
+    name: string
+    sector: string
+    size: string
+    location: string
+    submittedDate: string
+    email: string
+    phone?: string
+    status: string
+  }>
+  recentActivity: Array<{
+    id: string
+    type: string
+    title: string
+    description: string
+    time: string
+    status: string
+    user: {
+      name: string
+      email: string
+      image?: string
+    }
+  }>
+  topStudents: Array<{
+    id: string
+    name: string
+    position: string
+    company: string
+    hiredDate: string
+    avatar?: string
+  }>
+}
+
 export default function CoordinatorDashboard() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+      return
+    }
+
+    if (status === "authenticated") {
+      if (session.user.role !== 'coordinator') {
+        router.push("/")
+        return
+      }
+      fetchDashboardData()
+    }
+  }, [status, router, session])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/coordinador/dashboard")
+      
+      if (!response.ok) {
+        throw new Error("Error al cargar los datos del dashboard")
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        setDashboardData(result.data)
+      } else {
+        setError(result.error || "Error desconocido")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar los datos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 1) return 'Hace 1 día'
+    if (diffDays < 7) return `Hace ${diffDays} días`
+    if (diffDays < 14) return 'Hace 1 semana'
+    return `Hace ${Math.ceil(diffDays / 7)} semanas`
+  }
+
+  // Helper function to get activity icon
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'placement':
+        return UserCheck
+      case 'interview':
+        return Calendar
+      case 'validation':
+        return Building2
+      default:
+        return Briefcase
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4" />
+                </div>
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchDashboardData}>Reintentar</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!dashboardData) {
+    return null
+  }
+
   const stats = [
     {
       title: "Estudiantes Activos",
-      value: "1,247",
-      change: "+12%",
+      value: dashboardData.statistics.totalStudents.value.toString(),
+      change: `+${dashboardData.statistics.totalStudents.growth}%`,
       trend: "up",
       icon: Users,
       color: "text-blue-600",
     },
     {
       title: "Empresas Validadas",
-      value: "89",
-      change: "+5%",
+      value: dashboardData.statistics.approvedCompanies.value.toString(),
+      change: `+${dashboardData.statistics.approvedCompanies.growth}%`,
       trend: "up",
       icon: Building2,
       color: "text-green-600",
     },
     {
       title: "Vacantes Publicadas",
-      value: "156",
-      change: "+18%",
+      value: dashboardData.statistics.totalVacantes.value.toString(),
+      change: `+${dashboardData.statistics.totalVacantes.growth}%`,
       trend: "up",
       icon: Briefcase,
       color: "text-purple-600",
     },
     {
       title: "Colocaciones Exitosas",
-      value: "73",
-      change: "+23%",
+      value: dashboardData.statistics.successfulPlacements.value.toString(),
+      change: `+${dashboardData.statistics.successfulPlacements.growth}%`,
       trend: "up",
       icon: TrendingUp,
       color: "text-orange-600",
     },
   ]
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "validation",
-      title: "Nueva empresa registrada",
-      description: "TechCorp S.A. solicita validación",
-      time: "Hace 2 horas",
-      status: "pending",
-      icon: Building2,
-    },
-    {
-      id: 2,
-      type: "placement",
-      title: "Colocación exitosa",
-      description: "María González fue contratada en DevSoft",
-      time: "Hace 4 horas",
-      status: "success",
-      icon: UserCheck,
-    },
-    {
-      id: 3,
-      type: "alert",
-      title: "Estudiante inactivo",
-      description: "Carlos Pérez sin actividad por 30 días",
-      time: "Hace 6 horas",
-      status: "warning",
-      icon: AlertTriangle,
-    },
-    {
-      id: 4,
-      type: "job",
-      title: "Nueva vacante publicada",
-      description: "Desarrollador Frontend en InnovateLab",
-      time: "Hace 8 horas",
-      status: "info",
-      icon: Briefcase,
-    },
-  ]
 
-  const pendingCompanies = [
-    {
-      id: 1,
-      name: "TechCorp S.A.",
-      sector: "Tecnología",
-      size: "50-100 empleados",
-      location: "Chetumal",
-      submittedDate: "2024-01-15",
-      documents: 4,
-      status: "pending",
-    },
-    {
-      id: 2,
-      name: "Green Solutions",
-      sector: "Sustentabilidad",
-      size: "10-50 empleados",
-      location: "Cancún",
-      submittedDate: "2024-01-14",
-      documents: 3,
-      status: "review",
-    },
-    {
-      id: 3,
-      name: "Maya Tourism",
-      sector: "Turismo",
-      size: "100+ empleados",
-      location: "Playa del Carmen",
-      submittedDate: "2024-01-13",
-      documents: 5,
-      status: "pending",
-    },
-  ]
-
-  const topStudents = [
-    {
-      id: 1,
-      name: "Ana Rodríguez",
-      career: "Ing. en Sistemas",
-      semester: "8vo",
-      gpa: 9.2,
-      applications: 12,
-      interviews: 5,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 2,
-      name: "Luis Martínez",
-      career: "Ing. Industrial",
-      semester: "7mo",
-      gpa: 8.9,
-      applications: 8,
-      interviews: 3,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    {
-      id: 3,
-      name: "Sofia Chen",
-      career: "Ing. Ambiental",
-      semester: "6to",
-      gpa: 9.5,
-      applications: 15,
-      interviews: 7,
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-  ]
 
   return (
     <div className="p-6 space-y-6">
@@ -216,31 +275,42 @@ export default function CoordinatorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50">
-                  <div
-                    className={`p-2 rounded-full ${
-                      activity.status === "success"
-                        ? "bg-green-100 text-green-600"
-                        : activity.status === "warning"
-                          ? "bg-yellow-100 text-yellow-600"
-                          : activity.status === "pending"
-                            ? "bg-blue-100 text-blue-600"
-                            : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    <activity.icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="text-sm text-muted-foreground">{activity.description}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
+              {dashboardData.recentActivity.length > 0 ? (
+                dashboardData.recentActivity.map((activity) => {
+                  const ActivityIcon = getActivityIcon(activity.type)
+                  return (
+                    <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50">
+                      <div
+                        className={`p-2 rounded-full ${
+                          activity.status === "success"
+                            ? "bg-green-100 text-green-600"
+                            : activity.status === "warning"
+                              ? "bg-yellow-100 text-yellow-600"
+                              : activity.status === "pending"
+                                ? "bg-blue-100 text-blue-600"
+                                : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        <ActivityIcon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{activity.title}</p>
+                        <p className="text-sm text-muted-foreground">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(activity.time)}</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No hay actividad reciente</p>
+                  <p className="text-sm">Las actividades aparecerán aquí cuando ocurran</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -294,29 +364,39 @@ export default function CoordinatorDashboard() {
                 <Building2 className="h-5 w-5 mr-2" />
                 Empresas Pendientes
               </div>
-              <Badge variant="secondary">{pendingCompanies.length}</Badge>
+              <Badge variant="secondary">{dashboardData.pendingCompanies.length}</Badge>
             </CardTitle>
             <CardDescription>Empresas esperando validación</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {pendingCompanies.map((company) => (
-                <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{company.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {company.sector} • {company.size}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{company.location}</p>
+              {dashboardData.pendingCompanies.length > 0 ? (
+                dashboardData.pendingCompanies.map((company) => (
+                  <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="font-medium">{company.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {company.sector} • {company.size}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{company.location}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Enviado: {formatDate(company.submittedDate)}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button size="sm" variant="outline">
+                        Revisar
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline">{company.documents} docs</Badge>
-                    <Button size="sm" variant="outline">
-                      Revisar
-                    </Button>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No hay empresas pendientes</p>
+                  <p className="text-sm">Todas las empresas han sido validadas</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -332,32 +412,39 @@ export default function CoordinatorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {topStudents.map((student) => (
-                <div key={student.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <Avatar>
-                    <AvatarImage src={student.avatar || "/placeholder.svg"} />
-                    <AvatarFallback>
-                      {student.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h4 className="font-medium">{student.name}</h4>
-                    {/* <p className="text-sm text-muted-foreground">
-                      {student.career} • {student.semester}
-                    </p> */}
-                    <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-xs">{student.applications} postulaciones</span>
-                      <span className="text-xs">{student.interviews} entrevistas</span>
+              {dashboardData.topStudents.length > 0 ? (
+                dashboardData.topStudents.map((student) => (
+                  <div key={student.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <Avatar>
+                      <AvatarImage src={student.avatar || "/placeholder.svg"} />
+                      <AvatarFallback>
+                        {student.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{student.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {student.position} en {student.company}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Contratado: {formatDate(student.hiredDate)}
+                      </p>
                     </div>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No hay colocaciones recientes</p>
+                  <p className="text-sm">Las colocaciones exitosas aparecerán aquí</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
