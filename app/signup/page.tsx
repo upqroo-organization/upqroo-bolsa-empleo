@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Chrome, Building2, GraduationCap } from "lucide-react"
+import { Chrome, Building2 } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import StateSelect from "@/components/StateSelector"
 import Link from "next/link"
@@ -100,22 +100,22 @@ export default function RegisterPage() {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <img src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg mx-auto" />
-          <h1 className="text-3xl font-bold text-blue-600">Crear Cuenta</h1>
+          <h1 className="text-3xl font-bold text-primary">Crear Cuenta</h1>
           <p className="text-gray-600 mt-2">Únete a la comunidad UPQROO</p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Registro de Usuario</CardTitle>
+            <CardTitle>Registro de empresa</CardTitle>
             <CardDescription>Selecciona el tipo de cuenta que deseas crear</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="student" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="student" className="flex items-center gap-2">
+            <Tabs defaultValue="company" className="w-full">
+              <TabsList className="grid w-full grid-cols-1">
+                {/* <TabsTrigger value="student" className="flex items-center gap-2">
                   <GraduationCap className="h-4 w-4" />
                   Estudiante/Egresado
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger value="company" className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   Empresa
@@ -125,19 +125,20 @@ export default function RegisterPage() {
               <TabsContent value="student" className="space-y-6">
                 <Button className="w-full" variant="outline" size="lg">
                   <Chrome className="mr-2 h-4 w-4" />
-                  Registrarse con Google Institucional
+                  Registrarse con Google
                 </Button>
                 <div className="text-center text-sm text-gray-500">
-                  <p>Usa tu cuenta @upqroo.edu.mx para acceso automático</p>
+                  {/* <p>Usa tu cuenta @upqroo.edu.mx para acceso automático</p> */}
+                  <p>Usa tu cuenta de Google para acceso automático</p>
                   <p className="mt-2">Tu perfil se creará automáticamente con los datos institucionales</p>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-blue-800 mb-2">Información que se sincronizará:</h4>
                   <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Nombre completo</li>
-                    <li>• Carrera y semestre actual</li>
-                    <li>• Correo institucional</li>
-                    <li>• Estado académico (estudiante/egresado)</li>
+                    {/* <li>• Carrera y semestre actual</li> */}
+                    <li>• Correo electrónico</li>
+                    {/* <li>• Estado académico (estudiante/egresado)</li> */}
                   </ul>
                 </div>
               </TabsContent>

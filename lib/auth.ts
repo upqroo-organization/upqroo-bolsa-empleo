@@ -70,9 +70,16 @@ export const authOptions: NextAuthOptions = {
   events: {
     async createUser(user) {
       // This is triggered only once for a new user
-      const defaultRole = await prisma.role.findUnique({
-        where: { name: 'student' },
-      })
+      let defaultRole;
+      if (user.user.email?.includes('@upqroo.edu.mx')) {
+        defaultRole = await prisma.role.findUnique({
+          where: { name: 'student' },
+        })
+      } else {
+        defaultRole = await prisma.role.findUnique({
+          where: { name: 'external' },
+        })
+      }
 
       if (defaultRole) {
         try {

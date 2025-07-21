@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -22,8 +21,6 @@ import {
 } from "lucide-react"
 
 export default function CoordinatorDashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState("month")
-
   const stats = [
     {
       title: "Estudiantes Activos",
@@ -164,30 +161,6 @@ export default function CoordinatorDashboard() {
     },
   ]
 
-  const systemAlerts = [
-    {
-      id: 1,
-      type: "critical",
-      title: "Servidor de respaldo",
-      message: "Requiere mantenimiento programado",
-      time: "Hace 1 hora",
-    },
-    {
-      id: 2,
-      type: "warning",
-      title: "Capacidad de almacenamiento",
-      message: "85% utilizado, considerar expansión",
-      time: "Hace 3 horas",
-    },
-    {
-      id: 3,
-      type: "info",
-      title: "Actualización disponible",
-      message: "Nueva versión del sistema disponible",
-      time: "Hace 1 día",
-    },
-  ]
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -201,10 +174,10 @@ export default function CoordinatorDashboard() {
             <FileText className="h-4 w-4 mr-2" />
             Generar Reporte
           </Button>
-          <Button size="sm">
+          {/* <Button size="sm">
             <Calendar className="h-4 w-4 mr-2" />
             Programar Reunión
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -231,7 +204,7 @@ export default function CoordinatorDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -273,7 +246,7 @@ export default function CoordinatorDashboard() {
         </Card>
 
         {/* System Alerts */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <AlertTriangle className="h-5 w-5 mr-2" />
@@ -309,7 +282,7 @@ export default function CoordinatorDashboard() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -353,9 +326,9 @@ export default function CoordinatorDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Users className="h-5 w-5 mr-2" />
-              Estudiantes Destacados
+                Últimas Colocaciones
             </CardTitle>
-            <CardDescription>Estudiantes con mejor rendimiento</CardDescription>
+            <CardDescription>Últimos estudiantes contratados</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -372,11 +345,10 @@ export default function CoordinatorDashboard() {
                   </Avatar>
                   <div className="flex-1">
                     <h4 className="font-medium">{student.name}</h4>
-                    <p className="text-sm text-muted-foreground">
+                    {/* <p className="text-sm text-muted-foreground">
                       {student.career} • {student.semester}
-                    </p>
+                    </p> */}
                     <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-xs">Promedio: {student.gpa}</span>
                       <span className="text-xs">{student.applications} postulaciones</span>
                       <span className="text-xs">{student.interviews} entrevistas</span>
                     </div>
@@ -398,21 +370,21 @@ export default function CoordinatorDashboard() {
           <CardDescription>Funciones principales del coordinador</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex-col">
-              <Building2 className="h-6 w-6 mb-2" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button variant="outline" className="h-20 flex flex-col">
+              <Building2 className="" />
               Validar Empresas
             </Button>
-            <Button variant="outline" className="h-20 flex-col">
+            {/* <Button variant="outline" className="h-20 flex-col">
               <Users className="h-6 w-6 mb-2" />
               Seguimiento Estudiantes
-            </Button>
+            </Button> */}
             <Button variant="outline" className="h-20 flex-col">
-              <FileText className="h-6 w-6 mb-2" />
+              <FileText className="" />
               Generar Reportes
             </Button>
             <Button variant="outline" className="h-20 flex-col">
-              <Calendar className="h-6 w-6 mb-2" />
+              <Calendar className="" />
               Programar Eventos
             </Button>
           </div>

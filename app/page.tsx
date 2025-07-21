@@ -279,14 +279,14 @@ export default async function LandingPage() {
               <Link href="/login">
                 <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8">
                   <GraduationCap className="mr-2 h-5 w-5" />
-                  Registrarse como Estudiante
+                  Iniciar sesión como Estudiante
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/signup">
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-primary h-12 px-8"
+                  className="border-white text-primary hover:bg-white hover:text-primary h-12 px-8"
                 >
                   <Building2 className="mr-2 h-5 w-5" />
                   Registrar Empresa

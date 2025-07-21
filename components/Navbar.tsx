@@ -47,7 +47,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Postulantes', href: '/empresa/postulantes' },
   ],
   coordinator: [
-    { name: 'Dashboard', href: '/' },
+    { name: 'Dashboard', href: '/coordinador' },
     { name: 'Validar Empresa', href: '/coordinador/validar-empresa' },
     { name: 'Encuestas', href: '/coordinador/encuestas' },
   ]
