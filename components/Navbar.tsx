@@ -22,7 +22,7 @@ import { Button } from './ui/button';
 // Define this elsewhere in your project and import it
 const perfilByRole: Record<string, string> = {
   admin: '/admin/perfil',
-  user: '/client/perfil',
+  external: '/client/perfil',
   company: '/empresa/perfil',
   student: '/client/perfil',
   coordinator: '/coordinator',
@@ -32,8 +32,8 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Dashboard', href: '/admin/dashboard' },
     { name: 'Usuarios', href: '/admin/users' },
   ],
-  user: [
-    { name: 'Inicio', href: '/' },
+  external: [
+    { name: 'Inicio', href: '/client' },
     { name: 'Perfil', href: '/profile' },
   ],
   student: [
