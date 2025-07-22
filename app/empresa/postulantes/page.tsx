@@ -197,10 +197,6 @@ export default function Applicants() {
             <Download className="mr-2 h-4 w-4" />
             Exportar CV
           </Button>
-          <Button variant="outline">
-            <Filter className="mr-2 h-4 w-4" />
-            Filtros Avanzados
-          </Button>
         </div>
       </div>
 
@@ -234,17 +230,6 @@ export default function Applicants() {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Buscar por nombre, carrera o habilidades..." className="pl-10 h-12" />
             </div>
-            <Select defaultValue="all-positions">
-              <SelectTrigger className="w-48 h-12">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-positions">Todas las vacantes</SelectItem>
-                <SelectItem value="frontend">Desarrollador Frontend</SelectItem>
-                <SelectItem value="analyst">Analista de Datos</SelectItem>
-                <SelectItem value="designer">Diseñador UX/UI</SelectItem>
-              </SelectContent>
-            </Select>
             <Select defaultValue="all-status">
               <SelectTrigger className="w-48 h-12">
                 <SelectValue />
@@ -256,17 +241,6 @@ export default function Applicants() {
                 <SelectItem value="interview">Entrevista</SelectItem>
                 <SelectItem value="hired">Contratados</SelectItem>
                 <SelectItem value="rejected">Rechazados</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select defaultValue="match-desc">
-              <SelectTrigger className="w-48 h-12">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="match-desc">Mayor compatibilidad</SelectItem>
-                <SelectItem value="match-asc">Menor compatibilidad</SelectItem>
-                <SelectItem value="date-desc">Más recientes</SelectItem>
-                <SelectItem value="date-asc">Más antiguos</SelectItem>
               </SelectContent>
             </Select>
           </div>

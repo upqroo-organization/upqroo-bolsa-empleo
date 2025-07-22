@@ -97,19 +97,23 @@ export default function EmpresaEncuestasPage() {
           <Card key={survey.id} className={survey.pendingCount > 0 ? 'border-orange-200 bg-orange-50' : ''}>
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    {survey.title}
-                    {survey.pendingCount > 0 ? (
-                      <Badge variant="destructive">
-                        {survey.pendingCount} pendientes
-                      </Badge>
-                    ) : (
-                      <Badge variant="default">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Completada
-                      </Badge>
-                    )}
+                <div className='w-full'>
+                  <CardTitle className="flex justify-between gap-2">
+                    <div>
+                      {survey.title}
+                    </div>
+                    <div>
+                      {survey.pendingCount > 0 ? (
+                        <Badge variant="destructive">
+                          {survey.pendingCount} pendientes
+                        </Badge>
+                      ) : (
+                        <Badge variant="default">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Completada
+                        </Badge>
+                      )}
+                    </div>
                   </CardTitle>
                   {survey.description && (
                     <p className="text-sm text-gray-600 mt-1">

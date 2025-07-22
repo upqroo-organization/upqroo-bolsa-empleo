@@ -20,6 +20,7 @@ import logoUperoo from '../assets/logo_upqroo.svg';
 import { Button } from './ui/button';
 
 // Define this elsewhere in your project and import it
+// Should be stay on a constant file
 const perfilByRole: Record<string, string> = {
   admin: '/admin/perfil',
   external: '/client/perfil',
@@ -29,7 +30,7 @@ const perfilByRole: Record<string, string> = {
 };
 const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   admin: [
-    { name: 'Dashboard', href: '/admin/dashboard' },
+    { name: 'Dashboard', href: '/admin' },
     { name: 'Usuarios', href: '/admin/users' },
   ],
   external: [
@@ -37,18 +38,19 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Perfil', href: '/profile' },
   ],
   student: [
-    { name: 'Mis Postulaciones', href: '/client/mis-postulaciones' },
-    { name: 'Mis Prácticas', href: '/client/practicas-profesionales' }
+    { name: 'Inicio', href: '/client' },
+    { name: 'Mis Postulaciones', href: '/client/mis-postulaciones' }
+    // { name: 'Mis Prácticas', href: '/client/practicas-profesionales' }
   ],
   company: [
-    { name: 'Dashboard', href: '/empresa' },
-    { name: 'Vacantes', href: '/empresa/gestionar-vacante' },
+    { name: 'Inicio', href: '/empresa' },
+    { name: 'Gestionar Vacantes', href: '/empresa/gestionar-vacante' },
     { name: 'Encuestas', href: '/empresa/encuestas' },
     { name: 'Postulantes', href: '/empresa/postulantes' },
   ],
   coordinator: [
-    { name: 'Dashboard', href: '/coordinador' },
-    { name: 'Validar Empresa', href: '/coordinador/validar-empresa' },
+    { name: 'Inicio', href: '/coordinador' },
+    { name: 'Validar Empresas', href: '/coordinador/validar-empresa' },
     { name: 'Encuestas', href: '/coordinador/encuestas' },
   ]
 };
@@ -99,9 +101,9 @@ export default function Navbar() {
             <DropdownMenuContent align="end" className="bg-white text-black">
               <DropdownMenuLabel>{user?.name || 'Usuario'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
+              {!['admin', 'coordinator'].includes(role) && <DropdownMenuItem asChild>
                 <Link href={perfilByRole[role]}>Perfil</Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem>}
               <DropdownMenuItem>
                 <Link href='/weather'>
                   Pronostico del tiempo
