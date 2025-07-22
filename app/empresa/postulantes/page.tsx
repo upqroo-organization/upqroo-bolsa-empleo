@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -5,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,16 +17,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   Search,
-  Filter,
   Download,
   Mail,
-  Phone,
   Calendar,
-  MapPin,
-  GraduationCap,
-  Star,
-  Eye,
-  MessageSquare,
   CheckCircle,
   XCircle,
   Clock,
@@ -34,123 +28,98 @@ import {
   MoreHorizontal,
   ThumbsUp,
   ThumbsDown,
+  Eye,
+  MessageSquare,
 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+
+// Types for our data
+interface ApplicantData {
+  id: string
+  name: string | null
+  email: string | null
+  image: string | null
+  cvUrl: string | null
+  position: string
+  appliedDate: Date
+  status: string
+  vacanteId: string
+  cvViewed: boolean
+  hiredAt: Date | null
+  career: string | null
+  notes?: string | null
+}
 
 export default function Applicants() {
-  const applicants = [
-    {
-      id: 1,
-      name: "Ana García López",
-      email: "ana.garcia@upqroo.edu.mx",
-      phone: "(998) 123-4567",
-      avatar: "/placeholder.svg?height=40&width=40",
-      position: "Desarrollador Frontend React",
-      appliedDate: "2024-06-12",
-      status: "Nuevo",
-      match: 95,
-      career: "Ingeniería en Software",
-      semester: "8vo Semestre",
-      gpa: 8.7,
-      skills: ["React", "JavaScript", "CSS", "Git", "Node.js"],
-      experience: "6 meses",
-      location: "Cancún, Q.Roo",
-      notes: "",
-    },
-    {
-      id: 2,
-      name: "Carlos Mendoza Ruiz",
-      email: "carlos.mendoza@upqroo.edu.mx",
-      phone: "(998) 234-5678",
-      avatar: "/placeholder.svg?height=40&width=40",
-      position: "Desarrollador Frontend React",
-      appliedDate: "2024-06-11",
-      status: "En revisión",
-      match: 88,
-      career: "Ingeniería en Software",
-      semester: "9vo Semestre",
-      gpa: 8.9,
-      skills: ["React", "TypeScript", "CSS", "Git"],
-      experience: "1 año",
-      location: "Playa del Carmen, Q.Roo",
-      notes: "Experiencia previa en startup local",
-    },
-    {
-      id: 3,
-      name: "María Fernández Castro",
-      email: "maria.fernandez@upqroo.edu.mx",
-      phone: "(998) 345-6789",
-      avatar: "/placeholder.svg?height=40&width=40",
-      position: "Analista de Datos Jr",
-      appliedDate: "2024-06-10",
-      status: "Entrevista programada",
-      match: 92,
-      career: "Ingeniería en Sistemas",
-      semester: "Egresada",
-      gpa: 9.1,
-      skills: ["Python", "SQL", "Excel", "Power BI", "Tableau"],
-      experience: "8 meses",
-      location: "Cancún, Q.Roo",
-      notes: "Entrevista programada para el 15 de junio",
-    },
-    {
-      id: 4,
-      name: "Luis Alberto Pérez",
-      email: "luis.perez@upqroo.edu.mx",
-      phone: "(998) 456-7890",
-      avatar: "/placeholder.svg?height=40&width=40",
-      position: "Desarrollador Frontend React",
-      appliedDate: "2024-06-09",
-      status: "Rechazado",
-      match: 65,
-      career: "Ingeniería en Software",
-      semester: "6to Semestre",
-      gpa: 7.8,
-      skills: ["HTML", "CSS", "JavaScript"],
-      experience: "Sin experiencia",
-      location: "Cozumel, Q.Roo",
-      notes: "No cumple con los requisitos mínimos de React",
-    },
-    {
-      id: 5,
-      name: "Sofia Ramírez González",
-      email: "sofia.ramirez@upqroo.edu.mx",
-      phone: "(998) 567-8901",
-      avatar: "/placeholder.svg?height=40&width=40",
-      position: "Diseñador UX/UI",
-      appliedDate: "2024-06-08",
-      status: "Contratado",
-      match: 96,
-      career: "Diseño Gráfico",
-      semester: "Egresada",
-      gpa: 9.3,
-      skills: ["Figma", "Adobe XD", "Photoshop", "Illustrator", "Prototyping"],
-      experience: "1.5 años",
-      location: "Cancún, Q.Roo",
-      notes: "Excelente portafolio, contratada para inicio inmediato",
-    },
-  ]
+  const router = useRouter();
+  const [applicants, setApplicants] = useState<ApplicantData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchApplicants = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/empresa/postulantes');
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            router.push('/auth/signin');
+            return;
+          }
+          throw new Error(`Error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setApplicants(data.applicants);
+      } catch (err) {
+        console.error('Error fetching applicants:', err);
+        setError('Error al cargar los postulantes. Por favor, intenta de nuevo.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicants();
+  }, [router]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Nuevo":
+      case "pending":
         return "bg-blue-100 text-blue-800"
-      case "En revisión":
-        return "bg-yellow-100 text-yellow-800"
-      case "Entrevista programada":
+      case "interview":
         return "bg-purple-100 text-purple-800"
-      case "Contratado":
+      case "hired":
         return "bg-green-100 text-green-800"
-      case "Rechazado":
+      case "rejected":
         return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
   }
 
-  const getMatchColor = (match: number) => {
-    if (match >= 90) return "text-green-600"
-    if (match >= 75) return "text-yellow-600"
-    return "text-red-600"
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Pendiente"
+      case "interview":
+        return "Entrevista"
+      case "hired":
+        return "Contratado"
+      case "rejected":
+        return "Rechazado"
+      default:
+        return status
+    }
+  }
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(new Date(date))
   }
 
   const stats = [
@@ -163,26 +132,54 @@ export default function Applicants() {
     },
     {
       icon: Clock,
-      value: applicants.filter((app) => app.status === "Nuevo").length,
-      label: "Nuevos",
+      value: applicants.filter((app) => app.status === "pending").length,
+      label: "Pendientes",
       color: "text-purple-600",
       bgColor: "bg-purple-100",
     },
     {
       icon: Calendar,
-      value: applicants.filter((app) => app.status === "Entrevista programada").length,
+      value: applicants.filter((app) => app.status === "interview").length,
       label: "Entrevistas",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
     },
     {
       icon: CheckCircle,
-      value: applicants.filter((app) => app.status === "Contratado").length,
+      value: applicants.filter((app) => app.status === "hired").length,
       label: "Contratados",
       color: "text-green-600",
       bgColor: "bg-green-100",
     },
   ]
+
+  if (loading) {
+    return (
+      <div className="p-6 flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Cargando postulantes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Error</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Intentar de nuevo
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-8">
@@ -236,8 +233,7 @@ export default function Applicants() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-status">Todos los estados</SelectItem>
-                <SelectItem value="new">Nuevos</SelectItem>
-                <SelectItem value="review">En revisión</SelectItem>
+                <SelectItem value="pending">Pendientes</SelectItem>
                 <SelectItem value="interview">Entrevista</SelectItem>
                 <SelectItem value="hired">Contratados</SelectItem>
                 <SelectItem value="rejected">Rechazados</SelectItem>
@@ -249,388 +245,426 @@ export default function Applicants() {
 
       {/* Applicants Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all">Todos ({applicants.length})</TabsTrigger>
-          <TabsTrigger value="new">Nuevos ({applicants.filter((app) => app.status === "Nuevo").length})</TabsTrigger>
-          <TabsTrigger value="review">
-            En Revisión ({applicants.filter((app) => app.status === "En revisión").length})
-          </TabsTrigger>
+          <TabsTrigger value="pending">Pendientes ({applicants.filter((app) => app.status === "pending").length})</TabsTrigger>
           <TabsTrigger value="interview">
-            Entrevistas ({applicants.filter((app) => app.status === "Entrevista programada").length})
+            Entrevistas ({applicants.filter((app) => app.status === "interview").length})
           </TabsTrigger>
           <TabsTrigger value="hired">
-            Contratados ({applicants.filter((app) => app.status === "Contratado").length})
+            Contratados ({applicants.filter((app) => app.status === "hired").length})
           </TabsTrigger>
           <TabsTrigger value="rejected">
-            Rechazados ({applicants.filter((app) => app.status === "Rechazado").length})
+            Rechazados ({applicants.filter((app) => app.status === "rejected").length})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4 mt-6">
-          {applicants.map((applicant) => (
-            <Card key={applicant.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={applicant.avatar || "/placeholder.svg"} />
-                      <AvatarFallback>
-                        {applicant.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-xl">{applicant.name}</CardTitle>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                          <span className={`text-sm font-medium ${getMatchColor(applicant.match)}`}>
-                            {applicant.match}% match
-                          </span>
+          {applicants.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay postulantes</h3>
+                <p className="text-muted-foreground">Aún no tienes postulantes para tus vacantes.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            applicants.map((applicant) => (
+              <Card key={applicant.id} className="hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={applicant.image || "/placeholder.svg"} />
+                        <AvatarFallback>
+                          {applicant.name
+                            ? applicant.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                            : "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <CardTitle className="text-xl">{applicant.name || "Sin nombre"}</CardTitle>
+                          {!applicant.cvViewed && (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                              Nuevo
+                            </Badge>
+                          )}
                         </div>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-muted-foreground">{applicant.position}</p>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <GraduationCap className="h-4 w-4" />
-                            {applicant.career} - {applicant.semester}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {applicant.location}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            Postulado {new Date(applicant.appliedDate).toLocaleDateString("es-ES")}
+                        <div className="space-y-1">
+                          <p className="text-muted-foreground">{applicant.position}</p>
+                          {applicant.career && (
+                            <p className="text-sm text-muted-foreground">{applicant.career}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              Postulado {formatDate(applicant.appliedDate)}
+                            </div>
+                            {applicant.hiredAt && (
+                              <div className="flex items-center gap-1">
+                                <CheckCircle className="h-4 w-4 text-green-600" />
+                                Contratado {formatDate(applicant.hiredAt)}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(applicant.status)}>
+                        {getStatusLabel(applicant.status)}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver Perfil Completo
+                          </DropdownMenuItem>
+                          {applicant.cvUrl && (
+                            <DropdownMenuItem>
+                              <Download className="mr-2 h-4 w-4" />
+                              Descargar CV
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem>
+                            <Mail className="mr-2 h-4 w-4" />
+                            Enviar Email
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Programar Entrevista
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {applicant.status === "pending" && (
+                            <>
+                              <DropdownMenuItem>
+                                <ThumbsUp className="mr-2 h-4 w-4" />
+                                Aprobar para Entrevista
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">
+                                <ThumbsDown className="mr-2 h-4 w-4" />
+                                Rechazar
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          {applicant.status === "interview" && (
+                            <DropdownMenuItem>
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Contratar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(applicant.status)}>{applicant.status}</Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
-                          Ver Perfil Completo
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span>{applicant.email || "Sin email"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>{applicant.cvUrl ? "CV disponible" : "Sin CV"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <Button size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Perfil
+                      </Button>
+                      {applicant.cvUrl && (
+                        <Button variant="outline" size="sm">
                           <Download className="mr-2 h-4 w-4" />
                           Descargar CV
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Enviar Email
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Programar Entrevista
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <ThumbsUp className="mr-2 h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Contactar
+                      </Button>
+                      {applicant.status === "pending" && (
+                        <Button variant="outline" size="sm">
+                          <CheckCircle className="mr-2 h-4 w-4" />
                           Aprobar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <ThumbsDown className="mr-2 h-4 w-4" />
-                          Rechazar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{applicant.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{applicant.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span>Promedio: {applicant.gpa}</span>
+                        </Button>
+                      )}
+                      {applicant.status === "interview" && (
+                        <Button size="sm">
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Contratar
+                        </Button>
+                      )}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
 
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Habilidades:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {applicant.skills.map((skill, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
+        {/* Pending Applicants */}
+        <TabsContent value="pending" className="space-y-4 mt-6">
+          {applicants.filter((app) => app.status === "pending").length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay postulantes pendientes</h3>
+                <p className="text-muted-foreground">No tienes postulantes pendientes de revisión.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            applicants
+              .filter((app) => app.status === "pending")
+              .map((applicant) => (
+                <Card key={applicant.id} className="border-blue-200 bg-blue-50/30">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={applicant.image || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {applicant.name
+                              ? applicant.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                              : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">{applicant.name || "Sin nombre"}</CardTitle>
+                          <CardDescription>
+                            {applicant.position}
+                            {applicant.career && ` • ${applicant.career}`}
+                          </CardDescription>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Postulado {formatDate(applicant.appliedDate)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-blue-100 text-blue-800">Pendiente</Badge>
+                        {!applicant.cvViewed && (
+                          <Badge variant="outline" className="text-xs">
+                            Sin revisar
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Compatibilidad con el puesto:</p>
-                    <div className="flex items-center gap-3">
-                      <Progress value={applicant.match} className="flex-1 h-2" />
-                      <span className={`text-sm font-medium ${getMatchColor(applicant.match)}`}>
-                        {applicant.match}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {applicant.notes && (
-                    <div className="p-3 bg-muted/50 rounded-lg">
-                      <p className="text-sm">
-                        <strong>Notas:</strong> {applicant.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 pt-2">
-                    <Button size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver Perfil
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" />
-                      Descargar CV
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Contactar
-                    </Button>
-                    {applicant.status === "Nuevo" && (
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      <Button size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Revisar Perfil
+                      </Button>
                       <Button variant="outline" size="sm">
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Aprobar
                       </Button>
-                    )}
-                    {applicant.status === "En revisión" && (
-                      <Button size="sm">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Programar Entrevista
+                      <Button variant="outline" size="sm">
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Rechazar
                       </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        {/* New Applicants */}
-        <TabsContent value="new" className="space-y-4 mt-6">
-          {applicants
-            .filter((app) => app.status === "Nuevo")
-            .map((applicant) => (
-              <Card key={applicant.id} className="border-blue-200 bg-blue-50/30">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={applicant.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>
-                          {applicant.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">{applicant.name}</CardTitle>
-                        <CardDescription>
-                          {applicant.position} • {applicant.career}
-                        </CardDescription>
-                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-blue-100 text-blue-800">Nuevo</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{applicant.match}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-3">
-                    <Button size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Revisar Perfil
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Aprobar
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <XCircle className="mr-2 h-4 w-4" />
-                      Rechazar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+          )}
         </TabsContent>
 
         {/* Interview Scheduled */}
         <TabsContent value="interview" className="space-y-4 mt-6">
-          {applicants
-            .filter((app) => app.status === "Entrevista programada")
-            .map((applicant) => (
-              <Card key={applicant.id} className="border-purple-200 bg-purple-50/30">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={applicant.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>
-                          {applicant.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">{applicant.name}</CardTitle>
-                        <CardDescription>
-                          {applicant.position} • {applicant.career}
-                        </CardDescription>
+          {applicants.filter((app) => app.status === "interview").length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay entrevistas programadas</h3>
+                <p className="text-muted-foreground">No tienes candidatos en fase de entrevista.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            applicants
+              .filter((app) => app.status === "interview")
+              .map((applicant) => (
+                <Card key={applicant.id} className="border-purple-200 bg-purple-50/30">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={applicant.image || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {applicant.name
+                              ? applicant.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                              : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">{applicant.name || "Sin nombre"}</CardTitle>
+                          <CardDescription>
+                            {applicant.position}
+                            {applicant.career && ` • ${applicant.career}`}
+                          </CardDescription>
+                        </div>
                       </div>
+                      <Badge className="bg-purple-100 text-purple-800">Entrevista</Badge>
                     </div>
-                    <Badge className="bg-purple-100 text-purple-800">Entrevista Programada</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {applicant.notes && (
-                    <div className="p-3 bg-purple-100 rounded-lg mb-4">
-                      <p className="text-sm text-purple-800">
-                        <strong>Próxima entrevista:</strong> {applicant.notes}
-                      </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      <Button size="sm">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Ver Detalles Entrevista
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        Contactar
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Contratar
+                      </Button>
                     </div>
-                  )}
-                  <div className="flex gap-3">
-                    <Button size="sm">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Ver Detalles Entrevista
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Contactar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+          )}
         </TabsContent>
 
         {/* Hired */}
         <TabsContent value="hired" className="space-y-4 mt-6">
-          {applicants
-            .filter((app) => app.status === "Contratado")
-            .map((applicant) => (
-              <Card key={applicant.id} className="border-green-200 bg-green-50/30">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={applicant.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>
-                          {applicant.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">{applicant.name}</CardTitle>
-                        <CardDescription>
-                          {applicant.position} • {applicant.career}
-                        </CardDescription>
+          {applicants.filter((app) => app.status === "hired").length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay candidatos contratados</h3>
+                <p className="text-muted-foreground">Aún no has contratado a ningún candidato.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            applicants
+              .filter((app) => app.status === "hired")
+              .map((applicant) => (
+                <Card key={applicant.id} className="border-green-200 bg-green-50/30">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={applicant.image || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {applicant.name
+                              ? applicant.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                              : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">{applicant.name || "Sin nombre"}</CardTitle>
+                          <CardDescription>
+                            {applicant.position}
+                            {applicant.career && ` • ${applicant.career}`}
+                          </CardDescription>
+                          {applicant.hiredAt && (
+                            <p className="text-xs text-green-700 mt-1">
+                              Contratado el {formatDate(applicant.hiredAt)}
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      <Badge className="bg-green-100 text-green-800">Contratado</Badge>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">Contratado</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {applicant.notes && (
-                    <div className="p-3 bg-green-100 rounded-lg mb-4">
-                      <p className="text-sm text-green-800">{applicant.notes}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      <Button variant="outline" size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Perfil
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Generar Contrato
+                      </Button>
                     </div>
-                  )}
-                  <div className="flex gap-3">
-                    <Button variant="outline" size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver Perfil
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Generar Contrato
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+          )}
         </TabsContent>
 
         {/* Rejected */}
         <TabsContent value="rejected" className="space-y-4 mt-6">
-          {applicants
-            .filter((app) => app.status === "Rechazado")
-            .map((applicant) => (
-              <Card key={applicant.id} className="opacity-75">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={applicant.avatar || "/placeholder.svg"} />
-                        <AvatarFallback>
-                          {applicant.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <CardTitle className="text-lg">{applicant.name}</CardTitle>
-                        <CardDescription>
-                          {applicant.position} • {applicant.career}
-                        </CardDescription>
+          {applicants.filter((app) => app.status === "rejected").length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <XCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay candidatos rechazados</h3>
+                <p className="text-muted-foreground">No has rechazado a ningún candidato.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            applicants
+              .filter((app) => app.status === "rejected")
+              .map((applicant) => (
+                <Card key={applicant.id} className="opacity-75">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={applicant.image || "/placeholder.svg"} />
+                          <AvatarFallback>
+                            {applicant.name
+                              ? applicant.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                              : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">{applicant.name || "Sin nombre"}</CardTitle>
+                          <CardDescription>
+                            {applicant.position}
+                            {applicant.career && ` • ${applicant.career}`}
+                          </CardDescription>
+                        </div>
                       </div>
+                      <Badge className="bg-red-100 text-red-800">Rechazado</Badge>
                     </div>
-                    <Badge className="bg-red-100 text-red-800">Rechazado</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {applicant.notes && (
-                    <div className="p-3 bg-red-50 rounded-lg mb-4">
-                      <p className="text-sm text-red-800">
-                        <strong>Motivo:</strong> {applicant.notes}
-                      </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3">
+                      <Button variant="outline" size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Perfil
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        Reconsiderar
+                      </Button>
                     </div>
-                  )}
-                  <div className="flex gap-3">
-                    <Button variant="outline" size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver Perfil
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      Reconsiderar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+          )}
         </TabsContent>
       </Tabs>
     </div>
