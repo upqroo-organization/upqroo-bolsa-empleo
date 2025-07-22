@@ -23,7 +23,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Building2,
   Search,
-  Filter,
   Eye,
   CheckCircle,
   XCircle,
@@ -33,6 +32,8 @@ import {
   Calendar,
   Download,
 } from "lucide-react"
+import { useCSVExport } from "@/hooks/useCSVExport"
+import { commonColumnConfigs } from "@/utils/csvExport"
 
 type Company = {
   id: string
@@ -80,6 +81,41 @@ export default function ValidateCompanies() {
   const [loading, setLoading] = useState(true)
   const [validating, setValidating] = useState(false)
   const [comments, setComments] = useState("")
+
+  // CSV Export functionality
+  const { isExporting, exportData } = useCSVExport({
+    defaultFilename: 'empresas_upqroo',
+    onExportStart: () => {
+      console.log('Iniciando exportación...')
+    },
+    onExportSuccess: (filename) => {
+      console.log(`Exportación exitosa: ${filename}`)
+    },
+    onExportError: (error) => {
+      console.error('Error en exportación:', error)
+    }
+  })
+
+  // Handle CSV export
+  const handleExport = async () => {
+    try {
+      const dataToExport = filteredCompanies.length > 0 ? filteredCompanies : companies
+
+      if (dataToExport.length === 0) {
+        toast.error('No hay datos para exportar', {
+          description: 'No se encontraron empresas para exportar',
+          duration: 3000
+        })
+        return
+      }
+
+      const filename = `empresas_${activeTab}_upqroo`
+      await exportData(dataToExport, commonColumnConfigs.companies, filename)
+
+    } catch (error) {
+      console.error('Error during export:', error)
+    }
+  }
 
   // Fetch companies data
   const fetchCompanies = useCallback(async () => {
@@ -209,9 +245,14 @@ export default function ValidateCompanies() {
           <p className="text-muted-foreground">Gestión y validación de empresas registradas en la plataforma</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Exportar
+            {isExporting ? 'Exportando...' : 'Exportar'}
           </Button>
         </div>
       </div>
