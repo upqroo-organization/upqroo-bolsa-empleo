@@ -26,9 +26,11 @@ export async function GET(request: NextRequest) {
 
     // Filter by approval status
     if (status === 'pending') {
-      whereConditions.isApprove = false;
+      whereConditions.approvalStatus = 'pending';
     } else if (status === 'approved') {
-      whereConditions.isApprove = true;
+      whereConditions.approvalStatus = 'approved';
+    } else if (status === 'rejected') {
+      whereConditions.approvalStatus = 'rejected';
     }
 
     // Filter by search term
@@ -71,8 +73,9 @@ export async function GET(request: NextRequest) {
 
     // Get statistics
     const statistics = {
-      pending: await prisma.company.count({ where: { isApprove: false } }),
-      approved: await prisma.company.count({ where: { isApprove: true } }),
+      pending: await prisma.company.count({ where: { approvalStatus: 'pending' } }),
+      approved: await prisma.company.count({ where: { approvalStatus: 'approved' } }),
+      rejected: await prisma.company.count({ where: { approvalStatus: 'rejected' } }),
       total: await prisma.company.count(),
     };
 

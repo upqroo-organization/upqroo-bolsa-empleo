@@ -21,6 +21,7 @@ model company {
   organizationCulture String? // Description of the company's culture
   size                String? // Size of the company (e.g., small, medium, large
   isApprove           Boolean   @default(false) // Indicates if the company is approved for job postings
+  approvalStatus      String    @default("pending") // pending, approved, rejected
 
   contactName     String? // Name of the primary contact person
   contactEmail    String? // Email of the primary contact person

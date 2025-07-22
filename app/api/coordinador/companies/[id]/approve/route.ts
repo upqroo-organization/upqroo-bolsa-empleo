@@ -44,10 +44,13 @@ export async function POST(
 
     // Update company approval status
     const isApproved = action === 'approve';
+    const approvalStatus = action === 'approve' ? 'approved' : 'rejected';
+    
     const updatedCompany = await prisma.company.update({
       where: { id: companyId },
       data: {
         isApprove: isApproved,
+        approvalStatus: approvalStatus,
       },
     });
 

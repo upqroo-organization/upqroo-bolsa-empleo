@@ -48,6 +48,7 @@ type Company = {
   phone: string | null
   rfc: string | null
   isApprove: boolean
+  approvalStatus: string
   createdAt: string
   updatedAt: string
   state: {
@@ -64,6 +65,7 @@ type Company = {
 type Statistics = {
   pending: number
   approved: number
+  rejected: number
   total: number
 }
 
@@ -74,7 +76,7 @@ export default function ValidateCompanies() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
   const [validationDialog, setValidationDialog] = useState(false)
   const [companies, setCompanies] = useState<Company[]>([])
-  const [statistics, setStatistics] = useState<Statistics>({ pending: 0, approved: 0, total: 0 })
+  const [statistics, setStatistics] = useState<Statistics>({ pending: 0, approved: 0, rejected: 0, total: 0 })
   const [loading, setLoading] = useState(true)
   const [validating, setValidating] = useState(false)
   const [comments, setComments] = useState("")
@@ -114,9 +116,11 @@ export default function ValidateCompanies() {
   const getFilteredCompanies = () => {
     switch (activeTab) {
       case 'pending':
-        return companies.filter(c => !c.isApprove)
+        return companies.filter(c => c.approvalStatus === 'pending')
       case 'approved':
-        return companies.filter(c => c.isApprove)
+        return companies.filter(c => c.approvalStatus === 'approved')
+      case 'rejected':
+        return companies.filter(c => c.approvalStatus === 'rejected')
       case 'all':
       default:
         return companies
@@ -170,23 +174,29 @@ export default function ValidateCompanies() {
   }
 
   const stats = [
-    { 
-      title: "Pendientes", 
-      value: statistics.pending.toString(), 
-      color: "text-yellow-600", 
-      bgColor: "bg-yellow-100" 
+    {
+      title: "Pendientes",
+      value: statistics.pending.toString(),
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100"
     },
-    { 
-      title: "Aprobadas", 
-      value: statistics.approved.toString(), 
-      color: "text-green-600", 
-      bgColor: "bg-green-100" 
+    {
+      title: "Aprobadas",
+      value: statistics.approved.toString(),
+      color: "text-green-600",
+      bgColor: "bg-green-100"
     },
-    { 
-      title: "Total", 
-      value: statistics.total.toString(), 
-      color: "text-blue-600", 
-      bgColor: "bg-blue-100" 
+    {
+      title: "Rechazadas",
+      value: statistics.rejected.toString(),
+      color: "text-red-600",
+      bgColor: "bg-red-100"
+    },
+    {
+      title: "Total",
+      value: statistics.total.toString(),
+      color: "text-blue-600",
+      bgColor: "bg-blue-100"
     },
   ]
 
@@ -202,10 +212,6 @@ export default function ValidateCompanies() {
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Exportar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
           </Button>
         </div>
       </div>
@@ -258,12 +264,15 @@ export default function ValidateCompanies() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending">
             Pendientes ({statistics.pending})
           </TabsTrigger>
           <TabsTrigger value="approved">
             Aprobadas ({statistics.approved})
+          </TabsTrigger>
+          <TabsTrigger value="rejected">
+            Rechazadas ({statistics.rejected})
           </TabsTrigger>
           <TabsTrigger value="all">
             Todas ({statistics.total})
@@ -422,15 +431,15 @@ export default function ValidateCompanies() {
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               onClick={() => handleValidation(selectedCompany?.id, "reject")}
                               disabled={validating}
                             >
                               <XCircle className="h-4 w-4 mr-2" />
                               Rechazar
                             </Button>
-                            <Button 
+                            <Button
                               onClick={() => handleValidation(selectedCompany?.id, "approve")}
                               disabled={validating}
                             >
@@ -500,6 +509,175 @@ export default function ValidateCompanies() {
           )}
         </TabsContent>
 
+        <TabsContent value="rejected" className="space-y-4">
+          {loading ? (
+            <div className="text-center py-8">
+              <p>Cargando empresas...</p>
+            </div>
+          ) : filteredCompanies.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No hay empresas rechazadas</p>
+            </div>
+          ) : (
+            filteredCompanies.map((company) => (
+              <Card key={company.id}>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarFallback>
+                          {company.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <h3 className="text-lg font-semibold">{company.name}</h3>
+                          <Badge variant="destructive" className="bg-red-100 text-red-800">
+                            Rechazada
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center">
+                            <Building2 className="h-4 w-4 mr-1" />
+                            {company.industry || 'No especificado'}
+                          </div>
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 mr-1" />
+                            {company.email}
+                          </div>
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {company.state?.name || 'No especificado'}
+                          </div>
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            {new Date(company.createdAt).toLocaleDateString('es-ES')}
+                          </div>
+                        </div>
+                        <p className="text-sm mt-2">{company.description || 'Sin descripción'}</p>
+                        <div className="mt-3">
+                          <div className="flex flex-wrap gap-2">
+                            {company.rfc && (
+                              <Badge variant="outline">
+                                RFC: {company.rfc}
+                              </Badge>
+                            )}
+                            {company.phone && (
+                              <Badge variant="outline">
+                                Tel: {company.phone}
+                              </Badge>
+                            )}
+                            {company.contactName && (
+                              <Badge variant="outline">
+                                Contacto: {company.contactName}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalles
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>{company.name}</DialogTitle>
+                            <DialogDescription>Información completa de la empresa rechazada</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Contacto Principal</Label>
+                                <div className="mt-1 space-y-1">
+                                  <p className="font-medium">{company.contactName || 'No especificado'}</p>
+                                  <p className="text-sm text-muted-foreground">{company.contactPosition || 'No especificado'}</p>
+                                  <div className="flex items-center text-sm">
+                                    <Mail className="h-3 w-3 mr-1" />
+                                    {company.contactEmail || company.email}
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <Phone className="h-3 w-3 mr-1" />
+                                    {company.contactPhone || company.phone || 'No especificado'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <Label>Información Empresarial</Label>
+                                <div className="mt-1 space-y-1">
+                                  <p className="text-sm">RFC: {company.rfc || 'No especificado'}</p>
+                                  <p className="text-sm">Sector: {company.industry || 'No especificado'}</p>
+                                  <p className="text-sm">Estado: {company.state?.name || 'No especificado'}</p>
+                                  <p className="text-sm">Registrada: {new Date(company.createdAt).toLocaleDateString('es-ES')}</p>
+                                  <p className="text-sm">Rechazada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Descripción</Label>
+                              <p className="text-sm mt-1">{company.description || 'Sin descripción proporcionada'}</p>
+                            </div>
+                            {company.address && (
+                              <div>
+                                <Label>Dirección</Label>
+                                <p className="text-sm mt-1">{company.address}</p>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <Dialog open={validationDialog} onOpenChange={setValidationDialog}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" onClick={() => setSelectedCompany(company)}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Revisar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Revisar Empresa Rechazada</DialogTitle>
+                            <DialogDescription>
+                              Revisar y posiblemente aprobar la empresa {selectedCompany?.name}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor="comments">Comentarios</Label>
+                              <Textarea
+                                id="comments"
+                                value={comments}
+                                onChange={(e) => setComments(e.target.value)}
+                                placeholder="Agregar comentarios sobre la revisión..."
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              onClick={() => handleValidation(selectedCompany?.id, "approve")}
+                              disabled={validating}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Aprobar Ahora
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+
         <TabsContent value="all" className="space-y-4">
           {loading ? (
             <div className="text-center py-8">
@@ -526,8 +704,8 @@ export default function ValidateCompanies() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           <h3 className="text-lg font-semibold">{company.name}</h3>
-                          <Badge variant={company.isApprove ? "default" : "secondary"} 
-                                 className={company.isApprove ? "bg-green-100 text-green-800" : ""}>
+                          <Badge variant={company.isApprove ? "default" : "secondary"}
+                            className={company.isApprove ? "bg-green-100 text-green-800" : ""}>
                             {company.isApprove ? "Aprobada" : "Pendiente"}
                           </Badge>
                         </div>
