@@ -8,6 +8,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   Users,
   Building2,
@@ -22,6 +35,11 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   MoreHorizontal,
+  CheckCircle,
+  XCircle,
+  MapPin,
+  Phone,
+  Mail,
 } from "lucide-react"
 
 interface DashboardData {
@@ -72,6 +90,12 @@ export default function CoordinatorDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Validation dialog states
+  const [selectedCompany, setSelectedCompany] = useState<any>(null)
+  const [validationDialog, setValidationDialog] = useState(false)
+  const [validating, setValidating] = useState(false)
+  const [comments, setComments] = useState("")
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login")
@@ -91,13 +115,13 @@ export default function CoordinatorDashboard() {
     try {
       setLoading(true)
       const response = await fetch("/api/coordinador/dashboard")
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar los datos del dashboard")
       }
 
       const result = await response.json()
-      
+
       if (result.success) {
         setDashboardData(result.data)
       } else {
@@ -137,6 +161,51 @@ export default function CoordinatorDashboard() {
     }
   }
 
+  // Handle company validation
+  const handleValidation = async (companyId: string | undefined, action: string) => {
+    if (!companyId) return
+
+    try {
+      setValidating(true)
+      const response = await fetch(`/api/coordinador/companies/${companyId}/approve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action,
+          comments: comments.trim()
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Refresh dashboard data
+        await fetchDashboardData()
+        setValidationDialog(false)
+        setComments('')
+        toast.success(data.message, {
+          description: action === 'approve' ? 'La empresa ha sido aprobada exitosamente' : 'La empresa ha sido rechazada',
+          duration: 5000
+        })
+      } else {
+        toast.error(data.error || 'Error al procesar la solicitud', {
+          description: 'No se pudo completar la acción. Intente nuevamente.',
+          duration: 5000
+        })
+      }
+    } catch (error) {
+      console.error('Error validating company:', error)
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifique su conexión a internet.',
+        duration: 5000
+      })
+    } finally {
+      setValidating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-6 space-y-6">
@@ -147,7 +216,7 @@ export default function CoordinatorDashboard() {
           </div>
           <Skeleton className="h-10 w-32" />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
@@ -281,15 +350,14 @@ export default function CoordinatorDashboard() {
                   return (
                     <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50">
                       <div
-                        className={`p-2 rounded-full ${
-                          activity.status === "success"
+                        className={`p-2 rounded-full ${activity.status === "success"
                             ? "bg-green-100 text-green-600"
                             : activity.status === "warning"
                               ? "bg-yellow-100 text-yellow-600"
                               : activity.status === "pending"
                                 ? "bg-blue-100 text-blue-600"
                                 : "bg-gray-100 text-gray-600"
-                        }`}
+                          }`}
                       >
                         <ActivityIcon className="h-4 w-4" />
                       </div>
@@ -384,9 +452,66 @@ export default function CoordinatorDashboard() {
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="outline">
-                        Revisar
-                      </Button>
+                      <Dialog open={validationDialog} onOpenChange={setValidationDialog}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" onClick={() => setSelectedCompany(company)}>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Revisar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Validar Empresa</DialogTitle>
+                            <DialogDescription>
+                              Aprobar o rechazar la solicitud de {selectedCompany?.name}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="p-4 bg-muted/50 rounded-lg">
+                              <h4 className="font-medium mb-2">Información de la Empresa</h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p><strong>Nombre:</strong> {selectedCompany?.name}</p>
+                                  <p><strong>Sector:</strong> {selectedCompany?.sector}</p>
+                                  <p><strong>Ubicación:</strong> {selectedCompany?.location}</p>
+                                </div>
+                                <div>
+                                  <p><strong>Email:</strong> {selectedCompany?.email}</p>
+                                  <p><strong>Tamaño:</strong> {selectedCompany?.size}</p>
+                                  <p><strong>Enviado:</strong> {selectedCompany?.submittedDate ? formatDate(selectedCompany.submittedDate) : 'N/A'}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="comments">Comentarios</Label>
+                              <Textarea
+                                id="comments"
+                                value={comments}
+                                onChange={(e) => setComments(e.target.value)}
+                                placeholder="Agregar comentarios sobre la validación..."
+                                className="mt-1"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              variant="outline"
+                              onClick={() => handleValidation(selectedCompany?.id, "reject")}
+                              disabled={validating}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Rechazar
+                            </Button>
+                            <Button
+                              onClick={() => handleValidation(selectedCompany?.id, "approve")}
+                              disabled={validating}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              {validating ? 'Procesando...' : 'Aprobar'}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 ))
@@ -406,7 +531,7 @@ export default function CoordinatorDashboard() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Users className="h-5 w-5 mr-2" />
-                Últimas Colocaciones
+              Últimas Colocaciones
             </CardTitle>
             <CardDescription>Últimos estudiantes contratados</CardDescription>
           </CardHeader>
