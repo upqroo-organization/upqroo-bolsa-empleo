@@ -71,7 +71,7 @@ interface DashboardData {
 }
 
 export default function StudentDashboard() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -396,9 +396,11 @@ export default function StudentDashboard() {
                   </div>
                 )}
               </div>
-              <Button variant="outline" className="w-full mt-6">
-                Ver Todas las Postulaciones
-              </Button>
+              <Link href="client/mis-postulaciones">
+                <Button variant="outline" className="w-full mt-6">
+                  Ver Todas las Postulaciones
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

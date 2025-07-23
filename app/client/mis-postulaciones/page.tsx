@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Search, Calendar, Building2, MapPin, Eye, MessageSquare, X, Clock, FileText, Users, Loader2 } from "lucide-react"
+import { Search, Calendar, Eye, X, Clock, FileText, Users } from "lucide-react"
 import Link from "next/link"
 import { useMyApplications, ApplicationWithVacante } from "@/hooks/useMyApplications"
 import { useState } from "react"
 import { Spinner } from "@/components/Spinner"
 import ApplicationCard from "@/components/ApplicationCard"
+import JobApplicationDrawer from "@/components/JobApplicationDrawer"
 export default function MyApplications() {
   const { 
     applications, 
@@ -27,46 +28,8 @@ export default function MyApplications() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("recent")
-
-  // Helper function to get status styling
-  const getStatusStyling = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return "bg-gray-100 text-gray-800 border-gray-200"
-      case 'accepted':
-        return "bg-green-100 text-green-800 border-green-200"
-      case 'rejected':
-        return "bg-red-100 text-red-800 border-red-200"
-      default:
-        return "bg-blue-100 text-blue-800 border-blue-200"
-    }
-  }
-
-  // Helper function to format status text
-  const getStatusText = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return "Postulación enviada"
-      case 'accepted':
-        return "Aceptada"
-      case 'rejected':
-        return "Rechazada"
-      default:
-        return status
-    }
-  }
-
-  // Helper function to format salary
-  const formatSalary = (min: number | null, max: number | null) => {
-    if (min && max) {
-      return `$${min.toLocaleString()} - $${max.toLocaleString()}`
-    } else if (min) {
-      return `Desde $${min.toLocaleString()}`
-    } else if (max) {
-      return `Hasta $${max.toLocaleString()}`
-    }
-    return "Salario no especificado"
-  }
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithVacante | null>(null)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   // Filter and sort applications
   const filteredApplications = applications
@@ -154,6 +117,17 @@ export default function MyApplications() {
           </Button>
         </Link>
       </div>
+      
+      {/* Job Application Drawer */}
+      <JobApplicationDrawer
+        application={selectedApplication}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onContact={() => {
+          // Implement contact functionality
+          console.log("Contact company for application:", selectedApplication?.id)
+        }}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -270,8 +244,8 @@ export default function MyApplications() {
                 key={application.id} 
                 application={application}
                 onViewDetails={(app) => {
-                  // TODO: Implement view details modal
-                  console.log("View details for:", app)
+                  setSelectedApplication(app)
+                  setIsDrawerOpen(true)
                 }}
               />
             ))
@@ -297,7 +271,8 @@ export default function MyApplications() {
                 key={application.id} 
                 application={application}
                 onViewDetails={(app) => {
-                  console.log("View details for:", app)
+                  setSelectedApplication(app)
+                  setIsDrawerOpen(true)
                 }}
               />
             ))
@@ -340,9 +315,15 @@ export default function MyApplications() {
                     </AlertDescription>
                   </Alert>
                   <div className="flex gap-3">
-                    <Button size="sm">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Ver Siguiente Paso
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedApplication(application)
+                        setIsDrawerOpen(true)
+                      }}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver Detalles
                     </Button>
                     <Button variant="outline" size="sm">
                       Contactar Empresa
@@ -389,8 +370,16 @@ export default function MyApplications() {
                     </AlertDescription>
                   </Alert>
                   <div className="flex gap-3">
-                    <Button variant="outline" size="sm">
-                      Ver Feedback
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setSelectedApplication(application)
+                        setIsDrawerOpen(true)
+                      }}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Ver Detalles
                     </Button>
                     <Link href="/vacantes">
                       <Button variant="outline" size="sm">
@@ -400,8 +389,7 @@ export default function MyApplications() {
                   </div>
                 </CardContent>
               </Card>
-            ))
-          )}
+            )))}
         </TabsContent>
       </Tabs>
     </div>

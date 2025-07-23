@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
@@ -27,19 +26,14 @@ import {
   Briefcase,
   TrendingUp,
   Clock,
-  AlertTriangle,
   Eye,
   UserCheck,
-  FileText,
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
   MoreHorizontal,
   CheckCircle,
   XCircle,
-  MapPin,
-  Phone,
-  Mail,
 } from "lucide-react"
 
 interface DashboardData {
