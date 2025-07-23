@@ -55,6 +55,13 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   ]
 };
 
+const ROLE_NAME = {
+  admin: "Administrador",
+  student: "Estudiante",
+  company: "Empresa",
+  coordinator: "Coordinador"
+}
+
 export default function Navbar() {
   const { data: session } = useSession();
   console.log(session);
@@ -77,7 +84,7 @@ export default function Navbar() {
           <Link href="/">
             <Image src={logoUperoo} alt="Logo" className='rounded-sm' width={140} height={140} />
           </Link>
-          {role && <Badge variant="secondary" className="ml-2">{role.toUpperCase()}</Badge>}
+          {role in ROLE_NAME && <Badge variant="secondary" className="ml-2">{ROLE_NAME[role as keyof typeof ROLE_NAME]}</Badge>}
         </div>
 
         {/* Navegación */}
@@ -104,11 +111,6 @@ export default function Navbar() {
               {!['admin', 'coordinator'].includes(role) && <DropdownMenuItem asChild>
                 <Link href={perfilByRole[role]}>Perfil</Link>
               </DropdownMenuItem>}
-              <DropdownMenuItem>
-                <Link href='/weather'>
-                  Pronostico del tiempo
-                </Link>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => signOut()}>
                 <LogOut color='red' />
                 Cerrar sesión

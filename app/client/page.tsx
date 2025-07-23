@@ -23,6 +23,7 @@ import {
   Target,
 } from "lucide-react"
 import Link from "next/link"
+import CVUploadModal from "@/components/CVUploadModal"
 
 interface DashboardData {
   user: {
@@ -351,10 +352,12 @@ export default function StudentDashboard() {
                   </div>
                 </div>
               </div>
-              <Button className="w-full">
-                <Target className="mr-2 h-4 w-4" />
-                Completar Perfil
-              </Button>
+              <Link href="/client/perfil">
+                <Button className="w-full">
+                  <Target className="mr-2 h-4 w-4" />
+                  Completar Perfil
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -479,18 +482,15 @@ export default function StudentDashboard() {
               <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <FileText className="mr-2 h-4 w-4" />
-                Actualizar CV
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <CVUploadModal />
+              {/* <Button variant="outline" className="w-full justify-start">
                 <Search className="mr-2 h-4 w-4" />
                 Buscar Prácticas
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Calendar className="mr-2 h-4 w-4" />
                 Ver Calendario
-              </Button>
+              </Button> */}
             </CardContent>
           </Card>
         </div>

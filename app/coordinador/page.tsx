@@ -298,10 +298,10 @@ export default function CoordinatorDashboard() {
           <p className="text-muted-foreground">Supervisión y gestión de la bolsa de trabajo universitaria</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
+          {/* <Button variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
             Generar Reporte
-          </Button>
+          </Button> */}
           {/* <Button size="sm">
             <Calendar className="h-4 w-4 mr-2" />
             Programar Reunión
@@ -576,7 +576,7 @@ export default function CoordinatorDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Accesos Rápidos</CardTitle>
           <CardDescription>Funciones principales del coordinador</CardDescription>
@@ -587,10 +587,10 @@ export default function CoordinatorDashboard() {
               <Building2 className="" />
               Validar Empresas
             </Button>
-            {/* <Button variant="outline" className="h-20 flex-col">
+            <Button variant="outline" className="h-20 flex-col">
               <Users className="h-6 w-6 mb-2" />
               Seguimiento Estudiantes
-            </Button> */}
+            </Button>
             <Button variant="outline" className="h-20 flex-col">
               <FileText className="" />
               Generar Reportes
@@ -601,7 +601,7 @@ export default function CoordinatorDashboard() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }
