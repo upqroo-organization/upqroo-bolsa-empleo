@@ -31,7 +31,7 @@ const perfilByRole: Record<string, string> = {
 const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   admin: [
     { name: 'Dashboard', href: '/admin' },
-    { name: 'Usuarios', href: '/admin/users' },
+    { name: 'Usuarios', href: '/admin/gestion-usuarios' },
   ],
   external: [
     { name: 'Inicio', href: '/client' },

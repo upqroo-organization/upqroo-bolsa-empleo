@@ -144,10 +144,6 @@ export default function ManageJobs() {
           <p className="text-muted-foreground">Administra todas tus ofertas laborales</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <BarChart3 className="mr-2 h-4 w-4" />
-            Reportes
-          </Button>
           <Link href="/empresa/publicar-vacante">
             <Button>
               <Plus className="mr-2 h-4 w-4" />

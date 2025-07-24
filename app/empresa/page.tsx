@@ -8,14 +8,12 @@ import {
   Building2,
   Users,
   Eye,
-  TrendingUp,
   MapPin,
   Star,
   Plus,
   FileText,
   Mail,
   Phone,
-  BarChart3,
   Target,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -47,15 +45,7 @@ export default function CompanyDashboard() {
       color: "text-accent",
       bgColor: "bg-accent/10",
       change: "+18% vs mes anterior",
-    },
-    {
-      icon: TrendingUp,
-      value: "73%",
-      label: "Tasa de Respuesta",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-      change: "+5% mejora",
-    },
+    }
   ]
 
   const recentApplications = [
@@ -67,7 +57,6 @@ export default function CompanyDashboard() {
       appliedDate: "Hace 2 horas",
       status: "Nuevo",
       match: 95,
-      career: "Ingeniería en Software",
     },
     {
       id: 2,
@@ -77,7 +66,6 @@ export default function CompanyDashboard() {
       appliedDate: "Hace 5 horas",
       status: "En revisión",
       match: 88,
-      career: "Ingeniería en Sistemas",
     },
     {
       id: 3,
@@ -87,7 +75,6 @@ export default function CompanyDashboard() {
       appliedDate: "Hace 1 día",
       status: "Entrevista",
       match: 92,
-      career: "Diseño Gráfico",
     },
   ]
 
@@ -145,7 +132,7 @@ export default function CompanyDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -206,7 +193,6 @@ export default function CompanyDashboard() {
                       <div>
                         <h4 className="font-semibold">{application.name}</h4>
                         <p className="text-sm text-muted-foreground">{application.position}</p>
-                        <p className="text-xs text-muted-foreground">{application.career}</p>
                       </div>
                     </div>
                     <div className="text-right space-y-2">
@@ -222,10 +208,6 @@ export default function CompanyDashboard() {
                         >
                           {application.status}
                         </Badge>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                        <span className="text-sm font-medium">{application.match}% match</span>
                       </div>
                       <p className="text-xs text-muted-foreground">{application.appliedDate}</p>
                     </div>
@@ -343,14 +325,6 @@ export default function CompanyDashboard() {
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
                 Ver Postulantes
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Generar Reporte
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Mail className="mr-2 h-4 w-4" />
-                Mensajes
               </Button>
             </CardContent>
           </Card>
