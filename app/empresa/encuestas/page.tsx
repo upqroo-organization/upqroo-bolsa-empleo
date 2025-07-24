@@ -165,8 +165,8 @@ export default function EmpresaEncuestasPage() {
                 <div className="mt-4">
                   <p className="text-sm font-medium mb-2">Estudiantes pendientes de evaluar:</p>
                   <div className="flex flex-wrap gap-2">
-                    {survey.pendingStudents.map((student) => (
-                      <Badge key={student.id} variant="outline">
+                    {survey.pendingStudents.map((student, index) => (
+                      <Badge key={index} variant="outline">
                         {student.name || student.email}
                       </Badge>
                     ))}

@@ -6,7 +6,7 @@ import { Survey, SurveyResponse, RATING_LABELS } from '@/types/survey';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Calendar, Users, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Calendar, Users, BarChart3, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SurveyDetailsPage() {
@@ -59,6 +59,119 @@ export default function SurveyDetailsPage() {
     };
   };
 
+  const exportToCSV = () => {
+    if (!survey || !survey.responses || survey.responses.length === 0) {
+      alert('No hay datos para exportar');
+      return;
+    }
+
+    const csvSections = [];
+
+    // Survey Information Section
+    csvSections.push('INFORMACIÓN DE LA ENCUESTA');
+    csvSections.push(`Título,${survey.title}`);
+    csvSections.push(`Descripción,"${survey.description || 'N/A'}"`);
+    csvSections.push(`Estado,${survey.isActive ? 'Activa' : 'Inactiva'}`);
+    csvSections.push(`Días después de contratación,${survey.daysAfterHiring}`);
+    csvSections.push(`Duración de la encuesta (días),${survey.surveyDuration}`);
+    csvSections.push(`Total de preguntas,${survey.questions.length}`);
+    csvSections.push(`Total de respuestas,${survey.responses.length}`);
+    csvSections.push(`Fecha de exportación,"${new Date().toLocaleString('es-ES')}"`);
+    csvSections.push('');
+
+    // Questions Section
+    csvSections.push('PREGUNTAS DE LA ENCUESTA');
+    csvSections.push('Número,Pregunta,Total Respuestas,Promedio');
+    survey.questions.forEach((question, index) => {
+      const stats = calculateQuestionStats(question.id);
+      csvSections.push(`${index + 1},"${question.question}",${stats?.total || 0},${stats?.average || 0}`);
+    });
+    csvSections.push('');
+
+    // Statistics Summary Section
+    csvSections.push('RESUMEN ESTADÍSTICO POR PREGUNTA');
+    csvSections.push('Pregunta,Muy Bien (5),Bien (4),Regular (3),Mal (2),Pésimo (1),No aplica (0),Total,Promedio');
+    survey.questions.forEach((question, index) => {
+      const stats = calculateQuestionStats(question.id);
+      if (stats) {
+        const distribution = stats.distribution;
+        csvSections.push(`"Pregunta ${index + 1}",${distribution[5] || 0},${distribution[4] || 0},${distribution[3] || 0},${distribution[2] || 0},${distribution[1] || 0},${distribution[0] || 0},${stats.total},${stats.average}`);
+      } else {
+        csvSections.push(`"Pregunta ${index + 1}",0,0,0,0,0,0,0,0`);
+      }
+    });
+    csvSections.push('');
+
+    // Detailed Responses Section
+    csvSections.push('RESPUESTAS DETALLADAS');
+    
+    // Headers for detailed responses
+    const detailHeaders = [
+      'ID Respuesta',
+      'Empresa',
+      'Estudiante',
+      'Email Estudiante',
+      'Fecha Respuesta',
+      'Estado',
+      'Promedio General',
+      'Comentarios'
+    ];
+
+    // Add question headers
+    survey.questions.forEach((question, index) => {
+      detailHeaders.push(`P${index + 1} - Calificación`);
+      detailHeaders.push(`P${index + 1} - Etiqueta`);
+    });
+
+    csvSections.push(detailHeaders.join(','));
+
+    // Add response rows
+    survey.responses.forEach(response => {
+      const averageRating = response.answers.length > 0 
+        ? Math.round((response.answers.reduce((sum, answer) => sum + answer.rating, 0) / response.answers.length) * 100) / 100
+        : 0;
+
+      const row = [
+        response.id,
+        `"${response.company?.name || 'N/A'}"`,
+        `"${response.student?.name || 'N/A'}"`,
+        `"${response.student?.email || 'N/A'}"`,
+        `"${new Date(response.createdAt).toLocaleString('es-ES')}"`,
+        response.isCompleted ? 'Completada' : 'Pendiente',
+        averageRating.toString(),
+        `"${response.comments || ''}"`
+      ];
+
+      // Add answers for each question
+      survey.questions.forEach(question => {
+        const answer = response.answers.find(a => a.questionId === question.id);
+        if (answer) {
+          row.push(answer.rating.toString());
+          row.push(`"${RATING_LABELS[answer.rating as keyof typeof RATING_LABELS]}"`);
+        } else {
+          row.push('');
+          row.push('"Sin respuesta"');
+        }
+      });
+
+      csvSections.push(row.join(','));
+    });
+
+    // Create final CSV content
+    const csvContent = csvSections.join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `encuesta_${survey.title.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (loading) {
     return <div className="p-6">Cargando encuesta...</div>;
   }
@@ -73,16 +186,25 @@ export default function SurveyDetailsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/coordinador/encuestas">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="w-4 h-4" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Link href="/coordinador/encuestas">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold">{survey.title}</h1>
+          <Badge variant={survey.isActive ? 'default' : 'secondary'}>
+            {getSurveyStatus()}
+          </Badge>
+        </div>
+        
+        {survey.responses && survey.responses.length > 0 && (
+          <Button onClick={exportToCSV} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
           </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">{survey.title}</h1>
-        <Badge variant={survey.isActive ? 'default' : 'secondary'}>
-          {getSurveyStatus()}
-        </Badge>
+        )}
       </div>
 
       <div className="grid gap-6">
@@ -173,10 +295,18 @@ export default function SurveyDetailsPage() {
         {survey.responses && survey.responses.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Respuestas Recibidas</CardTitle>
-              <CardDescription>
-                Evaluaciones de empresas para estudiantes contratados
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Respuestas Recibidas</CardTitle>
+                  <CardDescription>
+                    Evaluaciones de empresas para estudiantes contratados
+                  </CardDescription>
+                </div>
+                <Button onClick={exportToCSV} variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar a CSV
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -268,7 +398,7 @@ export default function SurveyDetailsPage() {
                     {response.comments && (
                       <div className="bg-muted/50 rounded-lg p-4">
                         <p className="text-sm font-medium mb-2">Comentarios adicionales:</p>
-                        <p className="text-sm text-muted-foreground italic">"{response.comments}"</p>
+                        <p className="text-sm text-muted-foreground italic">"{response.comments}&quot;</p>
                       </div>
                     )}
                   </div>

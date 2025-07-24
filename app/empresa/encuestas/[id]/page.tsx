@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Survey, RATING_LABELS, RatingValue } from '@/types/survey';
+import { Survey, RATING_LABELS } from '@/types/survey';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -194,8 +194,8 @@ export default function CompletarEncuestaPage() {
           </CardHeader>
           <CardContent>
             <RadioGroup value={selectedStudent} onValueChange={setSelectedStudent}>
-              {availableStudents.map((student) => (
-                <div key={student.id} className="flex items-center space-x-2">
+              {availableStudents.map((student, index) => (
+                <div key={index} className="flex items-center space-x-2">
                   <RadioGroupItem value={student.id} id={student.id} />
                   <Label htmlFor={student.id} className="cursor-pointer">
                     {student.name || student.email}
