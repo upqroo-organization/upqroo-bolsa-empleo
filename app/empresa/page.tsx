@@ -73,14 +73,14 @@ export default function CompanyDashboard() {
       bgColor: "bg-secondary/10",
       change: `+${data.stats.totalApplications.change} nuevos`,
     },
-    {
-      icon: Eye,
-      value: data.stats.totalViews.count.toString(),
-      label: "Visualizaciones",
-      color: "text-accent",
-      bgColor: "bg-accent/10",
-      change: `+${data.stats.totalViews.growth}% vs mes anterior`,
-    }
+    // {
+    //   icon: Eye,
+    //   value: data.stats.totalViews.count.toString(),
+    //   label: "Visualizaciones",
+    //   color: "text-accent",
+    //   bgColor: "bg-accent/10",
+    //   change: `+${data.stats.totalViews.growth}% vs mes anterior`,
+    // }
   ]
 
   const getStatusBadgeVariant = (status: string) => {
@@ -148,7 +148,7 @@ export default function CompanyDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {stats.map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -374,7 +374,7 @@ export default function CompanyDashboard() {
             <CardHeader>
               <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 grid">
               <Link href="/empresa/publicar-vacante">
                 <Button className="w-full justify-start">
                   <Plus className="mr-2 h-4 w-4" />
@@ -398,7 +398,7 @@ export default function CompanyDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {data.recentApplications.length > 0 ? (
-                  data.recentApplications.slice(0, 3).map((application, index) => {
+                  data.recentApplications.slice(0, 3).map((application) => {
                     return (
                       <div key={application.id} className="flex items-start gap-3">
                         <div className="bg-muted p-2 rounded-lg">

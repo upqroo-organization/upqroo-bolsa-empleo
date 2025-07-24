@@ -345,12 +345,12 @@ export default function CoordinatorDashboard() {
                     <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50">
                       <div
                         className={`p-2 rounded-full ${activity.status === "success"
-                            ? "bg-green-100 text-green-600"
-                            : activity.status === "warning"
-                              ? "bg-yellow-100 text-yellow-600"
-                              : activity.status === "pending"
-                                ? "bg-blue-100 text-blue-600"
-                                : "bg-gray-100 text-gray-600"
+                          ? "bg-green-100 text-green-600"
+                          : activity.status === "warning"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : activity.status === "pending"
+                              ? "bg-blue-100 text-blue-600"
+                              : "bg-gray-100 text-gray-600"
                           }`}
                       >
                         <ActivityIcon className="h-4 w-4" />

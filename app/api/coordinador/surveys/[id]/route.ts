@@ -70,22 +70,77 @@ export async function PUT(
         }
       });
 
-      // If questions are provided, update them
+      // If questions are provided, update them intelligently to preserve responses
       if (data.questions && Array.isArray(data.questions)) {
-        // Delete existing questions
-        await tx.surveyQuestion.deleteMany({
-          where: { surveyId: id }
+        // Get existing questions
+        const existingQuestions = await tx.surveyQuestion.findMany({
+          where: { surveyId: id },
+          orderBy: { order: 'asc' }
         });
 
-        // Create new questions
-        if (data.questions.length > 0) {
-          await tx.surveyQuestion.createMany({
-            data: data.questions.map((question: any, index: number) => ({
+        // Create a map of existing questions by their text content for matching
+        const existingQuestionsMap = new Map(
+          existingQuestions.map(q => [q.question.trim().toLowerCase(), q])
+        );
+
+        // Process new questions
+        const questionsToKeep = new Set<string>();
+        const questionsToCreate: any[] = [];
+        const questionsToUpdate: any[] = [];
+
+        data.questions.forEach((newQuestion: any, index: number) => {
+          const questionText = newQuestion.question.trim().toLowerCase();
+          const existingQuestion = existingQuestionsMap.get(questionText);
+
+          if (existingQuestion) {
+            // Question exists, update it if needed
+            questionsToKeep.add(existingQuestion.id);
+            if (existingQuestion.order !== index + 1 || existingQuestion.isRequired !== (newQuestion.isRequired !== undefined ? newQuestion.isRequired : true)) {
+              questionsToUpdate.push({
+                id: existingQuestion.id,
+                order: index + 1,
+                isRequired: newQuestion.isRequired !== undefined ? newQuestion.isRequired : true
+              });
+            }
+          } else {
+            // New question, create it
+            questionsToCreate.push({
               surveyId: id,
-              question: question.question,
+              question: newQuestion.question,
               order: index + 1,
-              isRequired: question.isRequired !== undefined ? question.isRequired : true
-            }))
+              isRequired: newQuestion.isRequired !== undefined ? newQuestion.isRequired : true
+            });
+          }
+        });
+
+        // Delete questions that are no longer needed (this will cascade delete their answers)
+        const questionsToDelete = existingQuestions
+          .filter(q => !questionsToKeep.has(q.id))
+          .map(q => q.id);
+
+        if (questionsToDelete.length > 0) {
+          await tx.surveyQuestion.deleteMany({
+            where: {
+              id: { in: questionsToDelete }
+            }
+          });
+        }
+
+        // Update existing questions
+        for (const questionUpdate of questionsToUpdate) {
+          await tx.surveyQuestion.update({
+            where: { id: questionUpdate.id },
+            data: {
+              order: questionUpdate.order,
+              isRequired: questionUpdate.isRequired
+            }
+          });
+        }
+
+        // Create new questions
+        if (questionsToCreate.length > 0) {
+          await tx.surveyQuestion.createMany({
+            data: questionsToCreate
           });
         }
       }

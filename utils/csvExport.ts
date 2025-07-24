@@ -26,22 +26,22 @@ export function convertToCSV(data: any[], columns: CSVColumn[]): string {
 
   // Create header row
   const headers = columns.map(col => `"${col.label}"`).join(',')
-  
+
   // Create data rows
   const rows = data.map(item => {
     return columns.map(col => {
       let value = getNestedValue(item, col.key)
-      
+
       // Apply transformation if provided
       if (col.transform && value !== null && value !== undefined) {
         value = col.transform(value)
       }
-      
+
       // Handle null/undefined values
       if (value === null || value === undefined) {
         value = ''
       }
-      
+
       // Convert to string and escape quotes
       const stringValue = String(value).replace(/"/g, '""')
       return `"${stringValue}"`
@@ -57,21 +57,21 @@ export function convertToCSV(data: any[], columns: CSVColumn[]): string {
 export function downloadCSV(csvContent: string, filename: string): void {
   // Add BOM for proper UTF-8 encoding in Excel
   const BOM = '\uFEFF'
-  const blob = new Blob([BOM + csvContent], { 
-    type: 'text/csv;charset=utf-8;' 
+  const blob = new Blob([BOM + csvContent], {
+    type: 'text/csv;charset=utf-8;'
   })
-  
+
   const link = document.createElement('a')
   const url = URL.createObjectURL(blob)
-  
+
   link.setAttribute('href', url)
   link.setAttribute('download', filename)
   link.style.visibility = 'hidden'
-  
+
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  
+
   // Clean up the URL object
   URL.revokeObjectURL(url)
 }
@@ -97,14 +97,14 @@ export function exportToCSV(options: CSVExportOptions): void {
 
   // Generate CSV content
   const csvContent = convertToCSV(data, columns)
-  
+
   // Generate filename with timestamp if requested
-  const timestamp = includeTimestamp 
+  const timestamp = includeTimestamp
     ? `_${new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')}`
     : ''
-  
+
   const finalFilename = `${filename}${timestamp}.csv`
-  
+
   // Download the file
   downloadCSV(csvContent, finalFilename)
 }
@@ -129,14 +129,14 @@ export const dateTransforms = {
     const d = new Date(date)
     return d.toLocaleDateString('es-ES')
   },
-  
+
   // Format date as DD/MM/YYYY HH:MM
   toDateTimeString: (date: string | Date) => {
     if (!date) return ''
     const d = new Date(date)
     return d.toLocaleString('es-ES')
   },
-  
+
   // Format date as YYYY-MM-DD
   toISODateString: (date: string | Date) => {
     if (!date) return ''
@@ -153,18 +153,18 @@ export const valueTransforms = {
   booleanToSpanish: (value: boolean) => {
     return value ? 'Sí' : 'No'
   },
-  
+
   // Convert null/undefined to empty string
   nullToEmpty: (value: any) => {
     return value === null || value === undefined ? '' : String(value)
   },
-  
+
   // Capitalize first letter
   capitalize: (value: string) => {
     if (!value) return ''
     return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
   },
-  
+
   // Format approval status to Spanish
   approvalStatusToSpanish: (status: string) => {
     const statusMap: { [key: string]: string } = {
@@ -189,34 +189,34 @@ export const commonColumnConfigs = {
     { key: 'contactName', label: 'Contacto Principal' },
     { key: 'contactEmail', label: 'Email de Contacto' },
     { key: 'phone', label: 'Teléfono' },
-    { 
-      key: 'approvalStatus', 
+    {
+      key: 'approvalStatus',
       label: 'Estado de Aprobación',
       transform: valueTransforms.approvalStatusToSpanish
     },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       label: 'Fecha de Registro',
       transform: dateTransforms.toDateString
     },
-    { 
-      key: 'updatedAt', 
+    {
+      key: 'updatedAt',
       label: 'Última Actualización',
       transform: dateTransforms.toDateString
     }
   ] as CSVColumn[],
-  
+
   users: [
     { key: 'name', label: 'Nombre Completo' },
     { key: 'email', label: 'Correo Electrónico' },
     { key: 'role.name', label: 'Rol' },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       label: 'Fecha de Registro',
       transform: dateTransforms.toDateString
     }
   ] as CSVColumn[],
-  
+
   vacantes: [
     { key: 'title', label: 'Título de la Vacante' },
     { key: 'company.name', label: 'Empresa' },
@@ -225,8 +225,8 @@ export const commonColumnConfigs = {
     { key: 'modality', label: 'Modalidad' },
     { key: 'salaryMin', label: 'Salario Mínimo' },
     { key: 'salaryMax', label: 'Salario Máximo' },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       label: 'Fecha de Publicación',
       transform: dateTransforms.toDateString
     }

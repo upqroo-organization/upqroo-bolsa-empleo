@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import ApplicantProfileDialog from "@/components/ApplicantProfileDialog"
+import ApplicantStatusDialog from "@/components/ApplicantStatusDialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +28,9 @@ import {
   Users,
   FileText,
   MoreHorizontal,
-  ThumbsUp,
-  ThumbsDown,
   Eye,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -56,6 +57,9 @@ export default function Applicants() {
   const [applicants, setApplicants] = useState<ApplicantData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedApplicant, setSelectedApplicant] = useState<ApplicantData | null>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -122,6 +126,81 @@ export default function Applicants() {
     }).format(new Date(date))
   }
 
+  const handleViewProfile = (applicant: ApplicantData) => {
+    setSelectedApplicant(applicant);
+    setIsProfileDialogOpen(true);
+  }
+
+  const markCvAsViewed = async (applicationId: string) => {
+    try {
+      const response = await fetch(`/api/empresa/applications/${applicationId}/mark-cv-viewed`, {
+        method: 'PATCH',
+      });
+
+      if (response.ok) {
+        // Update local state
+        setApplicants(prev => 
+          prev.map(app => 
+            app.id === applicationId 
+              ? { ...app, cvViewed: true }
+              : app
+          )
+        );
+        
+        // Update selected applicant if it's the same one
+        setSelectedApplicant(prev => 
+          prev && prev.id === applicationId 
+            ? { ...prev, cvViewed: true }
+            : prev
+        );
+      }
+    } catch (error) {
+      console.error('Error marking CV as viewed:', error);
+    }
+  }
+
+  const handleViewCV = async (cvUrl: string, applicationId: string) => {
+    if (cvUrl) {
+      const filename = cvUrl.split('/').pop();
+      if (filename) {
+        // Mark CV as viewed before opening
+        await markCvAsViewed(applicationId);
+        window.open(`/api/uploads/cvs/${filename}`, '_blank');
+      }
+    }
+  }
+
+  const handleDownloadCV = async (cvUrl: string, applicantName: string, applicationId: string) => {
+    if (cvUrl) {
+      const filename = cvUrl.split('/').pop();
+      if (filename) {
+        // Mark CV as viewed before downloading
+        await markCvAsViewed(applicationId);
+        const link = document.createElement('a');
+        link.href = `/api/uploads/cvs/${filename}`;
+        link.download = `CV_${applicantName || 'Candidato'}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  }
+
+  const handleChangeStatus = (applicant: ApplicantData) => {
+    setSelectedApplicant(applicant);
+    setIsStatusDialogOpen(true);
+  }
+
+  const handleStatusUpdate = (applicationId: string, newStatus: string) => {
+    setApplicants(prev => 
+      prev.map(app => 
+        app.id === applicationId 
+          ? { ...app, status: newStatus, hiredAt: newStatus === 'hired' ? new Date() : app.hiredAt }
+          : app
+      )
+    );
+  }
+
   const stats = [
     {
       icon: Users,
@@ -153,6 +232,8 @@ export default function Applicants() {
     },
   ]
 
+
+
   if (loading) {
     return (
       <div className="p-6 flex justify-center items-center min-h-[60vh]">
@@ -183,6 +264,19 @@ export default function Applicants() {
 
   return (
     <div className="p-6 space-y-8">
+      <ApplicantStatusDialog
+        isOpen={isStatusDialogOpen}
+        onOpenChange={setIsStatusDialogOpen}
+        applicant={selectedApplicant}
+        onStatusUpdate={handleStatusUpdate}
+      />
+      <ApplicantProfileDialog
+        isOpen={isProfileDialogOpen}
+        onOpenChange={setIsProfileDialogOpen}
+        applicant={selectedApplicant}
+        onViewCV={handleViewCV}
+        onDownloadCV={handleDownloadCV}
+      />
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -327,43 +421,21 @@ export default function Applicants() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewProfile(applicant)}>
                             <Eye className="mr-2 h-4 w-4" />
                             Ver Perfil Completo
                           </DropdownMenuItem>
                           {applicant.cvUrl && (
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownloadCV(applicant.cvUrl!, applicant.name || 'Candidato', applicant.id)}>
                               <Download className="mr-2 h-4 w-4" />
                               Descargar CV
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuItem>
-                            <Mail className="mr-2 h-4 w-4" />
-                            Enviar Email
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Programar Entrevista
-                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          {applicant.status === "pending" && (
-                            <>
-                              <DropdownMenuItem>
-                                <ThumbsUp className="mr-2 h-4 w-4" />
-                                Aprobar para Entrevista
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <ThumbsDown className="mr-2 h-4 w-4" />
-                                Rechazar
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          {applicant.status === "interview" && (
-                            <DropdownMenuItem>
-                              <CheckCircle className="mr-2 h-4 w-4" />
-                              Contratar
-                            </DropdownMenuItem>
-                          )}
+                          <DropdownMenuItem onClick={() => handleChangeStatus(applicant)}>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Cambiar Estado
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -383,32 +455,28 @@ export default function Applicants() {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => handleViewProfile(applicant)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Ver Perfil
                       </Button>
                       {applicant.cvUrl && (
-                        <Button variant="outline" size="sm">
-                          <Download className="mr-2 h-4 w-4" />
-                          Descargar CV
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewCV(applicant.cvUrl!, applicant.id)}
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Ver CV
                         </Button>
                       )}
-                      <Button variant="outline" size="sm">
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Contactar
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleChangeStatus(applicant)}
+                      >
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Cambiar Estado
                       </Button>
-                      {applicant.status === "pending" && (
-                        <Button variant="outline" size="sm">
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Aprobar
-                        </Button>
-                      )}
-                      {applicant.status === "interview" && (
-                        <Button size="sm">
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Contratar
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -469,17 +537,17 @@ export default function Applicants() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-3">
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => handleViewProfile(applicant)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Revisar Perfil
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleChangeStatus(applicant)}
+                      >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Aprobar
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <XCircle className="mr-2 h-4 w-4" />
-                        Rechazar
+                        Cambiar Estado
                       </Button>
                     </div>
                   </CardContent>
@@ -530,17 +598,21 @@ export default function Applicants() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-3">
-                      <Button size="sm">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Ver Detalles Entrevista
+                      <Button size="sm" onClick={() => handleViewProfile(applicant)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Ver Perfil
                       </Button>
                       <Button variant="outline" size="sm">
                         <MessageSquare className="mr-2 h-4 w-4" />
                         Contactar
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleChangeStatus(applicant)}
+                      >
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Contratar
+                        Cambiar Estado
                       </Button>
                     </div>
                   </CardContent>
@@ -596,7 +668,7 @@ export default function Applicants() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-3">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleViewProfile(applicant)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Ver Perfil
                       </Button>
@@ -653,7 +725,7 @@ export default function Applicants() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-3">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleViewProfile(applicant)}>
                         <Eye className="mr-2 h-4 w-4" />
                         Ver Perfil
                       </Button>
