@@ -417,7 +417,7 @@ export default function StudentDashboard() {
               <div className="space-y-4">
                 {dashboardData.recommendedJobs.length > 0 ? (
                   dashboardData.recommendedJobs.map((job) => (
-                    <Link key={job.id} href={`/vacantes/${job.id}`}>
+                    <Link key={job.id} href={`/vacantes?job=${job.id}`}>
                       <div className="p-4 border rounded-lg space-y-3 hover:shadow-sm transition-shadow cursor-pointer">
                         <h4 className="font-semibold text-sm">{job.title}</h4>
                         <p className="text-xs text-muted-foreground">{job.company}</p>

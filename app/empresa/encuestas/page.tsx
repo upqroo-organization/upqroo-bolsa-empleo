@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Users, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { NewSurveyIndicator } from '@/components/NewSurveyIndicator';
 
 interface ExtendedUser {
   id?: string;
@@ -91,6 +92,8 @@ export default function EmpresaEncuestasPage() {
           </Badge>
         )}
       </div>
+
+      <NewSurveyIndicator />
 
       <div className="grid gap-4">
         {surveyData.surveys.map((survey) => (

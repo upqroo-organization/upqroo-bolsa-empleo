@@ -18,6 +18,9 @@ import { useMemo } from 'react';
 import { LogOut } from 'lucide-react';
 import logoUperoo from '../assets/logo_upqroo.svg';
 import { Button } from './ui/button';
+import { SurveyNotificationBadge } from './SurveyNotificationBadge';
+import { SurveyNotificationDropdown } from './SurveyNotificationDropdown';
+import { usePendingSurveys } from '@/hooks/usePendingSurveys';
 
 // Define this elsewhere in your project and import it
 // Should be stay on a constant file
@@ -69,6 +72,7 @@ export default function Navbar() {
   const user = session?.user;
   const role = session?.user.role || ''; // ajusta según cómo guardas el rol
   const navLinks = useMemo(() => navLinksByRole[role] || [], [role]);
+  const { totalPendingSurveys } = usePendingSurveys();
 
   const handleGoogleSignIn = async () => {
     await signIn('google', { callbackUrl: '/vacantes' })
@@ -90,12 +94,24 @@ export default function Navbar() {
         {/* Navegación */}
         <ul className="flex items-center space-x-6">
           {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link href={link.href} className="hover:text-gray-500 text-black hover:underline">
+            <li key={link.href} className="relative">
+              <Link href={link.href} className="hover:text-gray-500 text-black hover:underline flex items-center gap-2">
                 {link.name}
+                {/* Show notification badge for Encuestas link for companies */}
+                {role === 'company' && link.href === '/empresa/encuestas' && totalPendingSurveys > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold"
+                  >
+                    {totalPendingSurveys > 99 ? '99+' : totalPendingSurveys}
+                  </Badge>
+                )}
               </Link>
             </li>
           ))}
+
+          {/* Survey notifications for companies */}
+          {role === 'company' && <SurveyNotificationDropdown />}
 
           {/* Avatar con dropdown */}
           {user ? <DropdownMenu>
