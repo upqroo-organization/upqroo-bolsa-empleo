@@ -307,6 +307,7 @@ export default function CompanyProfile() {
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-32 h-32 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-primary/20">
                     {formData.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={`/${formData.logoUrl}`} alt="Logo de la empresa" className="w-full h-full object-contain" />
                     ) : (
                       <Building2 className="h-16 w-16 text-primary" />

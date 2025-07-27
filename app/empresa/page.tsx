@@ -319,6 +319,7 @@ export default function CompanyDashboard() {
               <div className="text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-lg mx-auto mb-3 flex items-center justify-center">
                   {data.company.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img 
                       src={data.company.logoUrl} 
                       alt={data.company.name}
