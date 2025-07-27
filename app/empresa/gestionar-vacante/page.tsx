@@ -44,11 +44,34 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  BarChart3,
 } from "lucide-react"
 import ApplicantsModal from '@/components/ApplicantsModal';
 import { useCompanyJobs, Job } from '@/hooks/useCompanyJobs';
 import Link from 'next/link';
+import { VacanteTypeEnum } from '@/types/vacantes';
+
+const getJobTypeLabel = (type: string | null): string => {
+  if (!type) return '';
+  
+  // Map database values to enum keys
+  const typeMap: Record<string, keyof typeof VacanteTypeEnum> = {
+    'Full-time': 'fullTime',
+    'Part-time': 'partTime',
+    'Internship': 'intership',
+    'full-time': 'fullTime',
+    'part-time': 'partTime',
+    'internship': 'intership',
+    'tiempo completo': 'fullTime',
+    'tiempo parcial': 'partTime',
+    'becario': 'intership',
+    'fullTime': 'fullTime',
+    'partTime': 'partTime',
+    'intership': 'intership'
+  };
+  
+  const enumKey = typeMap[type.toLowerCase()] || typeMap[type];
+  return enumKey ? VacanteTypeEnum[enumKey] : type;
+};
 
 export default function ManageJobs() {
   const { jobs, loading, toggleJobStatus, deleteJob, duplicateJob } = useCompanyJobs();
@@ -329,7 +352,7 @@ export default function ManageJobs() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center gap-6">
-                      {job.type && <Badge variant="secondary">{job.type}</Badge>}
+                      {job.type && <Badge variant="secondary">{getJobTypeLabel(job.type)}</Badge>}
                       <div className="flex items-center gap-4 text-sm">
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4 text-muted-foreground" />
@@ -556,7 +579,7 @@ export default function ManageJobs() {
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta acción no se puede deshacer. Se eliminará permanentemente la vacante
-              "{jobToDelete?.title}&quot; y todos sus datos asociados.
+              &quot;{jobToDelete?.title}&quot; y todos sus datos asociados.
               {jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0 && (
                 <span className="block mt-2 text-destructive font-medium">
                   Advertencia: Esta vacante tiene {jobToDelete.applicationsCount} postulaciones 
@@ -570,7 +593,7 @@ export default function ManageJobs() {
             <AlertDialogAction
               onClick={confirmDeleteJob}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0}
+              disabled={!!(jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0)}
             >
               Eliminar
             </AlertDialogAction>
