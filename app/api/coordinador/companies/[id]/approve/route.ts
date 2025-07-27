@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { sendEmail } from '@/lib/mail';
+import { emailHelpers } from '@/lib/email';
 
 export async function POST(
   request: NextRequest,
@@ -56,30 +56,21 @@ export async function POST(
 
     // Send notification email to company
     try {
-      await sendEmail({
-        to: company.email,
-        subject: isApproved 
-          ? 'Tu empresa ha sido aprobada - Bolsa de Trabajo UPQROO' 
-          : 'Actualización sobre tu solicitud - Bolsa de Trabajo UPQROO',
-        html: isApproved
-          ? `
-            <h1>¡Felicidades! Tu empresa ha sido aprobada</h1>
-            <p>Estimado(a) ${company.contactName || company.name},</p>
-            <p>Nos complace informarte que tu empresa <strong>${company.name}</strong> ha sido aprobada en la Bolsa de Trabajo de la Universidad Politécnica de Quintana Roo.</p>
-            <p>Ahora puedes acceder a la plataforma y comenzar a publicar vacantes para nuestros estudiantes y egresados.</p>
-            ${comments ? `<p><strong>Comentarios del coordinador:</strong> ${comments}</p>` : ''}
-            <p>Accede a tu cuenta en: <a href="${process.env.NEXTAUTH_URL}/login">Bolsa de Trabajo UPQROO</a></p>
-            <p>Saludos cordiales,<br>Equipo de Coordinación<br>Universidad Politécnica de Quintana Roo</p>
-          `
-          : `
-            <h1>Actualización sobre tu solicitud</h1>
-            <p>Estimado(a) ${company.contactName || company.name},</p>
-            <p>Hemos revisado la información de tu empresa <strong>${company.name}</strong> y lamentamos informarte que no podemos aprobar tu solicitud en este momento.</p>
-            ${comments ? `<p><strong>Motivo:</strong> ${comments}</p>` : ''}
-            <p>Si deseas más información o quieres volver a enviar tu solicitud con la información actualizada, por favor contáctanos a través de coordinacion@upqroo.edu.mx</p>
-            <p>Saludos cordiales,<br>Equipo de Coordinación<br>Universidad Politécnica de Quintana Roo</p>
-          `
-      });
+      if (isApproved) {
+        await emailHelpers.sendCompanyApprovalEmail(
+          company.email,
+          company.name,
+          company.contactName || undefined,
+          comments || undefined
+        );
+      } else {
+        await emailHelpers.sendCompanyRejectionEmail(
+          company.email,
+          company.name,
+          company.contactName || undefined,
+          comments || undefined
+        );
+      }
     } catch (emailError) {
       console.error('Error sending notification email:', emailError);
       // Continue with the process even if email fails
