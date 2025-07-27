@@ -37,7 +37,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   ],
   external: [
     { name: 'Inicio', href: '/client' },
-    { name: 'Perfil', href: '/profile' },
+    { name: 'Mis Postulaciones', href: '/client/mis-postulaciones' },
   ],
   student: [
     { name: 'Inicio', href: '/client' },
