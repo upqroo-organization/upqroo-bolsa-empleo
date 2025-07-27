@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    const filters: unknown = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filters: any = {
       companyId: company.id
     };
 
@@ -156,7 +157,8 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getJobStatus(vacante: unknown) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getJobStatus(vacante: any) {
   // Use the status field if available, otherwise compute from deadline
   if (vacante.status) return vacante.status;
   

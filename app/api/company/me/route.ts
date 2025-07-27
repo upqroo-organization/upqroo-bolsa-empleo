@@ -66,7 +66,8 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     // Validate and sanitize the input data
-    const updateData: unknown = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: any = {};
 
     // Basic company information
     if (body.name) updateData.name = body.name;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState, useCallback } from "react";
 
 type FetchState<T> = {
@@ -7,7 +8,7 @@ type FetchState<T> = {
   isFirstRender: boolean;
 };
 
-export function useFetch<T = unknown>(
+export function useFetch<T = any>(
   initialUrl: string,
   initialOptions?: RequestInit
 ) {
@@ -54,7 +55,7 @@ export function useFetch<T = unknown>(
           error: null,
           isFirstRender: isFirstRenderRef.current,
         }));
-      } catch (err: unknown) {
+      } catch (err: any) {
         if (err.name === "AbortError") {
           // ignore abort errors
           return;

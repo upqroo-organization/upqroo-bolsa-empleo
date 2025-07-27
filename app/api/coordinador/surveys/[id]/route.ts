@@ -73,10 +73,13 @@ export async function PUT(
 
         // Process new questions
         const questionsToKeep = new Set<string>();
-        const questionsToCreate: unknown[] = [];
-        const questionsToUpdate: unknown[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const questionsToCreate: any[] = [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const questionsToUpdate: any[] = [];
 
-        data.questions.forEach((newQuestion: unknown, index: number) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.questions.forEach((newQuestion: any, index: number) => {
           const questionText = newQuestion.question.trim().toLowerCase();
           const existingQuestion = existingQuestionsMap.get(questionText);
 

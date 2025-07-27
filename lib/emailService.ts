@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import nodemailer from "nodemailer";
 
 interface EmailRequest {
@@ -6,7 +7,7 @@ interface EmailRequest {
   text?: string;
   html?: string;
   template?: string;
-  templateData?: Record<string, unknown>;
+  templateData?: Record<string, any>;
 }
 
 interface EmailTemplate {
@@ -192,7 +193,7 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
   }
 };
 
-function replaceTemplateVariables(template: string, data: Record<string, unknown>): string {
+function replaceTemplateVariables(template: string, data: Record<string, any>): string {
   // Handle conditional blocks like {{#if comments}}...{{/if}}
   const processedTemplate = template.replace(/\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
     return data[condition] ? content : '';

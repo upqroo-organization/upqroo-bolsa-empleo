@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
     const sector = searchParams.get('sector') || 'all';
 
     // Build filter conditions
-    const whereConditions: unknown = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereConditions: any = {};
 
     // Filter by approval status
     if (status === 'pending') {

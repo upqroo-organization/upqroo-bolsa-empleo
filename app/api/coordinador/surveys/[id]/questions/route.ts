@@ -38,7 +38,8 @@ export async function PUT(
 
     // Update questions in a transaction
     await prisma.$transaction(
-      questions.map((q: unknown) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      questions.map((q: any) =>
         prisma.surveyQuestion.update({
           where: { id: q.id },
           data: {

@@ -56,13 +56,15 @@ export default function CompletarEncuestaPage() {
         const surveyData = await surveyResponse.json();
         const existingResponses = await responsesResponse.json();
         
-        const currentSurvey = surveyData.surveys.find((s: unknown) => s.id === params.id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const currentSurvey = surveyData.surveys.find((s: any) => s.id === params.id);
         
         if (currentSurvey) {
           setSurveyData({
             survey: currentSurvey,
             students: surveyData.students,
-            existingResponses: existingResponses.map((r: unknown) => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            existingResponses: existingResponses.map((r: any) => ({
               studentId: r.studentId,
               isCompleted: r.isCompleted
             }))
