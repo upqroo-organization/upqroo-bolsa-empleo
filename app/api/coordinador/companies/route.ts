@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const sector = searchParams.get('sector') || 'all';
 
     // Build filter conditions
-    const whereConditions: any = {};
+    const whereConditions: unknown = {};
 
     // Filter by approval status
     if (status === 'pending') {

@@ -147,7 +147,7 @@ export default function EncuestasPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
-                  {(survey as unknown)._count?.responses || 0} respuestas
+                  {survey._count?.responses || 0} respuestas
                 </div>
               </div>
             </CardContent>

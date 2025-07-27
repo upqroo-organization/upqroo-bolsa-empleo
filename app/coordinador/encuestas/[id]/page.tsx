@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import { Survey, SurveyResponse, RATING_LABELS } from '@/types/survey';
+import { Survey, RATING_LABELS } from '@/types/survey';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -398,7 +398,7 @@ export default function SurveyDetailsPage() {
                     {response.comments && (
                       <div className="bg-muted/50 rounded-lg p-4">
                         <p className="text-sm font-medium mb-2">Comentarios adicionales:</p>
-                        <p className="text-sm text-muted-foreground italic">"{response.comments}&quot;</p>
+                        <p className="text-sm text-muted-foreground italic">&quot;{response.comments}&quot;</p>
                       </div>
                     )}
                   </div>

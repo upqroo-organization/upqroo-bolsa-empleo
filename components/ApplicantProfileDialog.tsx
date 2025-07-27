@@ -13,7 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Mail,
   Calendar,
-  CheckCircle,
   FileText,
   ExternalLink,
   Download,

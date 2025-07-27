@@ -37,7 +37,6 @@ export async function GET() {
     // Get current date for filtering
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     // Get active vacancies count
     const activeVacancies = await prisma.vacante.count({

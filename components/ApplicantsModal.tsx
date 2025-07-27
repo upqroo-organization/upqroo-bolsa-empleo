@@ -20,7 +20,6 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  User, 
   Mail, 
   FileText, 
   Calendar,

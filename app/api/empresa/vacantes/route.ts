@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    const filters: any = {
+    const filters: unknown = {
       companyId: company.id
     };
 
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getJobStatus(vacante: any) {
+function getJobStatus(vacante: unknown) {
   // Use the status field if available, otherwise compute from deadline
   if (vacante.status) return vacante.status;
   

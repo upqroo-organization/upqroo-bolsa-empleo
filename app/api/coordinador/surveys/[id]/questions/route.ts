@@ -38,7 +38,7 @@ export async function PUT(
 
     // Update questions in a transaction
     await prisma.$transaction(
-      questions.map((q: any) =>
+      questions.map((q: unknown) =>
         prisma.surveyQuestion.update({
           where: { id: q.id },
           data: {

@@ -18,7 +18,6 @@ import { useMemo } from 'react';
 import { LogOut } from 'lucide-react';
 import logoUperoo from '../assets/logo_upqroo.svg';
 import { Button } from './ui/button';
-import { SurveyNotificationBadge } from './SurveyNotificationBadge';
 import { SurveyNotificationDropdown } from './SurveyNotificationDropdown';
 import { usePendingSurveys } from '@/hooks/usePendingSurveys';
 

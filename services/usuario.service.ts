@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { User } from '@/types/users';
 
 export async function obtenerUsuarios() {
   try {

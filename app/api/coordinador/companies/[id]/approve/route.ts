@@ -6,7 +6,7 @@ import { emailHelpers } from '@/lib/email';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Get the current session
@@ -19,7 +19,7 @@ export async function POST(
       );
     }
 
-    const companyId = params.id;
+    const { id: companyId } = await params;
     const { action, comments } = await request.json();
 
     // Validate action

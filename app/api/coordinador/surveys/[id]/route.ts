@@ -58,18 +58,6 @@ export async function PUT(
 
     // Use transaction to update survey and questions atomically
     const result = await prisma.$transaction(async (tx) => {
-      // Update survey basic info
-      const updatedSurvey = await tx.survey.update({
-        where: { id },
-        data: {
-          title: data.title,
-          description: data.description,
-          daysAfterHiring: data.daysAfterHiring,
-          surveyDuration: data.surveyDuration,
-          isActive: data.isActive !== undefined ? data.isActive : undefined
-        }
-      });
-
       // If questions are provided, update them intelligently to preserve responses
       if (data.questions && Array.isArray(data.questions)) {
         // Get existing questions
@@ -85,10 +73,10 @@ export async function PUT(
 
         // Process new questions
         const questionsToKeep = new Set<string>();
-        const questionsToCreate: any[] = [];
-        const questionsToUpdate: any[] = [];
+        const questionsToCreate: unknown[] = [];
+        const questionsToUpdate: unknown[] = [];
 
-        data.questions.forEach((newQuestion: any, index: number) => {
+        data.questions.forEach((newQuestion: unknown, index: number) => {
           const questionText = newQuestion.question.trim().toLowerCase();
           const existingQuestion = existingQuestionsMap.get(questionText);
 

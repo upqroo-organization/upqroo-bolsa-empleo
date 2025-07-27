@@ -172,21 +172,6 @@ export default function StudentTracking() {
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "active":
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case "in-process":
-        return <Clock className="h-4 w-4 text-yellow-600" />
-      case "placed":
-        return <Award className="h-4 w-4 text-purple-600" />
-      case "inactive":
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
-      default:
-        return <Users className="h-4 w-4 text-gray-600" />
-    }
-  }
-
   return (
     <div className="p-6 space-y-6">
       {/* Header */}

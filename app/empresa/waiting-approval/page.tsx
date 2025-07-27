@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Clock, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Clock, AlertCircle } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
 export default function WaitingApprovalPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [company, setCompany] = useState<any>(null);
+  const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -6,7 +6,7 @@ interface SendEmailOptions {
   text?: string;
   html?: string;
   template?: string;
-  templateData?: Record<string, any>;
+  templateData?: Record<string, unknown>;
 }
 
 export async function sendEmail(options: SendEmailOptions) {

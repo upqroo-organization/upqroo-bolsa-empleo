@@ -40,7 +40,12 @@ export default function CompletarEncuestaPage() {
   const fetchSurveyData = useCallback(async () => {
     try {
       console.log(session?.user)
-      const companyId = (session?.user as any)?.id || 'company-id'; // Adjust this
+      const companyId = session?.user?.id;
+      
+      if (!companyId) {
+        console.error('No company ID found in session');
+        return;
+      }
       
       const [surveyResponse, responsesResponse] = await Promise.all([
         fetch(`/api/empresa/surveys?companyId=${companyId}`),
@@ -51,13 +56,13 @@ export default function CompletarEncuestaPage() {
         const surveyData = await surveyResponse.json();
         const existingResponses = await responsesResponse.json();
         
-        const currentSurvey = surveyData.surveys.find((s: any) => s.id === params.id);
+        const currentSurvey = surveyData.surveys.find((s: unknown) => s.id === params.id);
         
         if (currentSurvey) {
           setSurveyData({
             survey: currentSurvey,
             students: surveyData.students,
-            existingResponses: existingResponses.map((r: any) => ({
+            existingResponses: existingResponses.map((r: unknown) => ({
               studentId: r.studentId,
               isCompleted: r.isCompleted
             }))
@@ -92,7 +97,12 @@ export default function CompletarEncuestaPage() {
     setSubmitting(true);
 
     try {
-      const companyId = (session?.user as unknown)?.id || 'company-id'; // Adjust this
+      const companyId = session?.user?.id;
+      
+      if (!companyId) {
+        alert('Error: No se pudo obtener la información de la empresa');
+        return;
+      }
       
       const response = await fetch(`/api/empresa/surveys/${params.id}/responses`, {
         method: 'POST',

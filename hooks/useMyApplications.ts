@@ -72,6 +72,7 @@ export function useMyApplications() {
         error: null
       }))
     } catch (error) {
+      console.debug(error)
       setState(prev => ({
         ...prev,
         isLoading: false,

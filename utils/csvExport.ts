@@ -6,20 +6,20 @@
 export interface CSVColumn {
   key: string
   label: string
-  transform?: (value: any) => string
+  transform?: (value: unknown) => string
 }
 
 export interface CSVExportOptions {
   filename?: string
   columns: CSVColumn[]
-  data: any[]
+  data: unknown[]
   includeTimestamp?: boolean
 }
 
 /**
  * Converts data to CSV format
  */
-export function convertToCSV(data: any[], columns: CSVColumn[]): string {
+export function convertToCSV(data: unknown[], columns: CSVColumn[]): string {
   if (!data || data.length === 0) {
     return ''
   }
@@ -113,7 +113,7 @@ export function exportToCSV(options: CSVExportOptions): void {
  * Helper function to get nested object values using dot notation
  * Example: getNestedValue(obj, 'user.profile.name')
  */
-function getNestedValue(obj: any, path: string): any {
+function getNestedValue(obj: unknown, path: string): unknown {
   return path.split('.').reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : null
   }, obj)
@@ -155,7 +155,7 @@ export const valueTransforms = {
   },
 
   // Convert null/undefined to empty string
-  nullToEmpty: (value: any) => {
+  nullToEmpty: (value: unknown) => {
     return value === null || value === undefined ? '' : String(value)
   },
 

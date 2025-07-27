@@ -11,7 +11,7 @@ interface UseCSVExportOptions {
 
 interface UseCSVExportReturn {
   isExporting: boolean
-  exportData: (data: any[], columns: CSVColumn[], filename?: string) => Promise<void>
+  exportData: (data: unknown[], columns: CSVColumn[], filename?: string) => Promise<void>
   exportWithConfig: (options: CSVExportOptions) => Promise<void>
 }
 
@@ -30,7 +30,7 @@ export function useCSVExport(options: UseCSVExportOptions = {}): UseCSVExportRet
   } = options
 
   const exportData = async (
-    data: any[], 
+    data: unknown[], 
     columns: CSVColumn[], 
     filename?: string
   ): Promise<void> => {

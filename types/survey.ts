@@ -7,6 +7,9 @@ export interface Survey {
   surveyDuration: number; // How many days the survey stays available
   questions: SurveyQuestion[];
   responses?: SurveyResponse[];
+  _count?: {
+    responses?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }

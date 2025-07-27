@@ -77,6 +77,7 @@ export default function CompanyProfile() {
       }
     } catch (error) {
       toast.error('Error al cargar los datos de la empresa')
+      console.debug(error)
     } finally {
       setLoading(false)
     }
@@ -121,6 +122,7 @@ export default function CompanyProfile() {
       }
     } catch (error) {
       toast.error('Error al actualizar el perfil')
+      console.debug(error)
     } finally {
       setSaving(false)
     }
@@ -164,6 +166,7 @@ export default function CompanyProfile() {
       }
     } catch (error) {
       toast.error('Error al subir el logo')
+      console.debug(error)
     } finally {
       setUploadingLogo(false)
       // Reset file input
@@ -193,6 +196,7 @@ export default function CompanyProfile() {
       }
     } catch (error) {
       toast.error('Error al eliminar el logo')
+      console.debug(error)
     } finally {
       setUploadingLogo(false)
     }

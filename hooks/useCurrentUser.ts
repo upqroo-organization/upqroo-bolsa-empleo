@@ -96,6 +96,7 @@ export function useCurrentUser() {
         updating: false,
         error: 'Error de conexión',
       }));
+      console.debug(error)
       return { success: false, error: 'Error de conexión' };
     }
   }, []);

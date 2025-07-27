@@ -7,7 +7,7 @@ type FetchState<T> = {
   isFirstRender: boolean;
 };
 
-export function useFetch<T = any>(
+export function useFetch<T = unknown>(
   initialUrl: string,
   initialOptions?: RequestInit
 ) {
@@ -54,7 +54,7 @@ export function useFetch<T = any>(
           error: null,
           isFirstRender: isFirstRenderRef.current,
         }));
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (err.name === "AbortError") {
           // ignore abort errors
           return;

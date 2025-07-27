@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     // Get the current session
     const session = await getServerSession(authOptions);

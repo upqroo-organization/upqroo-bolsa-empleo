@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { SurveyFormData } from '@/types/survey';
 
 export async function POST(
   request: NextRequest,

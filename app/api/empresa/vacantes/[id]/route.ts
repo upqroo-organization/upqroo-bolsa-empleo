@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 // GET - Get job details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,7 +30,7 @@ export async function GET(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const job = await prisma.vacante.findFirst({
       where: {
@@ -80,7 +80,7 @@ export async function GET(
 // PUT - Update job
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -104,7 +104,7 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Verify job belongs to company
@@ -158,7 +158,7 @@ export async function PUT(
 // DELETE - Delete job
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -182,7 +182,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Verify job belongs to company
     const existingJob = await prisma.vacante.findFirst({

@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function PATCH(
       );
     }
 
-    const { id: vacanteId } = params;
+    const { id: vacanteId } = await params;
     const { action } = await request.json(); // 'pause' or 'activate'
 
     // Verify the job belongs to the company

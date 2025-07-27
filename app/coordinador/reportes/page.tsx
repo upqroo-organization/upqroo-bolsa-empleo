@@ -34,8 +34,6 @@ import {
 } from "lucide-react"
 
 export default function Reports() {
-  const [selectedReport, setSelectedReport] = useState(null)
-  const [dateRange, setDateRange] = useState("month")
   const [reportDialog, setReportDialog] = useState(false)
 
   const reportTypes = [

@@ -74,6 +74,7 @@ export default function LoginPage() {
       await signIn('google', { callbackUrl: '/redirect' })
     } catch (error) {
       toast.error('Error al iniciar sesión con Google')
+      console.debug(error)
       setLoading(false)
     }
   }

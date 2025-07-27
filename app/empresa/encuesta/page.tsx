@@ -119,7 +119,7 @@ const mockQuestions = [
 export default function Surveys() {
   const [activeTab, setActiveTab] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedSurvey, setSelectedSurvey] = useState<any>(null)
+  const [selectedSurvey, setSelectedSurvey] = useState(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const getStatusBadge = (status: string) => {

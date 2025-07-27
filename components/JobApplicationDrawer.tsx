@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Building2, MapPin, Clock, DollarSign, Calendar, CheckCircle, FileText, MessageSquare } from "lucide-react"
+import { Building2, MapPin, Clock, DollarSign, Calendar, CheckCircle, FileText } from "lucide-react"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/es'
@@ -22,7 +22,6 @@ export default function JobApplicationDrawer({
   application, 
   isOpen, 
   onClose,
-  onContact
 }: JobApplicationDrawerProps) {
   if (!application) return null
   

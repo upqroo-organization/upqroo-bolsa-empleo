@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Survey, SurveyResponse } from '@/types/survey';
+import { Survey } from '@/types/survey';
 
 interface UseSurveysOptions {
   companyId?: string;
@@ -37,7 +37,7 @@ export function useSurveys({ companyId, role = 'coordinator' }: UseSurveysOption
     }
   };
 
-  const createSurvey = async (surveyData: any) => {
+  const createSurvey = async (surveyData: unknown) => {
     try {
       const response = await fetch('/api/coordinador/surveys', {
         method: 'POST',
@@ -57,7 +57,7 @@ export function useSurveys({ companyId, role = 'coordinator' }: UseSurveysOption
     }
   };
 
-  const updateSurvey = async (id: string, updateData: any) => {
+  const updateSurvey = async (id: string, updateData: unknown) => {
     try {
       const response = await fetch(`/api/coordinador/surveys/${id}`, {
         method: 'PUT',
@@ -93,7 +93,7 @@ export function useSurveys({ companyId, role = 'coordinator' }: UseSurveysOption
     }
   };
 
-  const submitSurveyResponse = async (surveyId: string, responseData: any) => {
+  const submitSurveyResponse = async (surveyId: string, responseData: unknown) => {
     try {
       const response = await fetch(`/api/empresa/surveys/${surveyId}/responses`, {
         method: 'POST',

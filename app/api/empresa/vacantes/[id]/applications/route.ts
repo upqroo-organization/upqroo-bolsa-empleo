@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,7 +17,7 @@ export async function GET(
       );
     }
 
-    const { id: vacanteId } = params;
+    const { id: vacanteId } = await params;
 
     // Verify the job belongs to the company
     const vacante = await prisma.vacante.findFirst({

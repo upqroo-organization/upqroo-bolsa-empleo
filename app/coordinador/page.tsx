@@ -85,7 +85,7 @@ export default function CoordinatorDashboard() {
   const [error, setError] = useState<string | null>(null)
 
   // Validation dialog states
-  const [selectedCompany, setSelectedCompany] = useState<any>(null)
+  const [selectedCompany, setSelectedCompany] = useState(null)
   const [validationDialog, setValidationDialog] = useState(false)
   const [validating, setValidating] = useState(false)
   const [comments, setComments] = useState("")
