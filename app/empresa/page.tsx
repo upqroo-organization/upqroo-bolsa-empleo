@@ -7,7 +7,6 @@ import { Progress } from "@/components/ui/progress"
 import {
   Building2,
   Users,
-  Eye,
   MapPin,
   Plus,
   FileText,
@@ -122,12 +121,12 @@ export default function CompanyDashboard() {
             <Building2 className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">Dashboard Empresa</h1>
-            <p className="text-muted-foreground">{data.company.name} - Bienvenido de vuelta</p>
+            <h1 className="text-3xl font-bold">{data.company.name}</h1>
+            <p className="text-muted-foreground">Inicio</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
+          {/* <Button 
             variant="outline" 
             onClick={refetch}
             disabled={loading}
@@ -137,7 +136,7 @@ export default function CompanyDashboard() {
             ) : (
               "Actualizar"
             )}
-          </Button>
+          </Button> */}
           <Link href="/empresa/publicar-vacante">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
@@ -276,10 +275,6 @@ export default function CompanyDashboard() {
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-muted-foreground" />
                           <span>{job.applicationsCount} postulantes</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                          <span>{job.views} visualizaciones</span>
                         </div>
                       </div>
                       <div className="flex gap-2">

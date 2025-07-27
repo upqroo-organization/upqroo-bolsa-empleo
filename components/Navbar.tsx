@@ -50,8 +50,8 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   ],
   coordinator: [
     { name: 'Inicio', href: '/coordinador' },
+    { name: 'Encuestas de empleabilidad', href: '/coordinador/encuestas' },
     { name: 'Validar Empresas', href: '/coordinador/validar-empresa' },
-    { name: 'Encuestas', href: '/coordinador/encuestas' },
   ]
 };
 

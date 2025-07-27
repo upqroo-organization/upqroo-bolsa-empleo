@@ -38,11 +38,19 @@ export async function PATCH(
     const updateData: any = {};
 
     if (action === 'pause') {
-      // Set deadline to past date to effectively pause the job
-      updateData.deadline = new Date('2000-01-01');
+      // Store original deadline and set status to paused
+      updateData.originalDeadline = vacante.deadline;
+      updateData.status = 'paused';
     } else if (action === 'activate') {
-      // Set deadline to future date or null to reactivate
-      updateData.deadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+      // Restore original deadline or set a new one if none existed
+      if (vacante.originalDeadline) {
+        updateData.deadline = vacante.originalDeadline;
+        updateData.originalDeadline = null;
+      } else {
+        // If no original deadline, set to 30 days from now
+        updateData.deadline = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      }
+      updateData.status = 'active';
     } else {
       return NextResponse.json(
         { error: 'Acción inválida' },

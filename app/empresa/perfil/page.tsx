@@ -41,7 +41,7 @@ export default function CompanyProfile() {
       </Alert>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Básico
@@ -53,10 +53,6 @@ export default function CompanyProfile() {
           <TabsTrigger value="details" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Detalles
-          </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Preferencias
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -352,93 +348,6 @@ export default function CompanyProfile() {
                   <Button variant="outline" size="sm">
                     + Agregar
                   </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Preferences */}
-        <TabsContent value="preferences" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Preferencias de Cuenta
-              </CardTitle>
-              <CardDescription>Configuración de notificaciones y privacidad</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Bell className="h-4 w-4" />
-                  Notificaciones
-                </h4>
-                <div className="space-y-4">
-                  {[
-                    {
-                      title: "Nuevas postulaciones",
-                      description: "Recibir notificación cuando alguien se postule a tus vacantes",
-                      defaultChecked: true,
-                    },
-                    {
-                      title: "Recordatorios de entrevistas",
-                      description: "Recordatorios automáticos de entrevistas programadas",
-                      defaultChecked: true,
-                    },
-                    {
-                      title: "Reportes semanales",
-                      description: "Resumen semanal de actividad y métricas",
-                      defaultChecked: false,
-                    },
-                    {
-                      title: "Actualizaciones del sistema",
-                      description: "Notificaciones sobre nuevas funciones y actualizaciones",
-                      defaultChecked: true,
-                    },
-                  ].map((setting, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <p className="font-medium">{setting.title}</p>
-                        <p className="text-sm text-muted-foreground">{setting.description}</p>
-                      </div>
-                      <Switch defaultChecked={setting.defaultChecked} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Privacidad
-                </h4>
-                <div className="space-y-4">
-                  {[
-                    {
-                      title: "Perfil público",
-                      description: "Permitir que los estudiantes vean tu perfil de empresa",
-                      defaultChecked: true,
-                    },
-                    {
-                      title: "Mostrar en directorio",
-                      description: "Aparecer en el directorio público de empresas",
-                      defaultChecked: true,
-                    },
-                    {
-                      title: "Permitir contacto directo",
-                      description: "Los estudiantes pueden contactarte directamente",
-                      defaultChecked: false,
-                    },
-                  ].map((setting, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <p className="font-medium">{setting.title}</p>
-                        <p className="text-sm text-muted-foreground">{setting.description}</p>
-                      </div>
-                      <Switch defaultChecked={setting.defaultChecked} />
-                    </div>
-                  ))}
                 </div>
               </div>
             </CardContent>

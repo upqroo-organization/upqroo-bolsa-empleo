@@ -17,6 +17,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Search,
   Plus,
   Edit,
@@ -41,15 +51,34 @@ import { useCompanyJobs, Job } from '@/hooks/useCompanyJobs';
 import Link from 'next/link';
 
 export default function ManageJobs() {
-  const { jobs, loading, toggleJobStatus } = useCompanyJobs();
+  const { jobs, loading, toggleJobStatus, deleteJob, duplicateJob } = useCompanyJobs();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
 
   const openApplicantsModal = (job: Job) => {
     setSelectedJob(job);
     setIsApplicantsModalOpen(true);
+  };
+
+  const handleDeleteJob = (job: Job) => {
+    setJobToDelete(job);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteJob = async () => {
+    if (jobToDelete) {
+      await deleteJob(jobToDelete.id);
+      setDeleteDialogOpen(false);
+      setJobToDelete(null);
+    }
+  };
+
+  const handleDuplicateJob = async (job: Job) => {
+    await duplicateJob(job.id);
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -257,15 +286,19 @@ export default function ManageJobs() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            Ver Detalles
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <Link href={`/empresa/gestionar-vacante/${job.id}`}>
+                            <DropdownMenuItem>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Ver Detalles
+                            </DropdownMenuItem>
+                          </Link>
+                          <Link href={`/empresa/gestionar-vacante/${job.id}/editar`}>
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          </Link>
+                          <DropdownMenuItem onClick={() => handleDuplicateJob(job)}>
                             <Copy className="mr-2 h-4 w-4" />
                             Duplicar
                           </DropdownMenuItem>
@@ -281,7 +314,10 @@ export default function ManageJobs() {
                               Reactivar
                             </DropdownMenuItem>
                           ) : null}
-                          <DropdownMenuItem className="text-destructive">
+                          <DropdownMenuItem 
+                            className="text-destructive"
+                            onClick={() => handleDeleteJob(job)}
+                          >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Eliminar
                           </DropdownMenuItem>
@@ -335,14 +371,12 @@ export default function ManageJobs() {
                         <Users className="mr-2 h-4 w-4" />
                         Ver Postulantes ({job.applicationsCount})
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <BarChart3 className="mr-2 h-4 w-4" />
-                        Estadísticas
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Editar
-                      </Button>
+                      <Link href={`/empresa/gestionar-vacante/${job.id}/editar`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </Button>
+                      </Link>
                       {job.status === "active" && (
                         <Button 
                           variant="outline" 
@@ -411,9 +445,11 @@ export default function ManageJobs() {
                     >
                       Ver Postulantes
                     </Button>
-                    <Button variant="outline" size="sm">
-                      Editar
-                    </Button>
+                    <Link href={`/empresa/gestionar-vacante/${job.id}/editar`}>
+                      <Button variant="outline" size="sm">
+                        Editar
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -450,9 +486,11 @@ export default function ManageJobs() {
                       <Play className="mr-2 h-4 w-4" />
                       Reactivar
                     </Button>
-                    <Button variant="outline" size="sm">
-                      Editar
-                    </Button>
+                    <Link href={`/empresa/gestionar-vacante/${job.id}/editar`}>
+                      <Button variant="outline" size="sm">
+                        Editar
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -491,10 +529,6 @@ export default function ManageJobs() {
                       <TrendingUp className="mr-2 h-4 w-4" />
                       Renovar
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Copy className="mr-2 h-4 w-4" />
-                      Duplicar
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -514,6 +548,35 @@ export default function ManageJobs() {
           vacanteTitle={selectedJob.title}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente la vacante
+              "{jobToDelete?.title}&quot; y todos sus datos asociados.
+              {jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0 && (
+                <span className="block mt-2 text-destructive font-medium">
+                  Advertencia: Esta vacante tiene {jobToDelete.applicationsCount} postulaciones 
+                  y no se puede eliminar.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteJob}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={jobToDelete?.applicationsCount && jobToDelete.applicationsCount > 0}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

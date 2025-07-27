@@ -8,10 +8,10 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Chrome, Mail, Lock } from "lucide-react"
 import { signIn } from 'next-auth/react'
-import LogoUpqroo from "@/assets/logo_upqroo.svg"
+import Image from "next/image"
 // import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 
 export default function LoginPage() {
   const [companyData, setCompanyData] = useState({
@@ -30,7 +30,8 @@ export default function LoginPage() {
     await signIn('google', { callbackUrl: '/redirect' })
   }
 
-  const handleCompanySignIn = async () => {
+  const handleCompanySignIn = async (e: FormEvent) => {
+    e.preventDefault();
     if (!companyData.email || !companyData.password) {
       alert('Por favor, completa todos los campos.')
       return
@@ -53,9 +54,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          {/* eslint-disable-next-line @next/next/no-img-element*/}
-          <img src={LogoUpqroo.src} alt="Logo UPQROO" className="rounded-lg" />
-          <p className="text-gray-600 mt-2">Bolsa de Trabajo Universitaria</p>
+          <Image src="logo_upqroo.svg" width={480} height={280} alt="Logo UPQROO" className="rounded-lg" />
+          <h2 className="text-gray-600 mt-2 text-lg text-bold">Bolsa de Trabajo Universitaria</h2>
+          <h3 className="text-gray-600 mt-2">Atracción de talento</h3>
         </div>
 
         <Card>
@@ -71,7 +72,7 @@ export default function LoginPage() {
               </TabsList>
 
               <TabsContent value="student" className="space-y-4">
-                <Button onClick={handleGoogleSignIn} className="w-full" variant="outline">
+                <Button onClick={handleGoogleSignIn} className="w-full cursor-pointer" variant="outline">
                   <Chrome className="mr-2 h-4 w-4" />
                   Iniciar sesión
                 </Button>
@@ -79,39 +80,39 @@ export default function LoginPage() {
               </TabsContent>
 
               <TabsContent value="company" className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Correo Electrónico</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input value={companyData.email} onChange={handleCompanyInputChange} id="email" name="email" type="email" placeholder="empresa@ejemplo.com" className="pl-10" />
+                <form className="space-y-4" onSubmit={handleCompanySignIn}>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Correo Electrónico</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input value={companyData.email} onChange={handleCompanyInputChange} id="email" name="email" type="email" placeholder="empresa@ejemplo.com" className="pl-10" />
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input value={companyData.password} onChange={handleCompanyInputChange} id="password" name="password" type="password" placeholder="••••••••" className="pl-10" />
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Contraseña</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input value={companyData.password} onChange={handleCompanyInputChange} id="password" name="password" type="password" placeholder="••••••••" className="pl-10" />
+                    </div>
                   </div>
-                </div>
-                <Button onClick={handleCompanySignIn} className="w-full">Iniciar Sesión</Button>
+                  <Button type="submit" className="w-full">Iniciar Sesión</Button>
+                </form>
                 <div className="text-center">
                   <Button variant="link" className="text-sm">
                     ¿Olvidaste tu contraseña?
                   </Button>
                 </div>
+                <Separator className="my-6" />
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-gray-600">¿No tienes cuenta?</p>
+                  <Link href="/signup" className="w-full">
+                    <Button variant="outline" className="w-full">
+                      Registrarse
+                    </Button>
+                  </Link>
+                </div>
               </TabsContent>
             </Tabs>
-
-            <Separator className="my-6" />
-
-            <div className="text-center space-y-2">
-              <p className="text-sm text-gray-600">¿No tienes cuenta?</p>
-              <Link href="/signup" className="w-full">
-                <Button variant="outline" className="w-full">
-                  Registrarse
-                </Button>
-              </Link>
-            </div>
           </CardContent>
         </Card>
 

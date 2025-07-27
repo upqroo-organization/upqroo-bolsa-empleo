@@ -80,6 +80,72 @@ export function useCompanyJobs() {
     }
   };
 
+  const deleteJob = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/empresa/vacantes/${jobId}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(data.message);
+        fetchJobs(); // Refresh the jobs list
+        return true;
+      } else {
+        toast.error(data.error || 'Error al eliminar vacante');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      toast.error('Error al eliminar vacante');
+      return false;
+    }
+  };
+
+  const duplicateJob = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/empresa/vacantes/${jobId}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const job = data.data;
+        // Create a copy with modified title
+        const duplicatedJob = {
+          ...job,
+          title: `${job.title} (Copia)`,
+          deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        };
+        
+        const createResponse = await fetch('/api/empresa/vacantes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(duplicatedJob),
+        });
+
+        const createData = await createResponse.json();
+        
+        if (createData.success) {
+          toast.success('Vacante duplicada correctamente');
+          fetchJobs(); // Refresh the jobs list
+          return true;
+        } else {
+          toast.error('Error al duplicar vacante');
+          return false;
+        }
+      } else {
+        toast.error('Error al obtener datos de la vacante');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error duplicating job:', error);
+      toast.error('Error al duplicar vacante');
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchJobs();
   }, []);
@@ -89,5 +155,7 @@ export function useCompanyJobs() {
     loading,
     fetchJobs,
     toggleJobStatus,
+    deleteJob,
+    duplicateJob,
   };
 }

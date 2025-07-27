@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UPQROO - Bolsa de empleo",
-  description: "Bolsa de empleo creado por la Universidad Politécnica de Quintana Roo. Bolsa de trabajo enfocado en la comunidad universitaria.",
+  title: "UPQROO - Atracción de Talento - Bolsa de empleo",
+  description: "Atracció de talento y Bolsa de empleo creado por la Universidad Politécnica de Quintana Roo. Bolsa de trabajo enfocado en la comunidad universitaria de la Universidad Politécnica de Quintana Roo.",
 };
 
 export default function RootLayout({

@@ -8,6 +8,7 @@ import StateSelectServerSide from "@/components/StateSelectorServerSide"
 import { getFeaturedJobs, getJobsStats, FeaturedJob } from "@/lib/featured-jobs"
 import { Careers, VacanteTypeEnum, VacanteModalityEnum } from "@/types/vacantes"
 import { getEnumLabelSafe } from "@/utils/index"
+import Image from "next/image"
 
 // Helper function to format salary
 function formatSalary(min: number | null, max: number | null): string {
@@ -52,7 +53,7 @@ function getJobTags(job: FeaturedJob): string[] {
 export default async function LandingPage() {
   // Fetch real data
   const [featuredJobs, jobsStats] = await Promise.all([
-    getFeaturedJobs(6),
+    getFeaturedJobs(3),
     getJobsStats()
   ])
 
@@ -92,6 +93,9 @@ export default async function LandingPage() {
       <section className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground py-24">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:60px_60px]" />
         <div className="relative container mx-auto px-4 text-center">
+          <div className="w-full">
+            <Image className="mx-auto mb-6" src="/upqroo_logo_outlined.svg" alt="logo_upqroo" width={300} height={200} />
+          </div>
           <div className="max-w-4xl mx-auto space-y-8">
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
               Conectamos Talento con{" "}
@@ -206,8 +210,9 @@ export default async function LandingPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredJobs.map((job) => (
+              {/* Desktop: Show 3 cards in grid */}
+              <div className="hidden md:grid md:grid-cols-3 gap-8">
+                {featuredJobs.slice(0, 3).map((job) => (
                   <Card key={job.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                     <CardHeader>
                       <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
@@ -255,6 +260,62 @@ export default async function LandingPage() {
                   </Card>
                 ))}
               </div>
+
+              {/* Mobile: Carousel */}
+              <div className="md:hidden">
+                <div className="overflow-x-auto">
+                  <div className="flex gap-4 pb-4" style={{ width: `${featuredJobs.slice(0, 3).length * 280}px` }}>
+                    {featuredJobs.slice(0, 3).map((job) => (
+                      <Card key={job.id} className="flex-shrink-0 w-64 hover:shadow-lg transition-all duration-300">
+                        <CardHeader>
+                          <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
+                          <CardDescription className="flex items-center gap-1">
+                            <Building2 className="h-4 w-4" />
+                            {job.company.name}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <MapPin className="h-4 w-4" />
+                              {job.location} {job.state && `- ${job.state.name}`}
+                            </div>
+                            {job.type && (
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4" />
+                                {getEnumLabelSafe(VacanteTypeEnum, job.type)}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
+                              <DollarSign className="h-4 w-4" />
+                              {formatSalary(job.salaryMin, job.salaryMax)}
+                            </div>
+                          </div>
+                          
+                          {job.summary && (
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {job.summary}
+                            </p>
+                          )}
+                          
+                          <div className="flex flex-wrap gap-2">
+                            {getJobTags(job).map((tag, tagIndex) => (
+                              <Badge key={tagIndex} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <Link href={`/vacantes?job=${job.id}`}>
+                            <Button className="w-full">Ver Detalles</Button>
+                          </Link>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="text-center mt-12">
                 <Link href="/vacantes">
                   <Button variant="outline" size="lg">
@@ -301,25 +362,28 @@ export default async function LandingPage() {
       <footer className="bg-muted py-12">
         <div className="container mx-auto px-4">
           <div className="text-center space-y-4">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">UP</span>
-              </div>
-              <span className="text-xl font-bold text-primary">UPQROO</span>
+            <div>
+              <Link href="https://upqroo.edu.mx/" target="__blank" className="flex items-center justify-center space-x-2">
+                <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+                  <Image src="/logo_upqroo_150.png" alt="logo_pequeño_upqroo" width={80} height={80} />
+                </div>
+                <span className="text-xl font-bold text-primary">UPQROO</span>
+              </Link>
             </div>
             <p className="text-muted-foreground">
               © 2025 Universidad Politécnica de Quintana Roo. Todos los derechos reservados.
             </p>
             <div className="flex justify-center space-x-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-colors">
+              {/* <a href="#" className="hover:text-primary transition-colors">
                 Términos de Uso
-              </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              </a> */}
+              <a href="/terms" className="hover:text-primary transition-colors">
                 Política de Privacidad
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              {/* <a href="#" className="hover:text-primary transition-colors">
                 Contacto
-              </a>
+              </a> */}
+              <a href="#">Autores</a>
             </div>
           </div>
         </div>

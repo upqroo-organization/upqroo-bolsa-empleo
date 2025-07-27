@@ -202,7 +202,7 @@ export default function SurveyDetailsPage() {
         {survey.responses && survey.responses.length > 0 && (
           <Button onClick={exportToCSV} variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Exportar CSV
+            Exportar Excel
           </Button>
         )}
       </div>
@@ -304,7 +304,7 @@ export default function SurveyDetailsPage() {
                 </div>
                 <Button onClick={exportToCSV} variant="outline" size="sm">
                   <Download className="w-4 h-4 mr-2" />
-                  Exportar a CSV
+                  Exportar Excel
                 </Button>
               </div>
             </CardHeader>
