@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { format } from "date-fns"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Save,
   Send,
   FileText,
   MapPin,
@@ -32,9 +31,12 @@ import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useFetch } from "@/hooks/useFetch"
 import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 export default function PostJob() {
   const { data: user } = useSession()
+  const router = useRouter()
   const [date, setDate] = useState<Date | undefined>(undefined)
   const [formData, setFormData] = useState({
     title: '',
@@ -55,7 +57,8 @@ export default function PostJob() {
     state: undefined
   })
   const [loading, setLoading] = useState(false)
-  const { data, loading: stateLoading } = useFetch('/api/states')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const { data } = useFetch('/api/states')
   console.log(formData)
   useEffect(() => {
     if (user?.user?.id) {
@@ -74,13 +77,86 @@ export default function PostJob() {
         ? (e.target as HTMLInputElement).checked
         : value
     }))
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
   }
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }))
+    // Clear error when user starts typing/selecting
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }))
+    }
+  }
+
+  // Validation functions
+  const validateBasicInfo = () => {
+    const basicErrors: Record<string, string> = {}
+    
+    if (!formData.title.trim()) {
+      basicErrors.title = 'El título del puesto es requerido'
+    }
+    if (!formData.type) {
+      basicErrors.type = 'El tipo de empleo es requerido'
+    }
+    if (!formData.modality) {
+      basicErrors.modality = 'La modalidad de trabajo es requerida'
+    }
+    if (!formData.location.trim()) {
+      basicErrors.location = 'La ubicación es requerida'
+    }
+    if (!formData.state) {
+      basicErrors.state = 'El estado es requerido'
+    }
+    if (!formData.summary.trim()) {
+      basicErrors.summary = 'El resumen del puesto es requerido'
+    }
+    
+    return basicErrors
+  }
+
+  const validateDetails = () => {
+    const detailErrors: Record<string, string> = {}
+    
+    if (!formData.description.trim()) {
+      detailErrors.description = 'La descripción completa es requerida'
+    }
+    if (!formData.responsibilities.trim()) {
+      detailErrors.responsibilities = 'Las responsabilidades principales son requeridas'
+    }
+    
+    return detailErrors
+  }
+
+  const validateForm = () => {
+    const basicErrors = validateBasicInfo()
+    const detailErrors = validateDetails()
+    const allErrors = { ...basicErrors, ...detailErrors }
+    
+    setErrors(allErrors)
+    return Object.keys(allErrors).length === 0
+  }
+
+  // Check if sections have errors
+  const hasBasicErrors = () => {
+    const basicErrors = validateBasicInfo()
+    return Object.keys(basicErrors).length > 0
+  }
+
+  const hasDetailErrors = () => {
+    const detailErrors = validateDetails()
+    return Object.keys(detailErrors).length > 0
   }
 
   const handleSubmit = (isMock?: boolean) => {
+    // Validate form before submitting
+    if (!validateForm()) {
+      toast.error("Por favor completa todos los campos requeridos")
+      return
+    }
+
     setLoading(true)
     console.log(formData)
     const payload = {
@@ -99,12 +175,16 @@ export default function PostJob() {
       .then(res => res.status === 201 ? res.json() : Promise.reject(res.status))
       .then(data => {
         console.log("Vacante creada:", data)
-        alert("Vacante publicada correctamente")
+        toast.success("Vacante publicada correctamente")
+        // Redirect to gestionar-vacantes after successful creation
+        setTimeout(() => {
+          router.push('/empresa/gestionar-vacante')
+        }, 1000) // Small delay to show the toast
       })
       .catch(err => {
         const errorMsg = (err instanceof Error) ? err.message : String(err)
         console.log(err)
-        alert("Ocurrió un error al publicar: " + errorMsg)
+        toast.error("Ocurrió un error al publicar: " + errorMsg)
         console.error(err)
       })
       .finally(() => {
@@ -119,12 +199,6 @@ export default function PostJob() {
         <div>
           <h1 className="text-3xl font-bold">Publicar Nueva Vacante</h1>
           <p className="text-muted-foreground">Crea una nueva oportunidad laboral para estudiantes de UPQROO</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button disabled={loading} onClick={() => handleSubmit()}>
-            <Send className="mr-2 h-4 w-4" />
-            Publicar Vacante
-          </Button>
         </div>
       </div>
 
@@ -142,10 +216,16 @@ export default function PostJob() {
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Información Básica
+            {hasBasicErrors() && (
+              <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
+            )}
           </TabsTrigger>
           <TabsTrigger value="details" className="flex items-center gap-2">
             <Briefcase className="h-4 w-4" />
             Detalles del Puesto
+            {hasDetailErrors() && (
+              <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -165,11 +245,14 @@ export default function PostJob() {
                 <Input
                   id="jobTitle"
                   placeholder="Ej: Desarrollador Frontend React Jr"
-                  className="text-lg font-medium"
+                  className={cn("text-lg font-medium", errors.title && "border-red-500")}
                   onChange={handleChange}
                   value={formData.title}
                   name="title"
                 />
+                {errors.title && (
+                  <p className="text-xs text-red-500">{errors.title}</p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Usa un título claro y específico. Incluye el nivel (Jr, Sr) si aplica.
                 </p>
@@ -194,7 +277,7 @@ export default function PostJob() {
                 <div className="space-y-2">
                   <Label htmlFor="jobType">Tipo de Empleo *</Label>
                   <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time" value={formData.type}>
-                    <SelectTrigger>
+                    <SelectTrigger className={cn(errors.type && "border-red-500")}>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -205,6 +288,9 @@ export default function PostJob() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.type && (
+                    <p className="text-xs text-red-500">{errors.type}</p>
+                  )}
                 </div>
               </div>
 
@@ -235,6 +321,9 @@ export default function PostJob() {
                     );
                   })}
                 </RadioGroup>
+                {errors.modality && (
+                  <p className="text-xs text-red-500">{errors.modality}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -244,19 +333,27 @@ export default function PostJob() {
                     onChange={handleChange}
                     name="location"
                     id="location"
-                    placeholder="Ej: Cancún, Quintana Roo" value={formData.location} />
-
+                    className={cn(errors.location && "border-red-500")}
+                    placeholder="Ej: Cancún, Quintana Roo" 
+                    value={formData.location} 
+                  />
+                  {errors.location && (
+                    <p className="text-xs text-red-500">{errors.location}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="positions">Estado</Label>
+                  <Label htmlFor="positions">Estado *</Label>
                   <Select onValueChange={(val) => handleSelectChange("state", val)} value={formData.state}>
-                    <SelectTrigger className="w-full">
+                    <SelectTrigger className={cn("w-full", errors.state && "border-red-500")}>
                       <SelectValue className="w-full" placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.isArray(data) && data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
+                  {errors.state && (
+                    <p className="text-xs text-red-500">{errors.state}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="positions">Número de Vacantes</Label>
@@ -282,9 +379,13 @@ export default function PostJob() {
                   rows={3}
                   name="summary"
                   onChange={handleChange}
+                  className={cn(errors.summary && "border-red-500")}
                   placeholder="Breve descripción del puesto y lo que buscas en un candidato..."
                   value={formData.summary}
                 />
+                {errors.summary && (
+                  <p className="text-xs text-red-500">{errors.summary}</p>
+                )}
                 <p className="text-xs text-muted-foreground">Este resumen aparecerá en los resultados de búsqueda.</p>
               </div>
             </CardContent>
@@ -309,9 +410,13 @@ export default function PostJob() {
                   onChange={handleChange}
                   rows={6}
                   name="description"
+                  className={cn(errors.description && "border-red-500")}
                   placeholder="Describe detalladamente el puesto, las responsabilidades principales, el ambiente de trabajo, oportunidades de crecimiento..."
                   value={formData.description}
                 />
+                {errors.description && (
+                  <p className="text-xs text-red-500">{errors.description}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -321,9 +426,13 @@ export default function PostJob() {
                   rows={5}
                   name="responsibilities"
                   onChange={handleChange}
+                  className={cn(errors.responsibilities && "border-red-500")}
                   placeholder="• Desarrollar interfaces web responsivas&#10;• Colaborar con el equipo de diseño&#10;• Mantener código limpio y documentado&#10;• Participar en revisiones de código"
                   value={formData.responsibilities}
                 />
+                {errors.responsibilities && (
+                  <p className="text-xs text-red-500">{errors.responsibilities}</p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Usa viñetas (•) para listar las responsabilidades principales.
                 </p>
