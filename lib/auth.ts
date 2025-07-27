@@ -66,6 +66,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/login', // Redirect errors to login page
   },
   events: {
     async createUser(user) {
