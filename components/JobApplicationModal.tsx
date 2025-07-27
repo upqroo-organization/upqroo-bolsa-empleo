@@ -264,7 +264,7 @@ export default function JobApplicationModal({
           </div>
 
           {/* Application Process */}
-          {vacante.applicationProcess && (
+          {/* {vacante.applicationProcess && (
             <>
               <Separator />
               <div className="space-y-2">
@@ -274,7 +274,7 @@ export default function JobApplicationModal({
                 </p>
               </div>
             </>
-          )}
+          )} */}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">

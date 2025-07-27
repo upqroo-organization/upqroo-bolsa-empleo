@@ -227,7 +227,7 @@ export default function RegisterPage() {
 
                   {error && <p className="text-red-600 text-sm">{error}</p>}
 
-                  <Button className="w-full mt-4" size="lg" disabled={loading}>
+                  <Button className="w-full mt-4 cursor-pointer" size="lg" disabled={loading}>
                     {loading ? "Creando cuenta..." : "Crear Cuenta Empresarial"}
                   </Button>
 
@@ -244,9 +244,11 @@ export default function RegisterPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 ¿Ya tienes cuenta?{" "}
-                <Button variant="link" className="p-0 h-auto">
-                  Iniciar sesión
-                </Button>
+                <Link href="/login">
+                  <Button variant="link" className="p-0 h-auto cursor-pointer">
+                    Iniciar sesión
+                  </Button>
+                </Link>
               </p>
             </div>
           </CardContent>

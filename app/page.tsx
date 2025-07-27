@@ -109,7 +109,7 @@ export default async function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
-                <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8">
+                <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8 cursor-pointer">
                   <LogIn/>
                   Iniciar Sesión
                 </Button>

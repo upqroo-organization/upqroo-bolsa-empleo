@@ -144,14 +144,6 @@ export default function JobDetailsDrawer({
             )}
           </div>
 
-          {/* Application Process */}
-          {vacante.applicationProcess && (
-            <div>
-              <h3 className="font-semibold mb-2">Proceso de aplicación</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.applicationProcess}</p>
-            </div>
-          )}
-
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
             {isAuthenticated && hasApplied ? (

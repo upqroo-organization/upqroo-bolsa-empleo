@@ -56,7 +56,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Image src="logo_upqroo.svg" width={480} height={280} alt="Logo UPQROO" className="rounded-lg" />
           <h2 className="text-gray-600 mt-2 text-lg text-bold">Bolsa de Trabajo Universitaria</h2>
-          <h3 className="text-gray-600 mt-2">Atracción de talento</h3>
+          <h3 className="text-gray-600 mt-2">Atracción Talento</h3>
         </div>
 
         <Card>

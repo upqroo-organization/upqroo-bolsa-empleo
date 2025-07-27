@@ -48,12 +48,12 @@ export enum VacanteDepartamentEnum {
 
 export enum Careers {
   todos = "Sin especificar",
-  software = "Ingeniería en software",
-  tics = "Ingenniería en tecnologías de la información e innovación digital",
-  therapy = "Terapia física",
-  biotecnologie = "Ingeniería en biotecnología",
-  biomedic = "Ingeniería en biomédica",
-  finance = "Ingeniería financiera",
-  administation = "Administración",
+  software = "Ingeniería en Software",
+  tics = "Ingeniería en tecnologías de la información e innovación digital",
+  biotecnologie = "Ingeniería en Biotecnología",
+  biomedic = "Ingeniería en Biomédica",
+  finance = "Ingeniería Financiera",
   civil = "Ingenieria Civil",
+  administation = "Licenciatura en Administración",
+  therapy = "Licenciatura en Terapia física",
 }
