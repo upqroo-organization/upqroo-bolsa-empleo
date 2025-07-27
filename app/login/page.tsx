@@ -14,6 +14,7 @@ import { FormEvent, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { GoogleIcon } from "@/components/icons/GoogleIcon"
+import ForgotPasswordModal from "@/components/ForgotPasswordModal"
 
 export default function LoginPage() {
   const [companyData, setCompanyData] = useState({
@@ -21,12 +22,15 @@ export default function LoginPage() {
     password: ''
   })
   const [loading, setLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
   // Handle error from URL params (when redirected from NextAuth error page)
   useEffect(() => {
     const error = searchParams.get('error')
+    const message = searchParams.get('message')
+    
     if (error) {
       let errorMessage = 'Error al iniciar sesión'
       
@@ -43,6 +47,15 @@ export default function LoginPage() {
       // Clean the URL without the error parameter
       const newUrl = new URL(window.location.href)
       newUrl.searchParams.delete('error')
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false })
+    }
+
+    if (message === 'password-reset-success') {
+      toast.success('Contraseña actualizada exitosamente. Ya puedes iniciar sesión.')
+      
+      // Clean the URL without the message parameter
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('message')
       router.replace(newUrl.pathname + newUrl.search, { scroll: false })
     }
   }, [searchParams, router])
@@ -171,7 +184,12 @@ export default function LoginPage() {
                   </Button>
                 </form>
                 <div className="text-center">
-                  <Button variant="link" className="text-sm">
+                  <Button 
+                    variant="link" 
+                    className="text-sm"
+                    onClick={() => setShowForgotPassword(true)}
+                    type="button"
+                  >
                     ¿Olvidaste tu contraseña?
                   </Button>
                 </div>
@@ -194,6 +212,11 @@ export default function LoginPage() {
           <p>Todos los derechos reservados</p>
         </div>
       </div>
+
+      <ForgotPasswordModal 
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
     </div>
   )
 }
