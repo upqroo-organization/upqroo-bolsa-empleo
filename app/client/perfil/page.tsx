@@ -10,6 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function StudentProfile() {
   const { user, loading, error, isAuthenticated, updating, updateUser } = useCurrentUser();
@@ -25,6 +36,16 @@ export default function StudentProfile() {
   const [cvError, setCvError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Photo upload state
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoDeleting, setPhotoDeleting] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Confirmation modals state
+  const [showPhotoDeleteDialog, setShowPhotoDeleteDialog] = useState(false);
+  const [showCvDeleteDialog, setShowCvDeleteDialog] = useState(false);
+
   // Initialize form data when user data is loaded
   useEffect(() => {
     if (user) {
@@ -37,7 +58,9 @@ export default function StudentProfile() {
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.username.trim()) {
-      alert('Nombre y nombre de usuario son requeridos');
+      toast.error('Campos requeridos', {
+        description: 'Nombre y nombre de usuario son requeridos'
+      });
       return;
     }
 
@@ -47,10 +70,14 @@ export default function StudentProfile() {
     });
 
     if (result.success) {
-      alert(result.message || 'Perfil actualizado correctamente');
+      toast.success('Perfil actualizado', {
+        description: result.message || 'Tu información personal ha sido actualizada correctamente'
+      });
       setIsEditing(false);
     } else {
-      alert(result.error || 'Error al actualizar el perfil');
+      toast.error('Error al actualizar', {
+        description: result.error || 'No se pudo actualizar tu perfil. Intenta nuevamente.'
+      });
     }
   };
 
@@ -72,12 +99,18 @@ export default function StudentProfile() {
     // Validate file type
     if (file.type !== 'application/pdf') {
       setCvError('Solo se permiten archivos PDF');
+      toast.error('Formato no válido', {
+        description: 'Solo se permiten archivos PDF para el currículum'
+      });
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       setCvError('El archivo es demasiado grande. Máximo 5MB');
+      toast.error('Archivo muy grande', {
+        description: 'El archivo debe ser menor a 5MB. Comprime tu PDF e intenta nuevamente.'
+      });
       return;
     }
 
@@ -98,12 +131,20 @@ export default function StudentProfile() {
       if (result.success) {
         // Update user data in the hook
         await updateUser({ name: user?.name || '', username: user?.username || '' });
-        alert(result.message || 'CV subido correctamente');
+        toast.success('CV subido correctamente', {
+          description: result.message || 'Tu currículum ha sido actualizado exitosamente'
+        });
       } else {
         setCvError(result.error || 'Error al subir el CV');
+        toast.error('Error al subir CV', {
+          description: result.error || 'No se pudo subir tu currículum. Intenta nuevamente.'
+        });
       }
     } catch (error) {
       setCvError('Error al subir el CV');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
       console.error('CV upload error:', error);
     } finally {
       setCvUploading(false);
@@ -115,9 +156,6 @@ export default function StudentProfile() {
   };
 
   const handleCVDelete = async () => {
-    if (!confirm('¿Estás seguro de que quieres eliminar tu CV?')) {
-      return;
-    }
 
     setCvDeleting(true);
     setCvError(null);
@@ -132,12 +170,21 @@ export default function StudentProfile() {
       if (result.success) {
         // Update user data in the hook
         await updateUser({ name: user?.name || '', username: user?.username || '' });
-        alert(result.message || 'CV eliminado correctamente');
+        toast.success('CV eliminado', {
+          description: result.message || 'Tu currículum ha sido eliminado correctamente'
+        });
+        setShowCvDeleteDialog(false);
       } else {
         setCvError(result.error || 'Error al eliminar el CV');
+        toast.error('Error al eliminar CV', {
+          description: result.error || 'No se pudo eliminar tu currículum. Intenta nuevamente.'
+        });
       }
     } catch (error) {
       setCvError('Error al eliminar el CV');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
       console.error('CV delete error:', error);
     } finally {
       setCvDeleting(false);
@@ -152,6 +199,120 @@ export default function StudentProfile() {
         window.open(`/api/uploads/cvs/${filename}`, '_blank');
       }
     }
+  };
+
+  // Photo upload handlers
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setPhotoError('Solo se permiten archivos JPG, PNG o WEBP');
+      toast.error('Formato no válido', {
+        description: 'Solo se permiten imágenes en formato JPG, PNG o WEBP'
+      });
+      return;
+    }
+
+    // Validate file size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setPhotoError('El archivo es demasiado grande. Máximo 2MB');
+      toast.error('Imagen muy grande', {
+        description: 'La imagen debe ser menor a 2MB. Comprime la imagen e intenta nuevamente.'
+      });
+      return;
+    }
+
+    setPhotoError(null);
+    setPhotoUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const response = await fetch('/api/usuarios/me/photo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update user data in the hook
+        await updateUser({ name: user?.name || '', username: user?.username || '' });
+        toast.success('Foto actualizada', {
+          description: result.message || 'Tu foto de perfil ha sido actualizada correctamente'
+        });
+      } else {
+        setPhotoError(result.error || 'Error al subir la foto de perfil');
+        toast.error('Error al subir foto', {
+          description: result.error || 'No se pudo subir tu foto de perfil. Intenta nuevamente.'
+        });
+      }
+    } catch (error) {
+      setPhotoError('Error al subir la foto de perfil');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
+      console.error('Photo upload error:', error);
+    } finally {
+      setPhotoUploading(false);
+      // Reset file input
+      if (photoInputRef.current) {
+        photoInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handlePhotoDelete = async () => {
+
+    setPhotoDeleting(true);
+    setPhotoError(null);
+
+    try {
+      const response = await fetch('/api/usuarios/me/photo', {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update user data in the hook
+        await updateUser({ name: user?.name || '', username: user?.username || '' });
+        toast.success('Foto eliminada', {
+          description: result.message || 'Tu foto de perfil ha sido eliminada correctamente'
+        });
+        setShowPhotoDeleteDialog(false);
+      } else {
+        setPhotoError(result.error || 'Error al eliminar la foto de perfil');
+        toast.error('Error al eliminar foto', {
+          description: result.error || 'No se pudo eliminar tu foto de perfil. Intenta nuevamente.'
+        });
+      }
+    } catch (error) {
+      setPhotoError('Error al eliminar la foto de perfil');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
+      console.error('Photo delete error:', error);
+    } finally {
+      setPhotoDeleting(false);
+    }
+  };
+
+  const getPhotoUrl = (imageUrl: string | null) => {
+    if (!imageUrl) return undefined;
+    
+    // If it's a local upload, serve through our API
+    if (imageUrl.startsWith('uploads/photos/')) {
+      const filename = imageUrl.split('/').pop();
+      return `/api/uploads/photos/${filename}`;
+    }
+    
+    // If it's from OAuth provider (Google, etc.), use as-is
+    return imageUrl;
   };
 
   if (loading) {
@@ -256,17 +417,65 @@ export default function StudentProfile() {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={user.image || undefined} />
+                  <AvatarImage src={getPhotoUrl(user.image)} />
                   <AvatarFallback className="text-lg">
                     {user.name ? getInitials(user.name) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
-                  <Button variant="outline" disabled={!isEditing}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Cambiar Foto
-                  </Button>
-                  <p className="text-sm text-gray-600">Formatos: JPG, PNG. Tamaño máximo: 2MB</p>
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => photoInputRef.current?.click()}
+                      disabled={!isEditing || photoUploading || photoDeleting}
+                    >
+                      {photoUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Subiendo...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          {user.image ? 'Cambiar Foto' : 'Subir Foto'}
+                        </>
+                      )}
+                    </Button>
+                    {user.image && (
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowPhotoDeleteDialog(true)}
+                        disabled={!isEditing || photoUploading || photoDeleting}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        {photoDeleting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Eliminando...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">Formatos: JPG, PNG, WEBP. Tamaño máximo: 2MB</p>
+                  {photoError && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{photoError}</AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </div>
 
@@ -440,7 +649,7 @@ export default function StudentProfile() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={handleCVDelete}
+                          onClick={() => setShowCvDeleteDialog(true)}
                           disabled={cvUploading || cvDeleting}
                           className="text-red-600 hover:text-red-700"
                         >
@@ -513,6 +722,70 @@ export default function StudentProfile() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Photo Delete Confirmation Dialog */}
+      <AlertDialog open={showPhotoDeleteDialog} onOpenChange={setShowPhotoDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar foto de perfil?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente tu foto de perfil actual. 
+              No podrás recuperarla una vez eliminada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={photoDeleting}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handlePhotoDelete}
+              disabled={photoDeleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {photoDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                'Eliminar foto'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* CV Delete Confirmation Dialog */}
+      <AlertDialog open={showCvDeleteDialog} onOpenChange={setShowCvDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar currículum?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción eliminará permanentemente tu currículum actual. 
+              No podrás recuperarlo una vez eliminado y tendrás que subirlo nuevamente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cvDeleting}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCVDelete}
+              disabled={cvDeleting}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {cvDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Eliminando...
+                </>
+              ) : (
+                'Eliminar CV'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

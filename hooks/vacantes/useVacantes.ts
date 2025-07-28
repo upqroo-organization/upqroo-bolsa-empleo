@@ -29,6 +29,8 @@ export default function useVacantes() {
   const [isLoading, setIsLoading] = useState(true);
   const [total, setTotal] = useState<number|null|undefined>(0);
   const [titleSearch, setTitleSearch] = useState<string>("")
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Fixed items per page
   const [filters, setFilters] = useState<FiltersInterface>({
     state: !Number.isNaN(searchParams.get("estado")) ? Number(searchParams.get("estado")) : 0,
     career: "",
@@ -41,6 +43,7 @@ export default function useVacantes() {
 
   function resetFilters() {
     setFilters(FILTER_INITIAL_STATE)
+    setCurrentPage(1) // Reset to first page when filters are cleared
   }
 
   function handleFilters(key: string, val: string | number | [string, string]): void {
@@ -53,6 +56,7 @@ export default function useVacantes() {
         [key]: value
       }))
     }
+    setCurrentPage(1) // Reset to first page when filters change
   }
 
   function handleCheckboxChange(key: string, value: string, checked: boolean) {
@@ -71,10 +75,24 @@ export default function useVacantes() {
         }
       })
     }
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  function handlePageChange(page: number) {
+    setCurrentPage(page);
+    // Scroll to top when page changes for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   
   useEffect(() => {
-    const queryString = toQueryString({...filters, state: filters.state || undefined, title: debouncedValue}, { arrayFormat: 'brackets' });
+    const offset = (currentPage - 1) * itemsPerPage;
+    const queryString = toQueryString({
+      ...filters, 
+      state: filters.state || undefined, 
+      title: debouncedValue,
+      offset,
+      limit: itemsPerPage
+    }, { arrayFormat: 'brackets' });
     setIsLoading(true)
 
     fetch(`/api/vacantes?${queryString}`)
@@ -89,15 +107,22 @@ export default function useVacantes() {
         console.log('Error')
       })
       .finally(() => setIsLoading(false))
-  }, [filters, debouncedValue])
+  }, [filters, debouncedValue, currentPage, itemsPerPage])
+
+  // Calculate total pages
+  const totalPages = total ? Math.ceil(total / itemsPerPage) : 0;
 
   return {
     vacantes,
     total,
     filters,
     titleSearch,
+    currentPage,
+    totalPages,
+    itemsPerPage,
     handleFilters,
     handleCheckboxChange,
+    handlePageChange,
     resetFilters,
     isLoading
   }

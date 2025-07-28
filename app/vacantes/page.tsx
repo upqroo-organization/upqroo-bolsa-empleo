@@ -23,7 +23,20 @@ import { useUserApplications } from "@/hooks/useUserApplications"
 import { toast } from "sonner"
 
 export default function JobSearch() {
-  const { vacantes, total, titleSearch, handleFilters, handleCheckboxChange, resetFilters, filters, isLoading } = useVacantes();
+  const { 
+    vacantes, 
+    total, 
+    titleSearch, 
+    currentPage, 
+    totalPages, 
+    itemsPerPage,
+    handleFilters, 
+    handleCheckboxChange, 
+    handlePageChange,
+    resetFilters, 
+    filters, 
+    isLoading 
+  } = useVacantes();
   const [selectedVacante, setSelectedVacante] = useState<VacanteInterface | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -257,32 +270,54 @@ export default function JobSearch() {
         {/* Job Results */}
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">Mostrando {total} empleos de 47 resultados</p>
+            <p className="text-sm text-gray-600">
+              {total ? (
+                <>
+                  Mostrando {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, total)} de {total} empleos
+                </>
+              ) : (
+                'No se encontraron empleos'
+              )}
+            </p>
           </div>
 
-          {isLoading
-            ? <div className="w-full flex justify-center"><Spinner /></div>
-            : vacantes.map((item, i) => (
-                <VacanteCard 
-                  key={i} 
-                  vacante={item}
-                  hasApplied={hasAppliedToJob(item.id)}
-                  isAuthenticated={isAuthenticated}
-                  onViewDetails={handleViewDetails}
-                  onApply={handleApply}
-                  onShare={handleShare}
-                />
-              ))}
+          {isLoading ? (
+            <div className="w-full flex justify-center py-8">
+              <div className="flex items-center gap-2">
+                <Spinner />
+                <span className="text-gray-600">Cargando empleos...</span>
+              </div>
+            </div>
+          ) : vacantes.length > 0 ? (
+            vacantes.map((item, i) => (
+              <VacanteCard 
+                key={item.id} // Use unique ID instead of index
+                vacante={item}
+                hasApplied={hasAppliedToJob(item.id)}
+                isAuthenticated={isAuthenticated}
+                onViewDetails={handleViewDetails}
+                onApply={handleApply}
+                onShare={handleShare}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-2">No se encontraron empleos</p>
+              <p className="text-sm text-gray-500">Intenta ajustar tus filtros de búsqueda</p>
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="w-full flex justify-center">
-            <Pagination
-              currentPage={1}
-              totalPages={20}
-              onPageChange={(p) => console.log(p)}
-              maxVisiblePages={5}
-            />
-          </div>
+          {totalPages > 1 && (
+            <div className="w-full flex justify-center">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+                maxVisiblePages={5}
+              />
+            </div>
+          )}
         </div>
       </div>
 
