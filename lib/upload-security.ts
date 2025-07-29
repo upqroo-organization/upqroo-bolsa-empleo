@@ -40,8 +40,9 @@ export async function checkFileAccess(options: AccessControlOptions): Promise<bo
       break;
 
     case 'fiscal-document':
-      // Only coordinators and the company itself can access fiscal documents
-      return userRole === 'coordinator' && userRole === 'company';
+      // Only coordinators can access other companies' fiscal documents
+      // Companies can only access their own (handled by userId === fileOwnerId check above)
+      return userRole === 'coordinator';
 
     case 'photo':
       // Only coordinators and the user itself can access photos
