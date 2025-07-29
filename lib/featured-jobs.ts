@@ -54,7 +54,7 @@ export async function getFeaturedJobs(limit: number = 6): Promise<FeaturedJob[]>
 
 export async function getJobsStats() {
   try {
-    const [totalJobs, totalCompanies, totalUsers] = await Promise.all([
+    const [totalJobs, totalCompanies, totalUsers, successfulPlacements, totalApplications] = await Promise.all([
       prisma.vacante.count({
         where: { isMock: false }
       }),
@@ -67,17 +67,29 @@ export async function getJobsStats() {
             name: 'student'
           }
         }
-      })
+      }),
+      // Count successful placements (hired applications)
+      prisma.application.count({
+        where: {
+          status: 'hired'
+        }
+      }),
+      // Count total applications to calculate placement rate
+      prisma.application.count()
     ])
 
-    // Calculate placement rate (this is a mock calculation - you might want to implement real logic)
-    const placementRate = Math.min(85, Math.round((totalJobs / Math.max(totalUsers, 1)) * 100))
+    // Calculate real placement rate based on hired applications vs total applications
+    // If no applications exist, show 0% instead of a mock rate
+    const placementRate = totalApplications > 0 
+      ? Math.round((successfulPlacements / totalApplications) * 100)
+      : 0
 
     return {
       totalJobs,
       totalCompanies,
       totalUsers,
-      placementRate
+      placementRate,
+      successfulPlacements // Add this for potential future use
     }
   } catch (error) {
     console.error('Error fetching stats:', error)
@@ -85,7 +97,8 @@ export async function getJobsStats() {
       totalJobs: 0,
       totalCompanies: 0,
       totalUsers: 0,
-      placementRate: 0
+      placementRate: 0,
+      successfulPlacements: 0
     }
   }
 }

@@ -81,12 +81,20 @@ export default async function LandingPage() {
     },
     {
       icon: TrendingUp,
-      value: `${jobsStats.placementRate}%`,
-      label: "Tasa de Colocación",
+      value: jobsStats.successfulPlacements > 0 ? `${jobsStats.successfulPlacements}` : "0",
+      label: "Colocaciones Exitosas",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
+      // subtitle: jobsStats.placementRate > 0 ? `${jobsStats.placementRate}% tasa de éxito` : "0% tasa de éxito"
     },
-  ]
+  ] as Array<{
+    icon: React.ComponentType<{ className?: string }>;
+    value: string;
+    label: string;
+    color: string;
+    bgColor: string;
+    subtitle?: string;
+  }>
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -167,6 +175,9 @@ export default async function LandingPage() {
                     </div>
                     <h3 className="text-4xl font-bold mb-2">{stat.value}</h3>
                     <p className="text-muted-foreground">{stat.label}</p>
+                    {stat.subtitle && (
+                      <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                    )}
                   </CardContent>
                 </Card>
               )
@@ -378,12 +389,12 @@ export default async function LandingPage() {
                 Términos de Uso
               </a> */}
               <a href="/terms" className="hover:text-primary transition-colors">
-                Política de Privacidad
+                Aviso de Privacidad
               </a>
               {/* <a href="#" className="hover:text-primary transition-colors">
                 Contacto
               </a> */}
-              <a href="#">Autores</a>
+              <a href="/autores" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Autores</a>
             </div>
           </div>
         </div>

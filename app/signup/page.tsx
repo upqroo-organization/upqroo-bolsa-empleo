@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Chrome, Building2 } from "lucide-react"
+import { Chrome, Building2, Link2, ExternalLink } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import StateSelect from "@/components/StateSelector"
 import { toast } from 'sonner'
@@ -415,7 +415,7 @@ export default function RegisterPage() {
                         }} 
                       />
                       <Label htmlFor="terms" className="text-sm">
-                        Acepto los <Link href="/terms" target="_blank" className="text-primary hover:underline">términos y condiciones y la política de privacidad</Link>
+                        He leído y acepto la<Link href="/terms" target="_blank" className="underline text-blue-500">política de privacidad</Link>
                       </Label>
                     </div>
                     {errors.terms && (
