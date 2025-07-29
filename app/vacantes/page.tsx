@@ -151,12 +151,12 @@ export default function JobSearch() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Buscar Empleos</h1>
-          <p className="text-gray-600">Encuentra tu próxima oportunidad profesional</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Buscar Empleos</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Encuentra tu próxima oportunidad profesional</p>
         </div>
         <div className="flex gap-2">
         </div>
@@ -164,8 +164,8 @@ export default function JobSearch() {
 
       {/* Search Bar */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex gap-4 items-end">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
             <div className="flex-1 space-y-2">
               <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
               <div className="relative">
@@ -184,7 +184,7 @@ export default function JobSearch() {
               <label className="text-sm font-medium">Estado</label>
               <StateSelect value={filters.state} onChange={(stateId) => handleFilters("state", stateId)} />
             </div>
-            <Button size="lg">
+            <Button size="lg" className="w-full sm:w-auto">
               <Search className="mr-2 h-4 w-4" />
               Buscar
             </Button>
@@ -192,7 +192,7 @@ export default function JobSearch() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
         {/* Filters Sidebar */}
         <div className="lg:col-span-1">
           <Card>
@@ -270,10 +270,11 @@ export default function JobSearch() {
         {/* Job Results */}
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               {total ? (
                 <>
-                  Mostrando {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, total)} de {total} empleos
+                  <span className="hidden sm:inline">Mostrando {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, total)} de {total} empleos</span>
+                  <span className="sm:hidden">{total} empleos encontrados</span>
                 </>
               ) : (
                 'No se encontraron empleos'
@@ -289,7 +290,7 @@ export default function JobSearch() {
               </div>
             </div>
           ) : vacantes.length > 0 ? (
-            vacantes.map((item, i) => (
+            vacantes.map((item) => (
               <VacanteCard 
                 key={item.id} // Use unique ID instead of index
                 vacante={item}

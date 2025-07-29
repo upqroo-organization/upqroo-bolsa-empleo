@@ -74,11 +74,11 @@ export default function EncuestasPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Encuestas</h1>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold">Gestión de Encuestas</h1>
         <Link href="/coordinador/encuestas/nueva">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Nueva Encuesta
           </Button>
@@ -88,29 +88,29 @@ export default function EncuestasPage() {
       <div className="grid gap-4">
         {surveys.map((survey) => (
           <Card key={survey.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    {survey.title}
-                    <Badge variant={survey.isActive ? 'default' : 'secondary'}>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                    <span className="text-base sm:text-lg leading-tight">{survey.title}</span>
+                    <Badge variant={survey.isActive ? 'default' : 'secondary'} className="w-fit">
                       {getSurveyStatus(survey)}
                     </Badge>
                   </CardTitle>
                   {survey.description && (
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
                       {survey.description}
                     </p>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap sm:flex-nowrap gap-2">
                   <Link href={`/coordinador/encuestas/${survey.id}`}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                       <Eye className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Link href={`/coordinador/encuestas/${survey.id}/editar`}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                       <Edit className="w-4 h-4" />
                     </Button>
                   </Link>
@@ -118,36 +118,39 @@ export default function EncuestasPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => toggleSurveyStatus(survey.id, survey.isActive)}
+                    className="text-xs px-2 h-8"
                   >
-                    {survey.isActive ? 'Desactivar' : 'Activar'}
+                    <span className="hidden sm:inline">{survey.isActive ? 'Desactivar' : 'Activar'}</span>
+                    <span className="sm:hidden">{survey.isActive ? 'Des.' : 'Act.'}</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => deleteSurvey(survey.id)}
+                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Disponible {survey.daysAfterHiring} días después de contratación
+                  <Calendar className="w-3 w-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">Disponible {survey.daysAfterHiring} días después</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  Duración: {survey.surveyDuration} días
+                  <Calendar className="w-3 w-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">Duración: {survey.surveyDuration} días</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {survey.questions?.length || 0} preguntas
+                  <Users className="w-3 w-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">{survey.questions?.length || 0} preguntas</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  {survey._count?.responses || 0} respuestas
+                  <Users className="w-3 w-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">{survey._count?.responses || 0} respuestas</span>
                 </div>
               </div>
             </CardContent>

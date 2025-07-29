@@ -79,11 +79,11 @@ export default function Internships() {
       </Card>
 
       <Tabs defaultValue="current" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="current">Actual</TabsTrigger>
-          <TabsTrigger value="available">Disponibles</TabsTrigger>
-          <TabsTrigger value="reports">Reportes</TabsTrigger>
-          <TabsTrigger value="history">Historial</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1">
+          <TabsTrigger value="current" className="text-xs sm:text-sm">Actual</TabsTrigger>
+          <TabsTrigger value="available" className="text-xs sm:text-sm">Disponibles</TabsTrigger>
+          <TabsTrigger value="reports" className="text-xs sm:text-sm">Reportes</TabsTrigger>
+          <TabsTrigger value="history" className="text-xs sm:text-sm">Historial</TabsTrigger>
         </TabsList>
 
         {/* Current Internship Details */}

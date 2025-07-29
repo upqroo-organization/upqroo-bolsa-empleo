@@ -125,14 +125,14 @@ export default async function LandingPage() {
           <Card className="max-w-4xl mx-auto">
             <CardContent className="p-8">
               <form action="/vacantes" method="get" className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 space-y-2">
+                <div className="md:flex-1 w-full space-y-2">
                   <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 wmercad-4 text-muted-foreground" />
                     <Input name="vacante" type="text" placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
                   </div>
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className="w-full md:flex-1 space-y-2">
                   <StateSelectServerSide name="estado"/>
                 </div>
                 <Button type="submit" size="lg" className="h-12 px-8">

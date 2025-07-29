@@ -92,7 +92,8 @@ export async function GET() {
         name: true,
         email: true,
         cvUrl: true,
-        image: true
+        image: true,
+        role: true,
       }
     })
 

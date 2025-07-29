@@ -399,12 +399,12 @@ export default function StudentProfile() {
       </div>
 
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="personal">Personal</TabsTrigger>
-          <TabsTrigger value="academic">Académico</TabsTrigger>
-          <TabsTrigger value="experience">Experiencia</TabsTrigger>
-          <TabsTrigger value="skills">Habilidades</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto p-1">
+          <TabsTrigger value="personal" className="text-xs sm:text-sm">Personal</TabsTrigger>
+          <TabsTrigger value="academic" className="text-xs sm:text-sm">Académico</TabsTrigger>
+          <TabsTrigger value="experience" className="text-xs sm:text-sm">Experiencia</TabsTrigger>
+          <TabsTrigger value="skills" className="text-xs sm:text-sm">Habilidades</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm col-span-2 sm:col-span-1">Documentos</TabsTrigger>
         </TabsList>
 
         {/* Personal Information */}
@@ -636,7 +636,7 @@ export default function StudentProfile() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="grid md:flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"

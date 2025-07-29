@@ -185,24 +185,27 @@ export default function SurveyDetailsPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3 min-w-0">
           <Link href="/coordinador/encuestas">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="flex-shrink-0">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">{survey.title}</h1>
-          <Badge variant={survey.isActive ? 'default' : 'secondary'}>
-            {getSurveyStatus()}
-          </Badge>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold truncate">{survey.title}</h1>
+            <Badge variant={survey.isActive ? 'default' : 'secondary'} className="w-fit">
+              {getSurveyStatus()}
+            </Badge>
+          </div>
         </div>
         
         {survey.responses && survey.responses.length > 0 && (
-          <Button onClick={exportToCSV} variant="outline">
+          <Button onClick={exportToCSV} variant="outline" className="w-full sm:w-auto">
             <Download className="w-4 h-4 mr-2" />
-            Exportar Excel
+            <span className="hidden sm:inline">Exportar Excel</span>
+            <span className="sm:hidden">Exportar</span>
           </Button>
         )}
       </div>
@@ -211,28 +214,32 @@ export default function SurveyDetailsPage() {
         {/* Survey Info */}
         <Card>
           <CardHeader>
-            <CardTitle>Información de la Encuesta</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Información de la Encuesta</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {survey.description && (
-              <p className="text-gray-600">{survey.description}</p>
+              <p className="text-sm sm:text-base text-gray-600">{survey.description}</p>
             )}
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Disponible {survey.daysAfterHiring} días después de contratación
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <span className="text-gray-700">
+                  <span className="hidden sm:inline">Disponible </span>
+                  {survey.daysAfterHiring} días después
+                  <span className="hidden sm:inline"> de contratación</span>
+                </span>
               </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Duración: {survey.surveyDuration} días
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <Calendar className="w-4 h-4 text-green-600 flex-shrink-0" />
+                <span className="text-gray-700">Duración: {survey.surveyDuration} días</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                {survey.questions.length} preguntas
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <Users className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <span className="text-gray-700">{survey.questions.length} preguntas</span>
               </div>
-              <div className="flex items-center gap-1">
-                <BarChart3 className="w-4 h-4" />
-                {survey.responses?.length || 0} respuestas
+              <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                <BarChart3 className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                <span className="text-gray-700">{survey.responses?.length || 0} respuestas</span>
               </div>
             </div>
           </CardContent>

@@ -26,92 +26,94 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
       key={vacante.id}
       className={`hover:shadow-lg transition-shadow`}
     >
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <CardTitle className="text-lg">{vacante.title}</CardTitle>
+      <CardHeader className="pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+              <CardTitle className="text-base sm:text-lg leading-tight">{vacante.title}</CardTitle>
               {isAuthenticated && hasApplied && (
-                <Badge className="bg-green-100 text-green-800 border-green-200">
+                <Badge className="bg-green-100 text-green-800 border-green-200 w-fit">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Aplicado
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <Building2 className="h-4 w-4" />
-                {vacante.company.name}
+                <Building2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="truncate">{vacante.company.name}</span>
               </div>
               <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {vacante.location} - {vacante?.state?.name || ''}
+                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span className="truncate">{vacante.location} - {vacante?.state?.name || ''}</span>
               </div>
               <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {dayjs(vacante.updatedAt).fromNow()}
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span>{dayjs(vacante.updatedAt).fromNow()}</span>
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start">
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => onShare?.(vacante)}
+              className="h-8 w-8 p-0"
             >
               <Share className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            {vacante.type && (
-              <Badge variant="secondary">
-                {getEnumLabelSafe(VacanteTypeEnum, vacante.type)}
-              </Badge>
-            )}
-            <div className="flex items-center gap-1 text-green-600 font-semibold">
-              <DollarSign className="h-4 w-4" />
-              {vacante.salaryMin} - {vacante.salaryMax}
+      <CardContent className="pt-0">
+        <div className="space-y-3 sm:space-y-4">
+          {/* Badges and Salary Section */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              {vacante.type && (
+                <Badge variant="secondary" className="text-xs">
+                  {getEnumLabelSafe(VacanteTypeEnum, vacante.type)}
+                </Badge>
+              )}
+              {vacante.modality && (
+                <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                  {getEnumLabelSafe(VacanteModalityEnum, vacante.modality)}
+                </Badge>
+              )}
+              {vacante.career && (
+                <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
+                  {getEnumLabelSafe(Careers, vacante.career)}
+                </Badge>
+              )}
             </div>
-            {vacante.modality && (
-              <Badge variant="outline" className="text-blue-600 border-blue-600">
-                {getEnumLabelSafe(VacanteModalityEnum, vacante.modality)}
-              </Badge>
-            )}
-            {vacante.career && (
-              <Badge variant="outline" className="text-blue-600 border-blue-600">
-                {getEnumLabelSafe(Careers, vacante.career)}
-              </Badge>
-            )}
+            <div className="flex items-center gap-1 text-green-600 font-semibold text-sm sm:text-base">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">{vacante.salaryMin} - {vacante.salaryMax}</span>
+            </div>
           </div>
 
-          <p className="text-sm text-gray-700">{vacante.description}</p>
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-gray-700 line-clamp-2 sm:line-clamp-3">
+            {vacante.description}
+          </p>
 
-          {/* <div className="flex flex-wrap gap-2">
-            {vacante.requirements.map((req, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {req}
-              </Badge>
-            ))}
-          </div> */}
-
-          <div className="flex gap-2 pt-2">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
             {isAuthenticated && hasApplied ? (
               <Button 
-                className="flex-1"
+                className="flex-1 text-sm"
                 variant="outline"
                 disabled
+                size="sm"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Ya aplicaste
               </Button>
             ) : (
               <Button 
-                className="flex-1"
+                className="flex-1 text-sm"
                 onClick={() => onApply?.(vacante.id)}
+                size="sm"
               >
                 Postularme
               </Button>
@@ -119,6 +121,8 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
             <Button 
               variant="outline"
               onClick={() => onViewDetails?.(vacante)}
+              className="sm:w-auto text-sm"
+              size="sm"
             >
               Ver Detalles
             </Button>

@@ -209,11 +209,23 @@ export default function MyApplications() {
 
       {/* Applications Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">Todas ({applications.length})</TabsTrigger>
-          <TabsTrigger value="active">Activas ({getActiveCount()})</TabsTrigger>
-          <TabsTrigger value="accepted">Aceptadas ({getStatusCount("accepted")})</TabsTrigger>
-          <TabsTrigger value="rejected">Rechazadas ({getStatusCount("rejected")})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1">
+          <TabsTrigger value="all" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Todas ({applications.length})</span>
+            <span className="sm:hidden">Todas</span>
+          </TabsTrigger>
+          <TabsTrigger value="active" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Activas ({getActiveCount()})</span>
+            <span className="sm:hidden">Activas</span>
+          </TabsTrigger>
+          <TabsTrigger value="accepted" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Aceptadas ({getStatusCount("accepted")})</span>
+            <span className="sm:hidden">Aceptadas</span>
+          </TabsTrigger>
+          <TabsTrigger value="rejected" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Rechazadas ({getStatusCount("rejected")})</span>
+            <span className="sm:hidden">Rechazadas</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4 mt-6">
