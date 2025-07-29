@@ -257,11 +257,29 @@ export default function ManageJobs() {
 
       {/* Jobs Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">Todas ({filteredJobs.length})</TabsTrigger>
-          <TabsTrigger value="active">Activas ({filteredJobs.filter((job) => job.status === "active").length})</TabsTrigger>
-          <TabsTrigger value="paused">Pausadas ({filteredJobs.filter((job) => job.status === "paused").length})</TabsTrigger>
-          <TabsTrigger value="expired">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 h-auto p-2 bg-gray-50">
+          <TabsTrigger 
+            value="all" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+          >
+            Todas ({filteredJobs.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="active" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+          >
+            Activas ({filteredJobs.filter((job) => job.status === "active").length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="paused" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+          >
+            Pausadas ({filteredJobs.filter((job) => job.status === "paused").length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="expired" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+          >
             Expiradas ({filteredJobs.filter((job) => job.status === "expired").length})
           </TabsTrigger>
         </TabsList>

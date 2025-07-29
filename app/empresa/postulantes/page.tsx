@@ -339,17 +339,36 @@ export default function Applicants() {
 
       {/* Applicants Tabs */}
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="all">Todos ({applicants.length})</TabsTrigger>
-          <TabsTrigger value="pending">Pendientes ({applicants.filter((app) => app.status === "pending").length})</TabsTrigger>
-          <TabsTrigger value="interview">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 h-auto p-2 bg-gray-50">
+          <TabsTrigger 
+            value="pending" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
+            Pend. ({applicants.filter((app) => app.status === "pending").length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="hired" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
+            Aprob. ({applicants.filter((app) => app.status === "hired").length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="rejected" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
+            Rech. ({applicants.filter((app) => app.status === "rejected").length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="all" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
+            Todas ({applicants.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="interview" 
+            className="h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm md:col-span-1 col-span-2"
+          >
             Entrevistas ({applicants.filter((app) => app.status === "interview").length})
-          </TabsTrigger>
-          <TabsTrigger value="hired">
-            Contratados ({applicants.filter((app) => app.status === "hired").length})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rechazados ({applicants.filter((app) => app.status === "rejected").length})
           </TabsTrigger>
         </TabsList>
 

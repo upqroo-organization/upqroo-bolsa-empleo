@@ -193,12 +193,12 @@ export default function PostJob() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6 md:space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Publicar Nueva Vacante</h1>
-          <p className="text-muted-foreground">Crea una nueva oportunidad laboral para estudiantes de UPQROO</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Publicar Nueva Vacante</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Crea una nueva oportunidad laboral para estudiantes de UPQROO</p>
         </div>
       </div>
 
@@ -212,17 +212,25 @@ export default function PostJob() {
       </Alert>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="basic" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 gap-2 h-auto p-2 bg-gray-50">
+          <TabsTrigger 
+            value="basic" 
+            className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
             <FileText className="h-4 w-4" />
-            Información Básica
+            <span className="hidden sm:inline">Información Básica</span>
+            <span className="sm:hidden">Info Básica</span>
             {hasBasicErrors() && (
               <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
             )}
           </TabsTrigger>
-          <TabsTrigger value="details" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="details" 
+            className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
+          >
             <Briefcase className="h-4 w-4" />
-            Detalles del Puesto
+            <span className="hidden sm:inline">Detalles del Puesto</span>
+            <span className="sm:hidden">Detalles</span>
             {hasDetailErrors() && (
               <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
             )}
@@ -498,11 +506,14 @@ export default function PostJob() {
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-end gap-4 pt-6">
-        <Button variant="outline">Cancelar</Button>
-        <Button disabled={loading} onClick={() => handleSubmit()}>
+      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
+        <Button variant="outline" className="w-full sm:w-auto">
+          Cancelar
+        </Button>
+        <Button disabled={loading} onClick={() => handleSubmit()} className="w-full sm:w-auto">
           <Send className="mr-2 h-4 w-4" />
-          Publicar Vacante
+          <span className="hidden sm:inline">Publicar Vacante</span>
+          <span className="sm:hidden">Publicar</span>
         </Button>
       </div>
     </div>
