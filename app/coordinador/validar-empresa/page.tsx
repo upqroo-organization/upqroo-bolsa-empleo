@@ -237,12 +237,12 @@ export default function ValidateCompanies() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-primary">Validar Empresas</h1>
-          <p className="text-muted-foreground">Gestión y validación de empresas registradas en la plataforma</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">Validar Empresas</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Gestión y validación de empresas registradas en la plataforma</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -250,6 +250,7 @@ export default function ValidateCompanies() {
             size="sm"
             onClick={handleExport}
             disabled={isExporting}
+            className="w-full sm:w-auto"
           >
             <Download className="h-4 w-4 mr-2" />
             {isExporting ? 'Exportando...' : 'Exportar'}
@@ -277,7 +278,7 @@ export default function ValidateCompanies() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -288,7 +289,7 @@ export default function ValidateCompanies() {
           />
         </div>
         <Select value={sectorFilter} onValueChange={setSectorFilter}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filtrar por sector" />
           </SelectTrigger>
           <SelectContent>
@@ -305,18 +306,22 @@ export default function ValidateCompanies() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="pending">
-            Pendientes ({statistics.pending})
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1">
+          <TabsTrigger value="pending" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Pendientes ({statistics.pending})</span>
+            <span className="sm:hidden">Pend. ({statistics.pending})</span>
           </TabsTrigger>
-          <TabsTrigger value="approved">
-            Aprobadas ({statistics.approved})
+          <TabsTrigger value="approved" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Aprobadas ({statistics.approved})</span>
+            <span className="sm:hidden">Aprob. ({statistics.approved})</span>
           </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rechazadas ({statistics.rejected})
+          <TabsTrigger value="rejected" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Rechazadas ({statistics.rejected})</span>
+            <span className="sm:hidden">Rech. ({statistics.rejected})</span>
           </TabsTrigger>
-          <TabsTrigger value="all">
-            Todas ({statistics.total})
+          <TabsTrigger value="all" className="text-xs sm:text-sm">
+            <span className="hidden sm:inline">Todas ({statistics.total})</span>
+            <span className="sm:hidden">Todas ({statistics.total})</span>
           </TabsTrigger>
         </TabsList>
 
@@ -332,10 +337,10 @@ export default function ValidateCompanies() {
           ) : (
             filteredCompanies.map((company) => (
               <Card key={company.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="h-12 w-12">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                         <AvatarFallback>
                           {company.name
                             .split(" ")
@@ -343,48 +348,48 @@ export default function ValidateCompanies() {
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold">{company.name}</h3>
-                          <Badge variant="secondary">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                          <h3 className="text-base sm:text-lg font-semibold truncate">{company.name}</h3>
+                          <Badge variant="secondary" className="w-fit">
                             Pendiente
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center">
-                            <Building2 className="h-4 w-4 mr-1" />
-                            {company.industry || 'No especificado'}
+                            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.industry || 'No especificado'}</span>
                           </div>
                           <div className="flex items-center">
-                            <Mail className="h-4 w-4 mr-1" />
-                            {company.email}
+                            <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.email}</span>
                           </div>
                           <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {company.state?.name || 'No especificado'}
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.state?.name || 'No especificado'}</span>
                           </div>
                           <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(company.createdAt).toLocaleDateString('es-ES')}
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{new Date(company.createdAt).toLocaleDateString('es-ES')}</span>
                           </div>
                         </div>
-                        <p className="text-sm mt-2">{company.description || 'Sin descripción'}</p>
+                        <p className="text-xs sm:text-sm mt-2 line-clamp-2">{company.description || 'Sin descripción'}</p>
 
                         {/* Company Info */}
                         <div className="mt-3">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {company.rfc && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 RFC: {company.rfc}
                               </Badge>
                             )}
                             {company.phone && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 Tel: {company.phone}
                               </Badge>
                             )}
                             {company.contactName && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 Contacto: {company.contactName}
                               </Badge>
                             )}
@@ -392,12 +397,13 @@ export default function ValidateCompanies() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-2">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalles
+                            <span className="hidden sm:inline">Ver Detalles</span>
+                            <span className="sm:hidden">Detalles</span>
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
@@ -447,7 +453,7 @@ export default function ValidateCompanies() {
                       </Dialog>
                       <Dialog open={validationDialog} onOpenChange={setValidationDialog}>
                         <DialogTrigger asChild>
-                          <Button size="sm" onClick={() => setSelectedCompany(company)}>
+                          <Button size="sm" onClick={() => setSelectedCompany(company)} className="w-full sm:w-auto">
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Validar
                           </Button>
@@ -510,10 +516,10 @@ export default function ValidateCompanies() {
           ) : (
             filteredCompanies.map((company) => (
               <Card key={company.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="h-12 w-12">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                         <AvatarFallback>
                           {company.name
                             .split(" ")
@@ -521,27 +527,28 @@ export default function ValidateCompanies() {
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="text-lg font-semibold">{company.name}</h3>
-                          <Badge variant="default" className="bg-green-100 text-green-800">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                          <h3 className="text-base sm:text-lg font-semibold truncate">{company.name}</h3>
+                          <Badge variant="default" className="bg-green-100 text-green-800 w-fit">
                             Aprobada
                           </Badge>
                         </div>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <span>{company.industry || 'No especificado'}</span>
-                          <span>{company.state?.name || 'No especificado'}</span>
-                          <span>Aprobada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+                          <span className="truncate">{company.industry || 'No especificado'}</span>
+                          <span className="truncate">{company.state?.name || 'No especificado'}</span>
+                          <span className="truncate">Aprobada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</span>
                         </div>
-                        <div className="flex items-center space-x-4 text-sm mt-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm mt-1">
                           <span className="text-blue-600">{company.vacantes.length} vacantes publicadas</span>
-                          <span className="text-green-600">Activa desde {new Date(company.createdAt).toLocaleDateString('es-ES')}</span>
+                          <span className="text-green-600 truncate">Activa desde {new Date(company.createdAt).toLocaleDateString('es-ES')}</span>
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       <Eye className="h-4 w-4 mr-2" />
-                      Ver Perfil
+                      <span className="hidden sm:inline">Ver Perfil</span>
+                      <span className="sm:hidden">Perfil</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -562,10 +569,10 @@ export default function ValidateCompanies() {
           ) : (
             filteredCompanies.map((company) => (
               <Card key={company.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="h-12 w-12">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                         <AvatarFallback>
                           {company.name
                             .split(" ")
@@ -573,46 +580,46 @@ export default function ValidateCompanies() {
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <h3 className="text-lg font-semibold">{company.name}</h3>
-                          <Badge variant="destructive" className="bg-red-100 text-red-800">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                          <h3 className="text-base sm:text-lg font-semibold truncate">{company.name}</h3>
+                          <Badge variant="destructive" className="bg-red-100 text-red-800 w-fit">
                             Rechazada
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center">
-                            <Building2 className="h-4 w-4 mr-1" />
-                            {company.industry || 'No especificado'}
+                            <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.industry || 'No especificado'}</span>
                           </div>
                           <div className="flex items-center">
-                            <Mail className="h-4 w-4 mr-1" />
-                            {company.email}
+                            <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.email}</span>
                           </div>
                           <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {company.state?.name || 'No especificado'}
+                            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{company.state?.name || 'No especificado'}</span>
                           </div>
                           <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            {new Date(company.createdAt).toLocaleDateString('es-ES')}
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                            <span className="truncate">{new Date(company.createdAt).toLocaleDateString('es-ES')}</span>
                           </div>
                         </div>
-                        <p className="text-sm mt-2">{company.description || 'Sin descripción'}</p>
+                        <p className="text-xs sm:text-sm mt-2 line-clamp-2">{company.description || 'Sin descripción'}</p>
                         <div className="mt-3">
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
                             {company.rfc && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 RFC: {company.rfc}
                               </Badge>
                             )}
                             {company.phone && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 Tel: {company.phone}
                               </Badge>
                             )}
                             {company.contactName && (
-                              <Badge variant="outline">
+                              <Badge variant="outline" className="text-xs">
                                 Contacto: {company.contactName}
                               </Badge>
                             )}
@@ -620,12 +627,13 @@ export default function ValidateCompanies() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:space-x-2">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto">
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalles
+                            <span className="hidden sm:inline">Ver Detalles</span>
+                            <span className="sm:hidden">Detalles</span>
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl">
@@ -676,7 +684,7 @@ export default function ValidateCompanies() {
                       </Dialog>
                       <Dialog open={validationDialog} onOpenChange={setValidationDialog}>
                         <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" onClick={() => setSelectedCompany(company)}>
+                          <Button size="sm" variant="outline" onClick={() => setSelectedCompany(company)} className="w-full sm:w-auto">
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Revisar
                           </Button>
