@@ -5,12 +5,14 @@ import { Survey } from '@/types/survey';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Eye, Edit, Trash2, Calendar, Users } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Calendar, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function EncuestasPage() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
+  const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSurveys();
@@ -42,13 +44,18 @@ export default function EncuestasPage() {
 
       if (response.ok) {
         setSurveys(surveys.filter(s => s.id !== id));
+        toast.success('Encuesta eliminada correctamente');
+      } else {
+        toast.error('Error al eliminar la encuesta');
       }
     } catch (error) {
       console.error('Error deleting survey:', error);
+      toast.error('Error al eliminar la encuesta');
     }
   };
 
   const toggleSurveyStatus = async (id: string, isActive: boolean) => {
+    setTogglingStatus(id);
     try {
       const response = await fetch(`/api/coordinador/surveys/${id}`, {
         method: 'PUT',
@@ -59,9 +66,17 @@ export default function EncuestasPage() {
       if (response.ok) {
         const updatedSurvey = await response.json();
         setSurveys(surveys.map(s => s.id === id ? updatedSurvey : s));
+        
+        const statusText = !isActive ? 'activada' : 'desactivada';
+        toast.success(`Encuesta ${statusText} correctamente`);
+      } else {
+        toast.error('Error al cambiar el estado de la encuesta');
       }
     } catch (error) {
       console.error('Error updating survey:', error);
+      toast.error('Error al cambiar el estado de la encuesta');
+    } finally {
+      setTogglingStatus(null);
     }
   };
 
@@ -93,7 +108,10 @@ export default function EncuestasPage() {
                 <div className="flex-1 min-w-0">
                   <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
                     <span className="text-base sm:text-lg leading-tight">{survey.title}</span>
-                    <Badge variant={survey.isActive ? 'default' : 'secondary'} className="w-fit">
+                    <Badge 
+                      variant={survey.isActive ? 'default' : 'secondary'} 
+                      className={`w-fit ${survey.isActive ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}
+                    >
                       {getSurveyStatus(survey)}
                     </Badge>
                   </CardTitle>
@@ -118,10 +136,21 @@ export default function EncuestasPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => toggleSurveyStatus(survey.id, survey.isActive)}
+                    disabled={togglingStatus === survey.id}
                     className="text-xs px-2 h-8"
                   >
-                    <span className="hidden sm:inline">{survey.isActive ? 'Desactivar' : 'Activar'}</span>
-                    <span className="sm:hidden">{survey.isActive ? 'Des.' : 'Act.'}</span>
+                    {togglingStatus === survey.id ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        <span className="hidden sm:inline">Cambiando...</span>
+                        <span className="sm:hidden">...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">{survey.isActive ? 'Desactivar' : 'Activar'}</span>
+                        <span className="sm:hidden">{survey.isActive ? 'Des.' : 'Act.'}</span>
+                      </>
+                    )}
                   </Button>
                   <Button
                     variant="outline"

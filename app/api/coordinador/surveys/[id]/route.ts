@@ -56,6 +56,54 @@ export async function PUT(
     const { id } = await params;
     const data = await request.json();
 
+    // Handle simple isActive toggle
+    if (data.hasOwnProperty('isActive') && typeof data.isActive === 'boolean') {
+      // Check if survey exists first
+      const existingSurvey = await prisma.survey.findUnique({
+        where: { id },
+        include: {
+          _count: {
+            select: {
+              responses: true
+            }
+          }
+        }
+      });
+
+      if (!existingSurvey) {
+        return NextResponse.json(
+          { error: 'Survey not found' },
+          { status: 404 }
+        );
+      }
+
+      // Optional: Add warning if trying to deactivate a survey with responses
+      if (data.isActive === false && existingSurvey._count.responses > 0) {
+        // You can uncomment this if you want to prevent deactivation of surveys with responses
+        // return NextResponse.json(
+        //   { error: 'No se puede desactivar una encuesta que ya tiene respuestas' },
+        //   { status: 400 }
+        // );
+      }
+
+      const updatedSurvey = await prisma.survey.update({
+        where: { id },
+        data: { isActive: data.isActive },
+        include: {
+          questions: {
+            orderBy: { order: 'asc' }
+          },
+          _count: {
+            select: {
+              responses: true
+            }
+          }
+        }
+      });
+
+      return NextResponse.json(updatedSurvey);
+    }
+
     // Use transaction to update survey and questions atomically
     const result = await prisma.$transaction(async (tx) => {
       // If questions are provided, update them intelligently to preserve responses
