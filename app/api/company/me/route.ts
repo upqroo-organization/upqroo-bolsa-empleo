@@ -103,6 +103,11 @@ export async function PUT(request: NextRequest) {
       updateData.stateId = body.stateId ? parseInt(body.stateId) : null;
     }
 
+    // Fiscal document
+    if (body.fiscalDocumentUrl !== undefined) {
+      updateData.fiscalDocumentUrl = body.fiscalDocumentUrl || null;
+    }
+
     // Update the company
     const updatedCompany = await prisma.company.update({
       where: {

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Building2, Upload, Save, Mail, Users, CheckCircle, Loader2, Trash2 } from "lucide-react"
+import { Building2, Upload, Save, Mail, Users, CheckCircle, Loader2, Trash2, FileText, Download } from "lucide-react"
 import { toast } from "sonner"
 
 interface Company {
@@ -43,6 +43,7 @@ interface Company {
   approvalStatus: string
   createdAt: string
   updatedAt: string
+  fiscalDocumentUrl: string | null
 }
 
 interface State {
@@ -58,6 +59,11 @@ export default function CompanyProfile() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [formData, setFormData] = useState<Partial<Company>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Fiscal document upload state
+  const [fiscalUploading, setFiscalUploading] = useState(false)
+  const [fiscalDeleting, setFiscalDeleting] = useState(false)
+  const fiscalInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchCompanyData()
@@ -202,6 +208,96 @@ export default function CompanyProfile() {
     }
   }
 
+  // Fiscal document upload handlers
+  const handleFiscalUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Solo se permiten archivos PDF, JPG, PNG o WEBP')
+      return
+    }
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('El archivo es demasiado grande. Máximo 10MB')
+      return
+    }
+
+    setFiscalUploading(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('fiscalDocument', file)
+
+      const response = await fetch('/api/company/fiscal-document', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setCompany(result.data)
+        setFormData(result.data)
+        toast.success('Constancia fiscal subida correctamente')
+      } else {
+        toast.error(result.error || 'Error al subir el documento')
+      }
+    } catch (error) {
+      toast.error('Error al subir el documento')
+      console.debug(error)
+    } finally {
+      setFiscalUploading(false)
+      // Reset file input
+      if (fiscalInputRef.current) {
+        fiscalInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleFiscalDelete = async () => {
+    if (!company?.fiscalDocumentUrl) return
+
+    if (!confirm('¿Estás seguro de que quieres eliminar tu constancia de situación fiscal?')) {
+      return
+    }
+
+    setFiscalDeleting(true)
+
+    try {
+      const response = await fetch('/api/company/fiscal-document', {
+        method: 'DELETE',
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setCompany(result.data)
+        setFormData(result.data)
+        toast.success('Constancia fiscal eliminada correctamente')
+      } else {
+        toast.error(result.error || 'Error al eliminar el documento')
+      }
+    } catch (error) {
+      toast.error('Error al eliminar el documento')
+      console.debug(error)
+    } finally {
+      setFiscalDeleting(false)
+    }
+  }
+
+  const handleFiscalDownload = () => {
+    if (company?.fiscalDocumentUrl) {
+      const filename = company.fiscalDocumentUrl.split('/').pop()
+      if (filename) {
+        window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+      }
+    }
+  }
+
   const calculateCompletionPercentage = () => {
     if (!company) return 0
     
@@ -277,7 +373,7 @@ export default function CompanyProfile() {
       </Alert>
 
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
             Básico
@@ -285,6 +381,10 @@ export default function CompanyProfile() {
           <TabsTrigger value="contact" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
             Contacto
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Documentos
           </TabsTrigger>
           <TabsTrigger value="details" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -606,6 +706,125 @@ export default function CompanyProfile() {
                       onChange={(e) => handleInputChange('companyRole', e.target.value)}
                       placeholder="Descripción del rol"
                     />
+                  </div>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Documents */}
+        <TabsContent value="documents" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documentos Legales
+              </CardTitle>
+              <CardDescription>Gestiona los documentos requeridos para tu empresa</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Fiscal Document Section */}
+              <Card className="border-green-200 bg-green-50">
+                <CardHeader>
+                  <CardTitle className="text-green-800 flex items-center">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Constancia de Situación Fiscal
+                  </CardTitle>
+                  <CardDescription className="text-green-700">
+                    Documento requerido para validar la situación fiscal de tu empresa
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {company?.fiscalDocumentUrl ? (
+                    // Document exists - show current document with actions
+                    <div className="border rounded-lg p-4 bg-white">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <FileText className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-green-800">Documento Subido</p>
+                            <p className="text-sm text-green-600">
+                              <CheckCircle className="inline h-4 w-4 mr-1" />
+                              Tu constancia fiscal está disponible
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleFiscalDownload}
+                            disabled={fiscalUploading || fiscalDeleting}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Ver
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleFiscalDelete}
+                            disabled={fiscalUploading || fiscalDeleting}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            {fiscalDeleting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Eliminando...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Eliminar
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // No document - show upload area
+                    <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center bg-white">
+                      <FileText className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                      <p className="text-green-700 mb-2">Sube tu constancia de situación fiscal</p>
+                      <p className="text-sm text-green-600 mb-4">
+                        Este documento es requerido para validar tu empresa
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Upload button - always visible */}
+                  <div className="flex flex-col items-center gap-2 mt-4">
+                    <input
+                      ref={fiscalInputRef}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp"
+                      onChange={handleFiscalUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      onClick={() => fiscalInputRef.current?.click()}
+                      disabled={fiscalUploading || fiscalDeleting}
+                      variant={company?.fiscalDocumentUrl ? "outline" : "default"}
+                      className="w-full sm:w-auto"
+                    >
+                      {fiscalUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Subiendo documento...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          {company?.fiscalDocumentUrl ? 'Reemplazar Documento' : 'Subir Constancia Fiscal'}
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-xs text-green-600 text-center">
+                      Formatos: PDF, JPG, PNG, WEBP • Máximo 10MB
+                    </p>
                   </div>
                 </CardContent>
               </Card>

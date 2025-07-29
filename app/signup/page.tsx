@@ -10,15 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Chrome, Building2, } from "lucide-react"
+import { Chrome, Building2, FileText, Upload, Trash2, CheckCircle } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import StateSelect from "@/components/StateSelector"
 import { toast } from 'sonner'
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useRef } from "react"
 
 export default function RegisterPage() {
   const router = useRouter()
+  const fiscalInputRef = useRef<HTMLInputElement>(null)
 
   const [empresa, setCompanyData] = useState({
     nombre: "",
@@ -39,6 +41,10 @@ export default function RegisterPage() {
   const [error, setError] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
+  
+  // Fiscal document state
+  const [fiscalDocument, setFiscalDocument] = useState<File | null>(null)
+  const [fiscalError, setFiscalError] = useState<string | null>(null)
 
   console.log(empresa)
 
@@ -49,6 +55,48 @@ export default function RegisterPage() {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }
   }
+
+  // Fiscal document handlers
+  const handleFiscalUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!allowedTypes.includes(file.type)) {
+      setFiscalError('Solo se permiten archivos PDF, JPG, PNG o WEBP')
+      toast.error('Formato no válido', {
+        description: 'Solo se permiten documentos en formato PDF o imágenes JPG, PNG, WEBP'
+      })
+      return
+    }
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setFiscalError('El archivo es demasiado grande. Máximo 10MB')
+      toast.error('Archivo muy grande', {
+        description: 'El archivo debe ser menor a 10MB. Comprime el documento e intenta nuevamente.'
+      })
+      return
+    }
+
+    setFiscalError(null)
+    setFiscalDocument(file)
+    toast.success('Documento seleccionado', {
+      description: `${file.name} se subirá después del registro exitoso`
+    })
+  }
+
+  const handleFiscalRemove = () => {
+    setFiscalDocument(null)
+    setFiscalError(null)
+    if (fiscalInputRef.current) {
+      fiscalInputRef.current.value = ''
+    }
+    toast.info('Documento removido')
+  }
+
+
 
   // Validation functions
   const validateEmail = (email: string): boolean => {
@@ -165,7 +213,13 @@ export default function RegisterPage() {
         return
       }
 
-      toast.success("¡Cuenta creada exitosamente! Serás redirigido al login.")
+      if (fiscalDocument) {
+        toast.success("¡Cuenta creada exitosamente! Podrás subir tu constancia fiscal después de iniciar sesión.")
+      } else {
+        toast.success("¡Cuenta creada exitosamente!")
+      }
+
+      toast.success("Serás redirigido al login.")
       setTimeout(() => {
         router.push("/login?empresa=1")
       }, 1500)
@@ -368,6 +422,89 @@ export default function RegisterPage() {
                         onChange={e => handleChange("contactoPuesto", e.target.value)}
                         placeholder="Gerente de Recursos Humanos"
                       />
+                    </div>
+                  </div>
+
+                  {/* Fiscal Document Section */}
+                  <div className="space-y-4 p-4 border rounded-lg bg-green-50 border-green-200">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <Label className="text-green-800 font-medium">Constancia de Situación Fiscal</Label>
+                    </div>
+                    <p className="text-sm text-green-700">
+                      Selecciona tu constancia de situación fiscal. Se subirá automáticamente después de crear tu cuenta para acelerar el proceso de validación.
+                    </p>
+                    
+                    {fiscalError && (
+                      <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                        {fiscalError}
+                      </div>
+                    )}
+
+                    {fiscalDocument ? (
+                      // Document selected - show current document with actions
+                      <div className="border rounded-lg p-3 bg-white border-green-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                              <FileText className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-green-800">{fiscalDocument.name}</p>
+                              <p className="text-sm text-green-600">
+                                <CheckCircle className="inline h-4 w-4 mr-1" />
+                                {(fiscalDocument.size / 1024 / 1024).toFixed(2)} MB - Se subirá después del registro
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleFiscalRemove}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remover
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      // No document - show upload area
+                      <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center bg-white">
+                        <FileText className="h-10 w-10 text-green-400 mx-auto mb-3" />
+                        <p className="text-green-700 mb-2">Selecciona tu constancia fiscal</p>
+                        <p className="text-sm text-green-600 mb-4">
+                          Se subirá automáticamente después del registro
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Upload button - always visible */}
+                    <div className="flex flex-col items-center gap-2">
+                      <input
+                        ref={fiscalInputRef}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        onChange={handleFiscalUpload}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => fiscalInputRef.current?.click()}
+                        variant={fiscalDocument ? "outline" : "default"}
+                        size="sm"
+                        className="w-full sm:w-auto"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {fiscalDocument ? 'Cambiar Documento' : 'Seleccionar Constancia Fiscal'}
+                      </Button>
+                      <p className="text-xs text-green-600 text-center">
+                        Formatos: PDF, JPG, PNG, WEBP • Máximo 10MB
+                      </p>
+                      <p className="text-xs text-blue-600 text-center font-medium">
+                        💡 También podrás subir este documento después de iniciar sesión
+                      </p>
                     </div>
                   </div>
 

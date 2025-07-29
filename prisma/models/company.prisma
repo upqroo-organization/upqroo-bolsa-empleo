@@ -29,6 +29,9 @@ model company {
   contactPosition String? // Position of the primary contact person
   companyRole     String? // Role of the primary contact person in the company
 
+  // Fiscal document (Constancia de situación fiscal)
+  fiscalDocumentUrl String? // URL to the uploaded fiscal document (PDF or image)
+
   stateId Int?
   state   State? @relation(fields: [stateId], references: [id])
 

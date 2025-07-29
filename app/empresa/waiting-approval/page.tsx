@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Clock, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Clock, AlertCircle, Upload, FileText, Trash2, Download, CheckCircle } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 
 export default function WaitingApprovalPage() {
   const { data: session, status } = useSession();
@@ -13,6 +15,12 @@ export default function WaitingApprovalPage() {
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Fiscal document upload state
+  const [fiscalUploading, setFiscalUploading] = useState(false);
+  const [fiscalDeleting, setFiscalDeleting] = useState(false);
+  const [fiscalError, setFiscalError] = useState<string | null>(null);
+  const fiscalInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkCompanyStatus = async () => {
@@ -47,6 +55,116 @@ export default function WaitingApprovalPage() {
       router.push('/login');
     }
   }, [status, session, router]);
+
+  // Fiscal document upload handlers
+  const handleFiscalUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setFiscalError('Solo se permiten archivos PDF, JPG, PNG o WEBP');
+      toast.error('Formato no válido', {
+        description: 'Solo se permiten documentos en formato PDF o imágenes JPG, PNG, WEBP'
+      });
+      return;
+    }
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setFiscalError('El archivo es demasiado grande. Máximo 10MB');
+      toast.error('Archivo muy grande', {
+        description: 'El archivo debe ser menor a 10MB. Comprime el documento e intenta nuevamente.'
+      });
+      return;
+    }
+
+    setFiscalError(null);
+    setFiscalUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('fiscalDocument', file);
+
+      const response = await fetch('/api/company/fiscal-document', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCompany(result.data);
+        toast.success('Documento subido', {
+          description: result.message || 'Tu constancia de situación fiscal ha sido subida correctamente'
+        });
+      } else {
+        setFiscalError(result.error || 'Error al subir el documento');
+        toast.error('Error al subir documento', {
+          description: result.error || 'No se pudo subir tu constancia fiscal. Intenta nuevamente.'
+        });
+      }
+    } catch (error) {
+      setFiscalError('Error al subir el documento');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
+      console.error('Fiscal document upload error:', error);
+    } finally {
+      setFiscalUploading(false);
+      // Reset file input
+      if (fiscalInputRef.current) {
+        fiscalInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleFiscalDelete = async () => {
+    if (!confirm('¿Estás seguro de que quieres eliminar tu constancia de situación fiscal? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setFiscalDeleting(true);
+    setFiscalError(null);
+
+    try {
+      const response = await fetch('/api/company/fiscal-document', {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCompany(result.data);
+        toast.success('Documento eliminado', {
+          description: result.message || 'Tu constancia fiscal ha sido eliminada correctamente'
+        });
+      } else {
+        setFiscalError(result.error || 'Error al eliminar el documento');
+        toast.error('Error al eliminar documento', {
+          description: result.error || 'No se pudo eliminar tu constancia fiscal. Intenta nuevamente.'
+        });
+      }
+    } catch (error) {
+      setFiscalError('Error al eliminar el documento');
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
+      });
+      console.error('Fiscal document delete error:', error);
+    } finally {
+      setFiscalDeleting(false);
+    }
+  };
+
+  const handleFiscalDownload = () => {
+    if (company?.fiscalDocumentUrl) {
+      const filename = company.fiscalDocumentUrl.split('/').pop();
+      if (filename) {
+        window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank');
+      }
+    }
+  };
 
   if (status === 'loading' || loading) {
     return (
@@ -129,6 +247,118 @@ export default function WaitingApprovalPage() {
               </li>
             </ol>
           </div>
+
+          {/* Fiscal Document Section */}
+          <Card className="border-green-200 bg-green-50">
+            <CardHeader>
+              <CardTitle className="text-green-800 flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Constancia de Situación Fiscal
+              </CardTitle>
+              <CardDescription className="text-green-700">
+                Sube tu constancia de situación fiscal para acelerar el proceso de aprobación
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {fiscalError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{fiscalError}</AlertDescription>
+                </Alert>
+              )}
+
+              {company?.fiscalDocumentUrl ? (
+                // Document exists - show current document with actions
+                <div className="border rounded-lg p-4 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-lg">
+                        <FileText className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-green-800">Documento Subido</p>
+                        <p className="text-sm text-green-600">
+                          <CheckCircle className="inline h-4 w-4 mr-1" />
+                          Tu constancia fiscal está disponible para revisión
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleFiscalDownload}
+                        disabled={fiscalUploading || fiscalDeleting}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleFiscalDelete}
+                        disabled={fiscalUploading || fiscalDeleting}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        {fiscalDeleting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Eliminando...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // No document - show upload area
+                <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center bg-white">
+                  <FileText className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-green-700 mb-2">Sube tu constancia de situación fiscal</p>
+                  <p className="text-sm text-green-600 mb-4">
+                    Este documento ayudará a acelerar el proceso de validación de tu empresa
+                  </p>
+                </div>
+              )}
+
+              {/* Upload button - always visible */}
+              <div className="flex flex-col items-center gap-2 mt-4">
+                <input
+                  ref={fiscalInputRef}
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp"
+                  onChange={handleFiscalUpload}
+                  className="hidden"
+                />
+                <Button
+                  onClick={() => fiscalInputRef.current?.click()}
+                  disabled={fiscalUploading || fiscalDeleting}
+                  variant={company?.fiscalDocumentUrl ? "outline" : "default"}
+                  className="w-full sm:w-auto"
+                >
+                  {fiscalUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Subiendo documento...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {company?.fiscalDocumentUrl ? 'Reemplazar Documento' : 'Subir Constancia Fiscal'}
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-green-600 text-center">
+                  Formatos: PDF, JPG, PNG, WEBP • Máximo 10MB
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="border-t pt-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">

@@ -34,6 +34,8 @@ import {
   MoreHorizontal,
   CheckCircle,
   XCircle,
+  FileText,
+  Download,
 } from "lucide-react"
 
 interface DashboardData {
@@ -53,6 +55,7 @@ interface DashboardData {
     email: string
     phone?: string
     status: string
+    fiscalDocumentUrl?: string
   }>
   recentActivity: Array<{
     id: string
@@ -436,7 +439,15 @@ export default function CoordinatorDashboard() {
                 dashboardData.pendingCompanies.map((company) => (
                   <div key={company.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex-1">
-                      <h4 className="font-medium">{company.name}</h4>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{company.name}</h4>
+                        {company.fiscalDocumentUrl && (
+                          <div className="flex items-center gap-1 text-green-600">
+                            <FileText className="h-3 w-3" />
+                            <span className="text-xs">Constancia Fiscal</span>
+                          </div>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {company.sector} • {company.size}
                       </p>
@@ -474,6 +485,31 @@ export default function CoordinatorDashboard() {
                                   <p><strong>Tamaño:</strong> {selectedCompany?.size}</p>
                                   <p><strong>Enviado:</strong> {selectedCompany?.submittedDate ? formatDate(selectedCompany.submittedDate) : 'N/A'}</p>
                                 </div>
+                              </div>
+                              <div className="mt-3 pt-3 border-t">
+                                <p className="text-sm">
+                                  <strong>Constancia de Situación Fiscal:</strong>{' '}
+                                  {selectedCompany?.fiscalDocumentUrl ? (
+                                    <span className="inline-flex items-center gap-1 text-green-600">
+                                      <FileText className="h-3 w-3" />
+                                      Disponible
+                                      <button
+                                        onClick={() => {
+                                          const filename = selectedCompany.fiscalDocumentUrl?.split('/').pop()
+                                          if (filename) {
+                                            window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                                          }
+                                        }}
+                                        className="ml-1 text-blue-600 hover:text-blue-800 underline"
+                                      >
+                                        <Download className="h-3 w-3 inline mr-1" />
+                                        Ver
+                                      </button>
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground">No disponible</span>
+                                  )}
+                                </p>
                               </div>
                             </div>
                             <div>

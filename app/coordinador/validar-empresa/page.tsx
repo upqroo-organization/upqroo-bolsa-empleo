@@ -31,6 +31,7 @@ import {
   Mail,
   Calendar,
   Download,
+  FileText,
 } from "lucide-react"
 import { useCSVExport } from "@/hooks/useCSVExport"
 import { commonColumnConfigs } from "@/utils/csvExport"
@@ -52,6 +53,7 @@ type Company = {
   approvalStatus: string
   createdAt: string
   updatedAt: string
+  fiscalDocumentUrl: string | null
   state: {
     id: number
     name: string
@@ -393,6 +395,12 @@ export default function ValidateCompanies() {
                                 Contacto: {company.contactName}
                               </Badge>
                             )}
+                            {company.fiscalDocumentUrl && (
+                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                <FileText className="h-3 w-3 mr-1" />
+                                Constancia Fiscal
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -448,6 +456,32 @@ export default function ValidateCompanies() {
                                 <p className="text-sm mt-1">{company.address}</p>
                               </div>
                             )}
+                            <div>
+                              <Label>Constancia de Situación Fiscal</Label>
+                              <div className="mt-1">
+                                {company.fiscalDocumentUrl ? (
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm text-green-600">Documento disponible</span>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const filename = company.fiscalDocumentUrl?.split('/').pop()
+                                        if (filename) {
+                                          window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                                        }
+                                      }}
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Ver
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No disponible</p>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -542,6 +576,12 @@ export default function ValidateCompanies() {
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm mt-1">
                           <span className="text-blue-600">{company.vacantes.length} vacantes publicadas</span>
                           <span className="text-green-600 truncate">Activa desde {new Date(company.createdAt).toLocaleDateString('es-ES')}</span>
+                          {company.fiscalDocumentUrl && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              <FileText className="h-3 w-3 mr-1" />
+                              Constancia Fiscal
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -623,6 +663,12 @@ export default function ValidateCompanies() {
                                 Contacto: {company.contactName}
                               </Badge>
                             )}
+                            {company.fiscalDocumentUrl && (
+                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                <FileText className="h-3 w-3 mr-1" />
+                                Constancia Fiscal
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -679,6 +725,32 @@ export default function ValidateCompanies() {
                                 <p className="text-sm mt-1">{company.address}</p>
                               </div>
                             )}
+                            <div>
+                              <Label>Constancia de Situación Fiscal</Label>
+                              <div className="mt-1">
+                                {company.fiscalDocumentUrl ? (
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm text-green-600">Documento disponible</span>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const filename = company.fiscalDocumentUrl?.split('/').pop()
+                                        if (filename) {
+                                          window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                                        }
+                                      }}
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Ver
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No disponible</p>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>

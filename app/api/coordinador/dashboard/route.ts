@@ -230,7 +230,8 @@ export async function GET() {
                     submittedDate: company.createdAt,
                     email: company.email,
                     phone: company.phone,
-                    status: 'pending'
+                    status: 'pending',
+                    fiscalDocumentUrl: company.fiscalDocumentUrl
                 })),
                 recentActivity,
                 topStudents: topStudents.map(placement => ({
