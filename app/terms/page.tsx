@@ -1,74 +1,71 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Shield, FileText, Users, Lock, AlertTriangle, ExternalLink, Calendar, Mail } from "lucide-react"
+import { Shield, FileText, ExternalLink, Mail } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
 const termsData = [
+  // {
+  //   id: 1,
+  //   icon: Users,
+  //   title: "Uso del Sitio",
+  //   content: [
+  //     "Esta plataforma está destinada exclusivamente para estudiantes, egresados y empresas de la Universidad Politécnica de Quintana Roo.",
+  //     "Los usuarios deben proporcionar información veraz y actualizada en sus perfiles.",
+  //     "Está prohibido el uso de la plataforma para actividades ilegales, fraudulentas o que violen estos términos.",
+  //     "Los usuarios son responsables de mantener la confidencialidad de sus credenciales de acceso."
+  //   ]
+  // },
   {
     id: 1,
-    icon: Users,
-    title: "Uso del Sitio",
-    content: [
-      "Esta plataforma está destinada exclusivamente para estudiantes, egresados y empresas de la Universidad Politécnica de Quintana Roo.",
-      "Los usuarios deben proporcionar información veraz y actualizada en sus perfiles.",
-      "Está prohibido el uso de la plataforma para actividades ilegales, fraudulentas o que violen estos términos.",
-      "Los usuarios son responsables de mantener la confidencialidad de sus credenciales de acceso."
-    ]
-  },
-  {
-    id: 2,
     icon: Shield,
     title: "Privacidad y Protección de Datos",
     content: [
-      "Recopilamos únicamente la información necesaria para el funcionamiento de la plataforma.",
-      "Los datos personales son tratados conforme a la Ley Federal de Protección de Datos Personales.",
-      "No compartimos información personal con terceros sin consentimiento expreso.",
-      "Los usuarios pueden solicitar la eliminación de sus datos en cualquier momento."
+      "La Universidad Politécnica de Quintana Roo, con domicilio en Av. Arco Bicentenario, Mza. 11, Lote 1119-33, SM. 55, C.P. 77500, de la Ciudad de Cancún, Quintana Roo, informa que es el responsable del tratamiento de los Datos Personales que nos proporcione, los cuales serán protegidos de conformidad a lo dispuesto por la Ley General de Protección de Datos Personales en Posesión de los Sujetos Obligados, la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados para el Estado de Quintana Roo y demás normatividad que resulte aplicable. La copia, reenvío, uso, revelación y/o distribución de dicha información confidencial sin la autorización expresa y por escrito de la UNIVERSIDAD POLITÉCNICA DE QUINTANA ROO, está prohibida por las leyes ya mencionadas.",
     ]
   },
-  {
-    id: 3,
-    icon: FileText,
-    title: "Propiedad Intelectual",
-    content: [
-      "Todo el contenido de la plataforma, incluyendo diseño, código y logotipos, es propiedad de UPQROO.",
-      "Los usuarios conservan los derechos sobre el contenido que publican (CV, perfiles, etc.).",
-      "Está prohibida la reproducción no autorizada del contenido de la plataforma.",
-      "El uso de marcas registradas de UPQROO requiere autorización previa."
-    ]
-  },
-  {
-    id: 4,
-    icon: Lock,
-    title: "Responsabilidades y Limitaciones",
-    content: [
-      "UPQROO no garantiza la veracidad de la información publicada por usuarios o empresas.",
-      "No somos responsables por las relaciones laborales que se establezcan a través de la plataforma.",
-      "Los usuarios utilizan la plataforma bajo su propio riesgo.",
-      "UPQROO se reserva el derecho de suspender cuentas que violen estos términos."
-    ]
-  },
-  {
-    id: 5,
-    icon: AlertTriangle,
-    title: "Modificaciones y Actualizaciones",
-    content: [
-      "Nos reservamos el derecho de modificar estos términos en cualquier momento.",
-      "Los cambios serán notificados a través de la plataforma con al menos 15 días de anticipación.",
-      "El uso continuado de la plataforma implica la aceptación de los nuevos términos.",
-      "Los usuarios pueden cancelar su cuenta si no están de acuerdo con las modificaciones."
-    ]
-  }
+  // {
+  //   id: 3,
+  //   icon: FileText,
+  //   title: "Propiedad Intelectual",
+  //   content: [
+  //     "Todo el contenido de la plataforma, incluyendo diseño, código y logotipos, es propiedad de UPQROO.",
+  //     "Los usuarios conservan los derechos sobre el contenido que publican (CV, perfiles, etc.).",
+  //     "Está prohibida la reproducción no autorizada del contenido de la plataforma.",
+  //     "El uso de marcas registradas de UPQROO requiere autorización previa."
+  //   ]
+  // },
+  // {
+  //   id: 4,
+  //   icon: Lock,
+  //   title: "Responsabilidades y Limitaciones",
+  //   content: [
+  //     "UPQROO no garantiza la veracidad de la información publicada por usuarios o empresas.",
+  //     "No somos responsables por las relaciones laborales que se establezcan a través de la plataforma.",
+  //     "Los usuarios utilizan la plataforma bajo su propio riesgo.",
+  //     "UPQROO se reserva el derecho de suspender cuentas que violen estos términos."
+  //   ]
+  // },
+  // {
+  //   id: 5,
+  //   icon: AlertTriangle,
+  //   title: "Modificaciones y Actualizaciones",
+  //   content: [
+  //     "Nos reservamos el derecho de modificar estos términos en cualquier momento.",
+  //     "Los cambios serán notificados a través de la plataforma con al menos 15 días de anticipación.",
+  //     "El uso continuado de la plataforma implica la aceptación de los nuevos términos.",
+  //     "Los usuarios pueden cancelar su cuenta si no están de acuerdo con las modificaciones."
+  //   ]
+  // }
 ]
 
-const quickFacts = [
-  { label: "Última actualización", value: "Enero 2025", icon: Calendar },
-  { label: "Aplicable a", value: "Todos los usuarios", icon: Users },
-  { label: "Jurisdicción", value: "México", icon: Shield },
-  { label: "Contacto", value: "legal@upqroo.edu.mx", icon: Mail }
-]
+// const quickFacts = [
+//   { label: "Última actualización", value: "Julio 2025", icon: Calendar },
+//   { label: "Aplicable a", value: "Todos los usuarios", icon: Users },
+//   { label: "Jurisdicción", value: "México", icon: Shield },
+//   { label: "Contacto", value: "legal@upqroo.edu.mx", icon: Mail }
+// ]
 
 export default function TermsPage() {
   return (
@@ -100,7 +97,7 @@ export default function TermsPage() {
       </section>
 
       {/* Quick Facts */}
-      <section className="py-12 bg-muted/50">
+      {/* <section className="py-12 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {quickFacts.map((fact, index) => {
@@ -119,7 +116,7 @@ export default function TermsPage() {
             })}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Introduction */}
       <section className="py-16 bg-background">
@@ -132,10 +129,7 @@ export default function TermsPage() {
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-2">Antes de continuar</h3>
                   <p className="text-blue-800 text-sm leading-relaxed">
-                    Al utilizar la Bolsa de Trabajo Universitaria de UPQROO, aceptas cumplir con los siguientes 
-                    términos y condiciones. Estos términos rigen el uso de nuestra plataforma y establecen los 
-                    derechos y responsabilidades tanto de los usuarios como de la institución. Te recomendamos 
-                    leer cuidadosamente cada sección.
+                    Al utilizar la Bolsa de Trabajo Universitaria de UPQROO, estas de acuerdo con nuestro Aviso de Privacidad.
                   </p>
                 </div>
               </div>
@@ -149,13 +143,13 @@ export default function TermsPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Términos Detallados</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Términos</h2>
               <p className="text-xl text-muted-foreground">
-                Conoce tus derechos y responsabilidades al usar nuestra plataforma
+                Conoce nuestro Aviso de Privacidad
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
               {termsData.map((section) => {
                 const Icon = section.icon
                 return (
@@ -174,9 +168,9 @@ export default function TermsPage() {
                     <CardContent>
                       <ul className="space-y-3">
                         {section.content.map((item, index) => (
-                          <li key={index} className="flex items-start space-x-3 text-sm">
+                          <li key={index} className="flex items-start space-x-3 text-md">
                             <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
-                            <span className="text-muted-foreground leading-relaxed">{item}</span>
+                            <span className="leading-relaxed">{item}</span>
                           </li>
                         ))}
                       </ul>
@@ -198,23 +192,26 @@ export default function TermsPage() {
               Si tienes dudas sobre estos términos o necesitas más información, no dudes en contactarnos
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-8">
               <Card className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <Mail className="h-8 w-8 text-primary mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Correo Electrónico</h3>
                   <p className="text-muted-foreground text-sm mb-4">
+                  gestionempresarial@upqroo.edu.mx
+                  </p>
+                  <p className="text-muted-foreground text-sm mb-4">
                     Para consultas legales y términos de uso
                   </p>
                   <Button variant="outline" asChild>
-                    <a href="mailto:legal@upqroo.edu.mx">
+                    <a href="mailto:gestionempresarial@upqroo.edu.mx">
                       Contactar
                     </a>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="text-center hover:shadow-lg transition-shadow">
+              {/* <Card className="text-center hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <Users className="h-8 w-8 text-primary mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Soporte Técnico</h3>
@@ -227,7 +224,7 @@ export default function TermsPage() {
                     </a>
                   </Button>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           </div>
         </div>
