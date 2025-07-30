@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  serverRuntimeConfig: {
+    hostname: '0.0.0.0',
+    port: 6500
+  }
 };
 
 export default nextConfig;
