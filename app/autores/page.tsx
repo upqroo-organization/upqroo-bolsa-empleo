@@ -31,9 +31,9 @@ const contributors = [
   },
   {
     id: 2,
-    name: "Nombre del Desarrollador 2",
+    name: "Nancy Isabella Sanchez Rodriguez",
     role: "Frontend Developer & UI/UX Designer",
-    description: "Especialista en frontend y diseño de experiencia de usuario.",
+    description: "Desarrolladora de FrontEnd.",
     avatar: "/placeholder-avatar-2.jpg", // Replace with actual image
     skills: ["React", "TypeScript", "Tailwind CSS", "Figma", "UI/UX Design"],
     contributions: [
@@ -43,9 +43,8 @@ const contributors = [
       "Diseño responsive"
     ],
     links: {
-      github: "https://github.com/username2",
-      linkedin: "https://linkedin.com/in/username2",
-      email: "developer2@example.com"
+      github: "https://github.com/nancy7895",
+      email: "isa247bella@gmail.com"
     }
   }
 ]
