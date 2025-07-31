@@ -64,6 +64,7 @@ export default function StateSelectClient({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="none">Sin especificar</SelectItem>
         {states.map((state) => (
           <SelectItem key={state.id} value={state.id.toString()}>
             {state.name}

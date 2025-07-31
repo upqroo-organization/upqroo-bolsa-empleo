@@ -182,9 +182,7 @@ export default function FeaturedEvents() {
                     </Button>
                   </a>
                 ) : (
-                  <Button className="w-full" disabled>
-                    Más información próximamente
-                  </Button>
+                  <></>
                 )}
               </CardContent>
             </Card>

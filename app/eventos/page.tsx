@@ -1,7 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface State {
+  id: number;
+  name: string;
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,20 +33,21 @@ import { useEvents } from "@/hooks/useEvents";
 import { EventTypeLabels } from "@/types/events";
 import { format, isAfter } from "date-fns";
 import { es } from "date-fns/locale";
-import StateSelectClient from "@/components/StateSelectClient";
 
 export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedEventType, setSelectedEventType] = useState<string>('');
-  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedEventType, setSelectedEventType] = useState<string>('all');
+  const [selectedState, setSelectedState] = useState<string>('all');
   const [showUpcomingOnly, setShowUpcomingOnly] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [states, setStates] = useState<State[]>([]);
+  const [statesLoading, setStatesLoading] = useState(true);
 
   const { events, loading, error, pagination } = useEvents({
     limit: 12,
     page: currentPage,
-    eventType: selectedEventType || undefined,
-    stateId: selectedState || undefined,
+    eventType: selectedEventType === 'all' ? undefined : selectedEventType,
+    stateId: selectedState === 'all' ? undefined : selectedState,
     upcoming: showUpcomingOnly
   });
 
@@ -56,6 +62,25 @@ export default function EventsPage() {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Fetch states
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await fetch('/api/states');
+        const data = await response.json();
+        if (data.success) {
+          setStates(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching states:', error);
+      } finally {
+        setStatesLoading(false);
+      }
+    };
+
+    fetchStates();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,14 +115,14 @@ export default function EventsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <label className="text-sm font-medium">Tipo de evento</label>
                   <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todos los tipos" />
+                    <SelectTrigger className='w-full'>
+                      <SelectValue className='w-full' placeholder="Todos los tipos" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos los tipos</SelectItem>
+                      <SelectItem value="all">Todos los tipos</SelectItem>
                       {Object.entries(EventTypeLabels).map(([key, label]) => (
                         <SelectItem key={key} value={key}>
                           {label}
@@ -109,12 +134,19 @@ export default function EventsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Estado</label>
-                  <StateSelectClient
-                    name="state"
-                    value={selectedState}
-                    onValueChange={setSelectedState}
-                    placeholder="Todos los estados"
-                  />
+                  <Select value={selectedState} onValueChange={setSelectedState}>
+                    <SelectTrigger className='w-full'>
+                      <SelectValue placeholder="Todos los estados" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los estados</SelectItem>
+                      {!statesLoading && states.map((state) => (
+                        <SelectItem key={state.id} value={state.id.toString()}>
+                          {state.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -123,7 +155,7 @@ export default function EventsPage() {
                     value={showUpcomingOnly ? 'upcoming' : 'all'} 
                     onValueChange={(value) => setShowUpcomingOnly(value === 'upcoming')}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className='w-full'>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -164,8 +196,8 @@ export default function EventsPage() {
                 <Button 
                   onClick={() => {
                     setSearchTerm('');
-                    setSelectedEventType('');
-                    setSelectedState('');
+                    setSelectedEventType('all');
+                    setSelectedState('all');
                     setShowUpcomingOnly(true);
                   }}
                   variant="outline"
@@ -257,9 +289,7 @@ export default function EventsPage() {
                           </Button>
                         </a>
                       ) : (
-                        <Button className="w-full" disabled>
-                          Más información próximamente
-                        </Button>
+                        <></>
                       )}
                     </CardContent>
                   </Card>

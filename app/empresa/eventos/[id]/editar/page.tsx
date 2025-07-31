@@ -351,8 +351,8 @@ export default function EditEventPage() {
                     <Label htmlFor="state">Estado</Label>
                     <StateSelectClient
                       name="state"
-                      value={formData.stateId?.toString() || ''}
-                      onValueChange={(value) => handleInputChange('stateId', value ? parseInt(value) : undefined)}
+                      value={formData.stateId?.toString() || 'none'}
+                      onValueChange={(value) => handleInputChange('stateId', value === 'none' ? undefined : parseInt(value))}
                     />
                   </div>
                 </div>
