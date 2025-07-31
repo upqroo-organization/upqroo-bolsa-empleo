@@ -71,7 +71,7 @@ interface DashboardData {
 }
 
 export default function StudentDashboard() {
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -267,13 +267,15 @@ export default function StudentDashboard() {
               {dashboardData.user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
-          {<div>
+          <div>
             <h1 className="text-3xl font-bold">¡Hola, {dashboardData.user.name || 'Usuario'}!</h1>
-            <p className="text-muted-foreground flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              Estudiante UPQROO
-            </p>
-          </div>}
+            {session?.user?.role === 'student' && (
+              <p className="text-muted-foreground flex items-center gap-2">
+                <GraduationCap className="h-4 w-4" />
+                Estudiante UPQROO
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="icon">

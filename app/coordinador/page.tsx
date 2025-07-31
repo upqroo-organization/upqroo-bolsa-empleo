@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+// import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -93,6 +94,15 @@ export default function CoordinatorDashboard() {
   const [validating, setValidating] = useState(false)
   const [comments, setComments] = useState("")
 
+  // Email dialog states
+  // const [emailDialog, setEmailDialog] = useState(false)
+  // const [sendingEmail, setSendingEmail] = useState(false)
+  // const [emailData, setEmailData] = useState({
+  //   to: '',
+  //   subject: '',
+  //   message: ''
+  // })
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login")
@@ -157,6 +167,68 @@ export default function CoordinatorDashboard() {
         return Briefcase
     }
   }
+
+  // Handle email sending
+  // const handleSendEmail = async () => {
+  //   if (!emailData.to || !emailData.subject || !emailData.message) {
+  //     toast.error('Todos los campos son requeridos')
+  //     return
+  //   }
+
+  //   try {
+  //     setSendingEmail(true)
+  //     const response = await fetch('/api/mail', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         to: emailData.to,
+  //         subject: emailData.subject,
+  //         html: `
+  //           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+  //             <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+  //               <div style="text-align: center; margin-bottom: 30px;">
+  //                 <h1 style="color: #2563eb; margin: 0; font-size: 24px;">UPQROO Bolsa de Trabajo</h1>
+  //                 <h2 style="color: #374151; margin: 10px 0 0 0; font-size: 18px;">${emailData.subject}</h2>
+  //               </div>
+                
+  //               <div style="color: #374151; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">
+  //                 ${emailData.message}
+  //               </div>
+                
+  //               <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
+  //                 <div style="text-align: center;">
+  //                   <p style="color: #374151; margin: 0; font-size: 16px;">
+  //                     Saludos cordiales,<br>
+  //                     <strong>Equipo de Coordinación</strong><br>
+  //                     <span style="color: #6b7280;">Universidad Politécnica de Quintana Roo</span>
+  //                   </p>
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         `,
+  //         text: emailData.message
+  //       })
+  //     })
+
+  //     const result = await response.json()
+
+  //     if (result.success) {
+  //       toast.success('Correo enviado exitosamente')
+  //       setEmailDialog(false)
+  //       setEmailData({ to: '', subject: '', message: '' })
+  //     } else {
+  //       toast.error(result.error || 'Error al enviar el correo')
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending email:', error)
+  //     toast.error('Error de conexión al enviar el correo')
+  //   } finally {
+  //     setSendingEmail(false)
+  //   }
+  // }
 
   // Handle company validation
   const handleValidation = async (companyId: string | undefined, action: string) => {
@@ -291,19 +363,76 @@ export default function CoordinatorDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-primary">Dashboard Coordinador</h1>
+          <h1 className="text-3xl font-bold text-primary">Inicio Coordinador</h1>
           <p className="text-muted-foreground">Supervisión y gestión de la bolsa de trabajo universitaria</p>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* <Button variant="outline" size="sm">
-            <FileText className="h-4 w-4 mr-2" />
-            Generar Reporte
-          </Button> */}
-          {/* <Button size="sm">
-            <Calendar className="h-4 w-4 mr-2" />
-            Programar Reunión
-          </Button> */}
-        </div>
+        {/* <div className="flex items-center space-x-2">
+          <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Mail className="h-4 w-4 mr-2" />
+                Enviar Correo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Enviar Correo Electrónico</DialogTitle>
+                <DialogDescription>
+                  Envía un correo personalizado usando la plantilla institucional
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="email-to">Destinatario</Label>
+                  <Input
+                    id="email-to"
+                    type="email"
+                    value={emailData.to}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, to: e.target.value }))}
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email-subject">Asunto</Label>
+                  <Input
+                    id="email-subject"
+                    type="text"
+                    value={emailData.subject}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Asunto del correo"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email-message">Mensaje</Label>
+                  <Textarea
+                    id="email-message"
+                    value={emailData.message}
+                    onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Escribe tu mensaje aquí..."
+                    rows={6}
+                    className="resize-none"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setEmailDialog(false)}
+                  disabled={sendingEmail}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSendEmail}
+                  disabled={sendingEmail || !emailData.to || !emailData.subject || !emailData.message}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  {sendingEmail ? 'Enviando...' : 'Enviar Correo'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div> */}
       </div>
 
       {/* Stats Cards */}

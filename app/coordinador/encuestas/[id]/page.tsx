@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Users, BarChart3, Download } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function SurveyDetailsPage() {
   const params = useParams();
@@ -61,7 +62,7 @@ export default function SurveyDetailsPage() {
 
   const exportToCSV = () => {
     if (!survey || !survey.responses || survey.responses.length === 0) {
-      alert('No hay datos para exportar');
+      toast.info('No hay respuestas para exportar aún');
       return;
     }
 
@@ -201,13 +202,11 @@ export default function SurveyDetailsPage() {
           </div>
         </div>
         
-        {survey.responses && survey.responses.length > 0 && (
-          <Button onClick={exportToCSV} variant="outline" className="w-full sm:w-auto">
-            <Download className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Exportar Excel</span>
-            <span className="sm:hidden">Exportar</span>
-          </Button>
-        )}
+        <Button onClick={exportToCSV} variant="outline" className="w-full sm:w-auto">
+          <Download className="w-4 h-4 mr-2" />
+          <span className="hidden sm:inline">Exportar Excel</span>
+          <span className="sm:hidden">Exportar</span>
+        </Button>
       </div>
 
       <div className="grid gap-6">

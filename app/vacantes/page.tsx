@@ -89,8 +89,7 @@ export default function JobSearch() {
 
   const handleApply = (vacanteId: string) => {
     if (!session || !isAuthenticated) {
-      toast.error("Inicia sesión para aplicar", {
-        description: "Debes iniciar sesión para poder postularte a las vacantes",
+      toast.error("Inicia sesión para postularte", {
         duration: 4000,
         action: {
           label: "Iniciar Sesión",

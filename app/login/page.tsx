@@ -154,7 +154,7 @@ export default function LoginPage() {
                   )}
                   Iniciar sesión
                 </Button>
-                <div className="text-center text-sm text-gray-500">Usa tu cuenta @upqroo.edu.mx</div>
+                <div className="text-center text-sm text-gray-500">Usa tu cuenta de Google para acceso automático</div>
               </TabsContent>
 
               <TabsContent value="company" className="space-y-4">
