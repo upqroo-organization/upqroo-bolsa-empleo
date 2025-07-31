@@ -46,6 +46,25 @@ const contributors = [
       github: "https://github.com/nancy7895",
       email: "isa247bella@gmail.com"
     }
+  },
+  {
+    id: 3,
+    name: "Alberto Castrejon Hernandez",
+    role: "Soporte en Despliegue", 
+    description: "Colaboró en el despliegue y configuración del sistema en un servidor Linux utilizando Apache2.",
+    avatar: "/placeholder-avatar-2.jpg", // Reemplázalo si tienes una imagen propia
+    skills: ["Linux", "Ubuntu Server", "Apache2", "Despliegue de aplicaciones", "VirtualHost", "Configuración de puertos"],
+    contributions: [
+      "Apoyo en el despliegue del sistema en entorno Linux",
+      "Configuración y ajuste de Apache2",
+      "Manejo de archivos de configuración (.conf)",
+      "Soporte en pruebas de acceso y visibilidad del sistema"
+    ],
+    links: {
+      github: "https://github.com/AlbertoCastre",
+      linkedin: "https://www.linkedin.com/in/alberto-castrejon-aa5158378",
+      email: "albertocastrejon377@gmail.com"
+    }
   }
 ]
 
