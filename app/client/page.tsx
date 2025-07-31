@@ -24,6 +24,10 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import CVUploadModal from "@/components/CVUploadModal"
+import { useEvents } from "@/hooks/useEvents"
+import { EventTypeLabels } from "@/types/events"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 interface DashboardData {
   user: {
@@ -76,6 +80,12 @@ export default function StudentDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Fetch upcoming events
+  const { events: upcomingEvents } = useEvents({ 
+    limit: 3, 
+    upcoming: true 
+  })
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -162,22 +172,7 @@ export default function StudentDashboard() {
     return 'Salario a negociar'
   }
 
-  const upcomingEvents = [
-    {
-      title: "Feria de Empleo Virtual",
-      date: "15 de Junio, 10:00 AM",
-      icon: Calendar,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      title: "Taller: Preparación de CV",
-      date: "20 de Junio, 2:00 PM",
-      icon: FileText,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-  ]
+
 
   if (loading) {
     return (
@@ -458,24 +453,49 @@ export default function StudentDashboard() {
           {/* Upcoming Events */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Próximos Eventos</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Próximos Eventos</CardTitle>
+                <Link href="/eventos">
+                  <Button variant="outline" size="sm">
+                    Ver Todos
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {upcomingEvents.map((event, index) => {
-                  const Icon = event.icon
-                  return (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className={`${event.bgColor} p-2 rounded-lg`}>
-                        <Icon className={`h-4 w-4 ${event.color}`} />
+                {upcomingEvents.length > 0 ? (
+                  upcomingEvents.map((event) => (
+                    <div key={event.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="bg-primary/10 p-2 rounded-lg">
+                        <Calendar className="h-4 w-4 text-primary" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-sm">{event.title}</p>
-                        <p className="text-xs text-muted-foreground">{event.date}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm line-clamp-1">{event.title}</p>
+                        <p className="text-xs text-muted-foreground">{event.company.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(event.startDate), "PPP 'a las' p", { locale: es })}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary" className="text-xs">
+                            {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
+                          </Badge>
+                          {event.isOnline && (
+                            <Badge variant="outline" className="text-xs">
+                              En línea
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  )
-                })}
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm">No hay eventos próximos</p>
+                    <p className="text-xs">Revisa más tarde para nuevas oportunidades</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

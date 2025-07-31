@@ -47,6 +47,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
   company: [
     { name: 'Inicio', href: '/empresa' },
     { name: 'Gestionar Vacantes', href: '/empresa/gestionar-vacante' },
+    { name: 'Eventos', href: '/empresa/eventos' },
     { name: 'Encuestas', href: '/empresa/encuestas' },
     { name: 'Postulantes', href: '/empresa/postulantes' },
   ],

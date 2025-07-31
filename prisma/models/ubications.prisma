@@ -3,4 +3,5 @@ model State {
   name      String
   companies company[]
   vacante   Vacante[]
+  events    Event[]
 }

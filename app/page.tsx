@@ -9,6 +9,7 @@ import { getFeaturedJobs, getJobsStats, FeaturedJob } from "@/lib/featured-jobs"
 import { Careers, VacanteTypeEnum, VacanteModalityEnum } from "@/types/vacantes"
 import { getEnumLabelSafe } from "@/utils/index"
 import Image from "next/image"
+import FeaturedEvents from "@/components/FeaturedEvents"
 
 // Helper function to format salary
 function formatSalary(min: number | null, max: number | null): string {
@@ -153,41 +154,8 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nuestra Comunidad en Números</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Conectando estudiantes, egresados y empresas en Quintana Roo
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon
-              return (
-                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                  <CardContent className="p-8">
-                    <div
-                      className={`${stat.bgColor} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}
-                    >
-                      <Icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
-                    <h3 className="text-4xl font-bold mb-2">{stat.value}</h3>
-                    <p className="text-muted-foreground">{stat.label}</p>
-                    {stat.subtitle && (
-                      <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* Featured Jobs */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Vacantes Destacadas</h2>
@@ -336,6 +304,42 @@ export default async function LandingPage() {
               </div>
             </>
           )}
+        </div>
+      </section>
+
+      {/* Featured Events */}
+      <FeaturedEvents />
+
+      {/* Stats Section */}
+      <section className="py-20 bg-muted/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nuestra Comunidad en Números</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Conectando estudiantes, egresados y empresas en Quintana Roo
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                  <CardContent className="p-8">
+                    <div
+                      className={`${stat.bgColor} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4`}
+                    >
+                      <Icon className={`h-8 w-8 ${stat.color}`} />
+                    </div>
+                    <h3 className="text-4xl font-bold mb-2">{stat.value}</h3>
+                    <p className="text-muted-foreground">{stat.label}</p>
+                    {stat.subtitle && (
+                      <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </div>
       </section>
 

@@ -37,6 +37,7 @@ model company {
 
   vacantes        Vacante[] // Relation to Vacante model
   surveyResponses SurveyResponse[] // Relation to survey responses
+  events          Event[] // Relation to Event model
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
