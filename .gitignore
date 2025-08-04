@@ -49,6 +49,9 @@ prisma/migrations/dev_*
 generated/
 app/generated/
 
-# CV uploads - keep local only
+# File uploads - keep local only (but not the API routes)
 /uploads/
-uploads/
+/public/uploads/
+
+# Keep .gitkeep files for directory structure
+!uploads/*/.gitkeep
