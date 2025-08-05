@@ -22,7 +22,6 @@ export function usePendingSurveys() {
   const isInitialLoadRef = useRef<boolean>(true);
 
   const fetchPendingSurveys = async () => {
-    console.log('usePendingSurvey', session?.user)
     if (!session?.user?.id || session?.user?.role !== 'company') {
       return;
     }

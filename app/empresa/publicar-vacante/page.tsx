@@ -59,7 +59,7 @@ export default function PostJob() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { data } = useFetch('/api/states')
-  console.log(formData)
+
   useEffect(() => {
     if (user?.user?.id) {
       setFormData(prev => ({
@@ -158,7 +158,6 @@ export default function PostJob() {
     }
 
     setLoading(true)
-    console.log(formData)
     const payload = {
       ...formData,
       salaryMin: parseInt(formData.salaryMin) || null,

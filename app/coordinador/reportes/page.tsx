@@ -194,7 +194,7 @@ export default function Reports() {
     reportType: string,
     options: Record<string, unknown> = {}
   ) => {
-    console.log(`Generating ${reportType} report with options:`, options)
+    console.debug(`Generating ${reportType} report with options:`, options)
     setReportDialog(false)
   }
 

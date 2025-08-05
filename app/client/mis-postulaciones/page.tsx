@@ -123,10 +123,6 @@ export default function MyApplications() {
         application={selectedApplication}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onContact={() => {
-          // Implement contact functionality
-          console.log("Contact company for application:", selectedApplication?.id)
-        }}
       />
 
       {/* Stats Cards */}

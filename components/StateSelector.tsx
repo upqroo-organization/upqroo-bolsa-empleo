@@ -34,11 +34,28 @@ export default function StateSelect({
   const [states, setStates] = useState<State[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedState, setSelectedState] = useState<State | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch('/api/states')
       .then((res) => res.json())
-      .then(setStates);
+      .then((response) => {
+        // Handle the API response structure
+        if (response.success && Array.isArray(response.data)) {
+          setStates(response.data);
+        } else {
+          console.error('Invalid states response:', response);
+          setStates([]); // Fallback to empty array
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching states:', error);
+        setStates([]); // Fallback to empty array on error
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -62,15 +79,18 @@ export default function StateSelect({
           role="combobox"
           aria-expanded={open}
           className={"w-full justify-between " + className}
+          disabled={isLoading}
         >
-          {selectedState ? selectedState.name : 'Selecciona un estado'}
+          {isLoading ? 'Cargando estados...' : (selectedState ? selectedState.name : 'Selecciona un estado')}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
           <CommandInput placeholder="Search state..." />
-          <CommandEmpty>No se encontraron estados.</CommandEmpty>
+          <CommandEmpty>
+            {isLoading ? 'Cargando estados...' : 'No se encontraron estados.'}
+          </CommandEmpty>
           <CommandGroup className='max-h-[350px] overflow-auto'>
             <CommandItem
                 onSelect={() => handleSelect({id: 0, name: "Todos"})}
@@ -83,7 +103,7 @@ export default function StateSelect({
               />
               Todos
               </CommandItem>
-            {states.map((state) => (
+            {Array.isArray(states) && states.map((state) => (
               <CommandItem
                 key={state.id}
                 onSelect={() => handleSelect(state)}

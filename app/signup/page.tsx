@@ -46,8 +46,6 @@ export default function RegisterPage() {
   const [fiscalDocument, setFiscalDocument] = useState<File | null>(null)
   const [fiscalError, setFiscalError] = useState<string | null>(null)
 
-  console.log(empresa)
-
   const handleChange = (field: string, value: string | number) => {
     setCompanyData({ ...empresa, [field]: value })
     // Clear error when user starts typing
