@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Deploy via SSH
+      - name: Copy files to server
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PASSWORD }}" | sshpass -p ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /var/www/upqroo-bolsa-empleo && git fetch && git reset --hard origin/main && npm ci --production && npm run build && pm2 restart bolsa-upqroo"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/upqroo-bolsa-empleo
