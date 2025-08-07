@@ -13,4 +13,4 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/upqroo-bolsa-empleo
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /var/www/upqroo-bolsa-empleo && npm ci --production && npm run build && pm2 restart bolsa-upqroo"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /var/www/upqroo-bolsa-empleo && npm ci && npm run build && pm2 restart bolsa-upqroo"
