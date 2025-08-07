@@ -1,5 +1,4 @@
 name: Deploy to Server
-
 on:
   push:
     branches:
@@ -10,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Deploy to Ubuntu Server via SSH
@@ -20,7 +19,8 @@ jobs:
 
           sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             cd /var/www/upqroo-bolsa-empleo &&
-            git pull &&
+            git fetch &&
+            git reset --hard origin/main &&
             npm ci --production &&
             npm run build &&
             pm2 restart bolsa-upqroo
