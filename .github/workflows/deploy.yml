@@ -1,39 +1,25 @@
 name: Deploy to Production
-
 on:
   push:
     branches:
-      - main  # o la rama principal que estés usando
-
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }} # O usa una key si prefieres
+          password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
           script: |
-            echo "📁 Entrando a la carpeta del proyecto"
             cd /var/www/upqroo-bolsa-empleo
-
-            echo "📌 Haciendo pull del repositorio"
-            git pull origin main
-
-            echo "📦 Instalando dependencias"
-            npm install
-
-            echo "🛠️ Ejecutando build"
+            git fetch
+            git reset --hard origin/main
+            npm ci --production
             npm run build
-
-            echo "🔄 Reiniciando PM2"
-            pm2 restart 0
-
-            echo "✅ Deploy completado"
+            pm2 restart bolsa-upqroo
