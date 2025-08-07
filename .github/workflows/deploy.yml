@@ -1,31 +1,39 @@
-name: Deploy Next.js App to Server
+name: Deploy to Production
 
 on:
   push:
     branches:
-      - main
+      - main  # o la rama principal que estés usando
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Deploy via SSH
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sshpass
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }} # O usa una key si prefieres
+          port: 22
+          script: |
+            echo "📁 Entrando a la carpeta del proyecto"
+            cd /var/www/upqroo-bolsa-empleo
 
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /var/www/tu-proyecto
+            echo "📌 Haciendo pull del repositorio"
             git pull origin main
-            export NODE_ENV=production
 
-         
-            npm ci
-            npx prisma generate || true # Solo si usas Prisma
+            echo "📦 Instalando dependencias"
+            npm install
+
+            echo "🛠️ Ejecutando build"
             npm run build
-            pm2 restart tu-proyecto
-          EOF
+
+            echo "🔄 Reiniciando PM2"
+            pm2 restart 0
+
+            echo "✅ Deploy completado"
