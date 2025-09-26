@@ -1,0 +1,475 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  TrendingUp,
+  Search,
+  ArrowLeft,
+  Calendar,
+  MapPin,
+  DollarSign,
+  Users,
+  Building2,
+  Eye,
+  Filter,
+  GraduationCap,
+  Briefcase,
+  Award,
+  CheckCircle,
+} from "lucide-react"
+
+interface Colocacion {
+  id: string
+  student: {
+    id: string
+    name: string
+    email: string
+    image?: string
+    career: string
+    semester: number
+  }
+  company: {
+    id: string
+    name: string
+    sector: string
+    size: string
+  }
+  vacante: {
+    id: string
+    title: string
+    type: string
+    modality: string
+    location: string
+    salaryMin?: number
+    salaryMax?: number
+  }
+  hiredDate: string
+  startDate?: string
+  status: string
+  performance?: number
+  notes?: string
+}
+
+export default function ColocacionesExitosas() {
+  const router = useRouter()
+  const [colocaciones, setColocaciones] = useState<Colocacion[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [careerFilter, setCareerFilter] = useState("all")
+  const [sectorFilter, setSectorFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+
+  useEffect(() => {
+    fetchColocaciones()
+  }, [])
+
+  const fetchColocaciones = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/coordinador/colocaciones-exitosas")
+      
+      if (!response.ok) {
+        throw new Error("Error al cargar las colocaciones")
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        setColocaciones(result.data)
+      } else {
+        setError(result.error || "Error desconocido")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar los datos")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    })
+  }
+
+  const formatSalary = (salaryMin?: number, salaryMax?: number) => {
+    if (!salaryMin && !salaryMax) return 'No especificado'
+    if (salaryMin && salaryMax) return `$${salaryMin.toLocaleString()} - $${salaryMax.toLocaleString()}`
+    if (salaryMin) return `Desde $${salaryMin.toLocaleString()}`
+    if (salaryMax) return `Hasta $${salaryMax.toLocaleString()}`
+    return 'No especificado'
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800"
+      case "completed":
+        return "bg-blue-100 text-blue-800"
+      case "terminated":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "active":
+        return "Activo"
+      case "completed":
+        return "Completado"
+      case "terminated":
+        return "Terminado"
+      default:
+        return status
+    }
+  }
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "fullTime":
+        return "Tiempo Completo"
+      case "partTime":
+        return "Tiempo Parcial"
+      case "intership":
+        return "Prácticas"
+      default:
+        return type
+    }
+  }
+
+  const getModalityLabel = (modality: string) => {
+    switch (modality) {
+      case "onSite":
+        return "Presencial"
+      case "remote":
+        return "Remoto"
+      case "hybrid":
+        return "Híbrido"
+      default:
+        return modality
+    }
+  }
+
+  const getPerformanceColor = (performance?: number) => {
+    if (!performance) return "bg-gray-100 text-gray-800"
+    if (performance >= 90) return "bg-green-100 text-green-800"
+    if (performance >= 80) return "bg-blue-100 text-blue-800"
+    if (performance >= 70) return "bg-yellow-100 text-yellow-800"
+    return "bg-red-100 text-red-800"
+  }
+
+  const filteredColocaciones = colocaciones.filter(colocacion => {
+    const matchesSearch = colocacion.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         colocacion.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         colocacion.vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         colocacion.student.career.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesCareer = careerFilter === "all" || colocacion.student.career === careerFilter
+    const matchesSector = sectorFilter === "all" || colocacion.company.sector === sectorFilter
+    const matchesStatus = statusFilter === "all" || colocacion.status === statusFilter
+    
+    return matchesSearch && matchesCareer && matchesSector && matchesStatus
+  })
+
+  const careers = [...new Set(colocaciones.map(c => c.student.career))]
+  const sectors = [...new Set(colocaciones.map(c => c.company.sector))]
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10" />
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <Skeleton className="h-12 w-12 rounded-full" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-32 mb-2" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={fetchColocaciones}>Reintentar</Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-4 md:p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="w-fit"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 md:h-8 w-8 text-orange-600" />
+            Colocaciones Exitosas
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Estudiantes contratados exitosamente ({filteredColocaciones.length} colocaciones)
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-orange-600" />
+              <div>
+                <p className="text-2xl font-bold">{colocaciones.length}</p>
+                <p className="text-xs text-muted-foreground">Total Colocaciones</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <div>
+                <p className="text-2xl font-bold">{colocaciones.filter(c => c.status === "active").length}</p>
+                <p className="text-xs text-muted-foreground">Activas</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Award className="h-4 w-4 text-blue-600" />
+              <div>
+                <p className="text-2xl font-bold">
+                  {colocaciones.filter(c => c.performance && c.performance >= 80).length}
+                </p>
+                <p className="text-xs text-muted-foreground">Alto Rendimiento</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-purple-600" />
+              <div>
+                <p className="text-2xl font-bold">{new Set(colocaciones.map(c => c.company.id)).size}</p>
+                <p className="text-xs text-muted-foreground">Empresas Participantes</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por estudiante, empresa o puesto..."
+                className="pl-10 h-12"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Select value={careerFilter} onValueChange={setCareerFilter}>
+              <SelectTrigger className="w-full md:w-48 h-12">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Carrera" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las carreras</SelectItem>
+                {careers.map((career) => (
+                  <SelectItem key={career} value={career}>
+                    {career}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={sectorFilter} onValueChange={setSectorFilter}>
+              <SelectTrigger className="w-full md:w-48 h-12">
+                <SelectValue placeholder="Sector" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los sectores</SelectItem>
+                {sectors.map((sector) => (
+                  <SelectItem key={sector} value={sector}>
+                    {sector}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-48 h-12">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="active">Activos</SelectItem>
+                <SelectItem value="completed">Completados</SelectItem>
+                <SelectItem value="terminated">Terminados</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Colocaciones Grid */}
+      {filteredColocaciones.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No se encontraron colocaciones</h3>
+            <p className="text-muted-foreground">
+              {searchTerm || careerFilter !== "all" || sectorFilter !== "all" || statusFilter !== "all"
+                ? "Intenta ajustar los filtros de búsqueda"
+                : "No hay colocaciones exitosas registradas"}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredColocaciones.map((colocacion) => (
+            <Card key={colocacion.id} className="hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={colocacion.student.image || "/placeholder.svg"} />
+                      <AvatarFallback>
+                        {colocacion.student.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-lg">{colocacion.student.name}</CardTitle>
+                      <CardDescription className="text-sm">
+                        {colocacion.student.career} • Semestre {colocacion.student.semester}
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <Badge className={getStatusColor(colocacion.status)}>
+                      {getStatusLabel(colocacion.status)}
+                    </Badge>
+                    {colocacion.performance && (
+                      <Badge className={getPerformanceColor(colocacion.performance)}>
+                        {colocacion.performance}%
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">{colocacion.company.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {colocacion.company.sector}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{colocacion.vacante.title}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{colocacion.vacante.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <span>{formatSalary(colocacion.vacante.salaryMin, colocacion.vacante.salaryMax)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>Contratado: {formatDate(colocacion.hiredDate)}</span>
+                  </div>
+                  {colocacion.startDate && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span>Inicio: {formatDate(colocacion.startDate)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {getTypeLabel(colocacion.vacante.type)}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {getModalityLabel(colocacion.vacante.modality)}
+                  </Badge>
+                </div>
+
+                {colocacion.notes && (
+                  <div className="p-2 bg-blue-50 rounded text-sm text-blue-800">
+                    <p className="line-clamp-2">{colocacion.notes}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Detalles
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
