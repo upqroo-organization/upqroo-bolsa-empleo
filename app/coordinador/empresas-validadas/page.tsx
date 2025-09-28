@@ -10,6 +10,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Table,
   TableBody,
   TableCell,
@@ -65,6 +72,8 @@ export default function EmpresasValidadas() {
   const [sectorFilter, setSectorFilter] = useState("all")
   const [sizeFilter, setSizeFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchCompanies()
@@ -144,6 +153,16 @@ export default function EmpresasValidadas() {
 
   const sectors = [...new Set(companies.map(company => company.sector))]
   const sizes = [...new Set(companies.map(company => company.size))]
+
+  const handleViewDetails = (company: Company) => {
+    setSelectedCompany(company)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedCompany(null)
+  }
 
   if (loading) {
     return (
@@ -425,12 +444,14 @@ export default function EmpresasValidadas() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleViewDetails(company)}
+                  >
                     <Eye className="h-4 w-4 mr-2" />
                     Ver Detalles
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Briefcase className="h-4 w-4" />
                   </Button>
                 </div>
               </CardContent>
@@ -528,6 +549,226 @@ export default function EmpresasValidadas() {
           </CardContent>
         </Card>
       )}
+
+      {/* Company Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
+        <DialogContent className="max-w-6xl! max-h-[95vh] overflow-y-auto w-[95vw]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={`/placeholder.svg`} />
+                <AvatarFallback>
+                  {selectedCompany?.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-xl font-bold">{selectedCompany?.name}</h2>
+                <p className="text-sm text-muted-foreground">{selectedCompany?.sector}</p>
+              </div>
+            </DialogTitle>
+            <DialogDescription>
+              Información completa de la empresa validada
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCompany && (
+            <div className="space-y-6">
+              {/* Company Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Información General
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Tamaño de Empresa</span>
+                          <div className="mt-1">
+                            <Badge className={getSizeColor(selectedCompany.size)}>
+                              {getSizeLabel(selectedCompany.size)}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Estado</span>
+                          <div className="mt-1">
+                            <Badge className="bg-green-100 text-green-800">
+                              Validada
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Fecha de Aprobación</span>
+                          <p className="text-sm mt-1">
+                            {formatDate(selectedCompany.approvedDate)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-muted-foreground">Constancia Fiscal</span>
+                          <div className="mt-1">
+                            {selectedCompany.fiscalDocumentUrl ? (
+                              <Badge variant="outline" className="text-xs">
+                                <FileText className="h-3 w-3 mr-1" />
+                                Disponible
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No disponible</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Estadísticas
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <p className="text-2xl font-bold text-purple-600">{selectedCompany.vacantesCount}</p>
+                        <p className="text-xs text-muted-foreground">Vacantes Publicadas</p>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-600">{selectedCompany.applicationsCount}</p>
+                        <p className="text-xs text-muted-foreground">Postulaciones</p>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-600">{selectedCompany.hiresCount}</p>
+                        <p className="text-xs text-muted-foreground">Contrataciones</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Contact Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Información de Contacto
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-medium text-sm text-muted-foreground">EMPRESA</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{selectedCompany.email}</span>
+                        </div>
+                        {selectedCompany.phone && (
+                          <div className="flex items-center gap-3">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{selectedCompany.phone}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{selectedCompany.location}</span>
+                        </div>
+                        {selectedCompany.website && (
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <a 
+                              href={selectedCompany.website} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              {selectedCompany.website}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {(selectedCompany.contactName || selectedCompany.contactEmail || selectedCompany.contactPhone) && (
+                      <div className="space-y-4">
+                        <h4 className="font-medium text-sm text-muted-foreground">CONTACTO PRINCIPAL</h4>
+                        <div className="space-y-3">
+                          {selectedCompany.contactName && (
+                            <div className="flex items-center gap-3">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{selectedCompany.contactName}</span>
+                            </div>
+                          )}
+                          {selectedCompany.contactEmail && (
+                            <div className="flex items-center gap-3">
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{selectedCompany.contactEmail}</span>
+                            </div>
+                          )}
+                          {selectedCompany.contactPhone && (
+                            <div className="flex items-center gap-3">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">{selectedCompany.contactPhone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Company Description */}
+              {selectedCompany.description && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Descripción de la Empresa
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {selectedCompany.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                {selectedCompany.fiscalDocumentUrl && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      const filename = selectedCompany.fiscalDocumentUrl?.split('/').pop()
+                      if (filename) {
+                        window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                      }
+                    }}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Ver Constancia Fiscal
+                  </Button>
+                )}
+                <Button variant="outline" onClick={handleCloseModal}>
+                  Cerrar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

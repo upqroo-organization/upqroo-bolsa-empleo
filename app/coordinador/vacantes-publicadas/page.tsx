@@ -9,6 +9,14 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
   Briefcase,
   Search,
   ArrowLeft,
@@ -22,6 +30,8 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
+  Grid3X3,
+  List,
 } from "lucide-react"
 
 interface Vacante {
@@ -57,6 +67,7 @@ export default function VacantesPublicadas() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
   const [modalityFilter, setModalityFilter] = useState("all")
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
 
   useEffect(() => {
     fetchVacantes()
@@ -281,63 +292,85 @@ export default function VacantesPublicadas() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters and View Toggle */}
       <Card>
         <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por título, empresa o ubicación..."
-                className="pl-10 h-12"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por título, empresa o ubicación..."
+                  className="pl-10 h-12"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="active">Activas</SelectItem>
+                  <SelectItem value="paused">Pausadas</SelectItem>
+                  <SelectItem value="expired">Expiradas</SelectItem>
+                  <SelectItem value="closed">Cerradas</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
+                  {types.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {getTypeLabel(type)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={modalityFilter} onValueChange={setModalityFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <SelectValue placeholder="Modalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las modalidades</SelectItem>
+                  {modalities.map((modality) => (
+                    <SelectItem key={modality} value={modality}>
+                      {getModalityLabel(modality)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex bg-muted rounded-lg p-1">
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="flex items-center gap-2"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Cards</span>
+                </Button>
+                <Button
+                  variant={viewMode === "table" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  <span className="hidden sm:inline">Tabla</span>
+                </Button>
+              </div>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="active">Activas</SelectItem>
-                <SelectItem value="paused">Pausadas</SelectItem>
-                <SelectItem value="expired">Expiradas</SelectItem>
-                <SelectItem value="closed">Cerradas</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los tipos</SelectItem>
-                {types.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {getTypeLabel(type)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={modalityFilter} onValueChange={setModalityFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <SelectValue placeholder="Modalidad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las modalidades</SelectItem>
-                {modalities.map((modality) => (
-                  <SelectItem key={modality} value={modality}>
-                    {getModalityLabel(modality)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Vacantes Grid */}
+      {/* Vacantes Display */}
       {filteredVacantes.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
@@ -350,7 +383,8 @@ export default function VacantesPublicadas() {
             </p>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === "cards" ? (
+        // Cards View
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVacantes.map((vacante) => (
             <Card key={vacante.id} className="hover:shadow-md transition-shadow">
@@ -439,6 +473,107 @@ export default function VacantesPublicadas() {
             </Card>
           ))}
         </div>
+      ) : (
+        // Table View
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[250px]">Vacante</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Ubicación</TableHead>
+                    <TableHead>Salario</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Modalidad</TableHead>
+                    <TableHead className="text-center">Postulaciones</TableHead>
+                    <TableHead className="text-center">Entrevistas</TableHead>
+                    <TableHead className="text-center">Contratados</TableHead>
+                    <TableHead>Fecha Publicación</TableHead>
+                    <TableHead>Fecha Límite</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredVacantes.map((vacante) => (
+                    <TableRow key={vacante.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div>
+                          <p className="font-medium line-clamp-2">{vacante.title}</p>
+                          {vacante.career && (
+                            <p className="text-xs text-muted-foreground">{vacante.career}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{vacante.company.name}</p>
+                          <p className="text-xs text-muted-foreground">{vacante.company.sector}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{vacante.location}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{formatSalary(vacante.salaryMin, vacante.salaryMax)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(vacante.status)}>
+                          {getStatusLabel(vacante.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {getTypeLabel(vacante.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {getModalityLabel(vacante.modality)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-semibold text-blue-600">
+                          {vacante.applicationsCount}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-semibold text-purple-600">
+                          {vacante.interviewsCount}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-semibold text-green-600">
+                          {vacante.hiresCount}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDate(vacante.createdDate)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {vacante.deadline ? (
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm text-muted-foreground">
+                              {formatDate(vacante.deadline)}
+                            </span>
+                            {vacante.status === "expired" && (
+                              <AlertCircle className="h-3 w-3 text-red-500" />
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Sin límite</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

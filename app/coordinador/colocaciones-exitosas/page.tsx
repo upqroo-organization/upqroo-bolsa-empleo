@@ -10,6 +10,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
   TrendingUp,
   Search,
   ArrowLeft,
@@ -24,6 +32,8 @@ import {
   Briefcase,
   Award,
   CheckCircle,
+  Grid3X3,
+  List,
 } from "lucide-react"
 
 interface Colocacion {
@@ -67,6 +77,7 @@ export default function ColocacionesExitosas() {
   const [careerFilter, setCareerFilter] = useState("all")
   const [sectorFilter, setSectorFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
 
   useEffect(() => {
     fetchColocaciones()
@@ -302,62 +313,84 @@ export default function ColocacionesExitosas() {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Filters and View Toggle */}
       <Card>
         <CardContent className="p-4 md:p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por estudiante, empresa o puesto..."
-                className="pl-10 h-12"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por estudiante, empresa o puesto..."
+                  className="pl-10 h-12"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Select value={careerFilter} onValueChange={setCareerFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Carrera" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las carreras</SelectItem>
+                  {careers.map((career) => (
+                    <SelectItem key={career} value={career}>
+                      {career}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <SelectValue placeholder="Sector" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los sectores</SelectItem>
+                  {sectors.map((sector) => (
+                    <SelectItem key={sector} value={sector}>
+                      {sector}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-48 h-12">
+                  <SelectValue placeholder="Estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="active">Activos</SelectItem>
+                  <SelectItem value="completed">Completados</SelectItem>
+                  <SelectItem value="terminated">Terminados</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex bg-muted rounded-lg p-1">
+                <Button
+                  variant={viewMode === "cards" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("cards")}
+                  className="flex items-center gap-2"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  <span className="hidden sm:inline">Cards</span>
+                </Button>
+                <Button
+                  variant={viewMode === "table" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  <span className="hidden sm:inline">Tabla</span>
+                </Button>
+              </div>
             </div>
-            <Select value={careerFilter} onValueChange={setCareerFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Carrera" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las carreras</SelectItem>
-                {careers.map((career) => (
-                  <SelectItem key={career} value={career}>
-                    {career}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sectorFilter} onValueChange={setSectorFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <SelectValue placeholder="Sector" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los sectores</SelectItem>
-                {sectors.map((sector) => (
-                  <SelectItem key={sector} value={sector}>
-                    {sector}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48 h-12">
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="active">Activos</SelectItem>
-                <SelectItem value="completed">Completados</SelectItem>
-                <SelectItem value="terminated">Terminados</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Colocaciones Grid */}
+      {/* Colocaciones Display */}
       {filteredColocaciones.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
@@ -370,7 +403,8 @@ export default function ColocacionesExitosas() {
             </p>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === "cards" ? (
+        // Cards View
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredColocaciones.map((colocacion) => (
             <Card key={colocacion.id} className="hover:shadow-md transition-shadow">
@@ -469,6 +503,111 @@ export default function ColocacionesExitosas() {
             </Card>
           ))}
         </div>
+      ) : (
+        // Table View
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">Estudiante</TableHead>
+                    <TableHead>Carrera</TableHead>
+                    <TableHead>Empresa</TableHead>
+                    <TableHead>Puesto</TableHead>
+                    <TableHead>Ubicación</TableHead>
+                    <TableHead>Salario</TableHead>
+                    <TableHead>Estado</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Modalidad</TableHead>
+                    <TableHead className="text-center">Rendimiento</TableHead>
+                    <TableHead>Fecha Contratación</TableHead>
+                    <TableHead>Fecha Inicio</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredColocaciones.map((colocacion) => (
+                    <TableRow key={colocacion.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={colocacion.student.image || "/placeholder.svg"} />
+                            <AvatarFallback className="text-xs">
+                              {colocacion.student.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{colocacion.student.name}</p>
+                            <p className="text-xs text-muted-foreground">{colocacion.student.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{colocacion.student.career}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{colocacion.company.name}</p>
+                          <p className="text-xs text-muted-foreground">{colocacion.company.sector}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{colocacion.vacante.title}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{colocacion.vacante.location}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm">{formatSalary(colocacion.vacante.salaryMin, colocacion.vacante.salaryMax)}</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(colocacion.status)}>
+                          {getStatusLabel(colocacion.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {getTypeLabel(colocacion.vacante.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {getModalityLabel(colocacion.vacante.modality)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {colocacion.performance ? (
+                          <Badge className={getPerformanceColor(colocacion.performance)}>
+                            {colocacion.performance}%
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDate(colocacion.hiredDate)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {colocacion.startDate ? (
+                          <span className="text-sm text-muted-foreground">
+                            {formatDate(colocacion.startDate)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Pendiente</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

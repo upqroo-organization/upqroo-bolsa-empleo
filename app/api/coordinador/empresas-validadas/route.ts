@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       contactPhone: company.contactPhone,
       vacantesCount: company.vacantes.length,
       applicationsCount: company.vacantes.reduce((sum, vacante) => sum + vacante.applications.length, 0),
-      hiresCount: company.vacantes.reduce((sum, vacante) => 
+      hiresCount: company.vacantes.reduce((sum, vacante) =>
         sum + vacante.applications.filter(app => app.status === 'hired').length, 0
       ),
     }))
