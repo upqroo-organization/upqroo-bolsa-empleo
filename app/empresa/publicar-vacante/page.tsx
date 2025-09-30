@@ -94,7 +94,7 @@ export default function PostJob() {
   // Validation functions
   const validateBasicInfo = () => {
     const basicErrors: Record<string, string> = {}
-    
+
     if (!formData.title.trim()) {
       basicErrors.title = 'El título del puesto es requerido'
     }
@@ -113,20 +113,20 @@ export default function PostJob() {
     if (!formData.summary.trim()) {
       basicErrors.summary = 'El resumen del puesto es requerido'
     }
-    
+
     return basicErrors
   }
 
   const validateDetails = () => {
     const detailErrors: Record<string, string> = {}
-    
+
     if (!formData.description.trim()) {
       detailErrors.description = 'La descripción completa es requerida'
     }
     if (!formData.responsibilities.trim()) {
       detailErrors.responsibilities = 'Las responsabilidades principales son requeridas'
     }
-    
+
     return detailErrors
   }
 
@@ -134,7 +134,7 @@ export default function PostJob() {
     const basicErrors = validateBasicInfo()
     const detailErrors = validateDetails()
     const allErrors = { ...basicErrors, ...detailErrors }
-    
+
     setErrors(allErrors)
     return Object.keys(allErrors).length === 0
   }
@@ -212,8 +212,8 @@ export default function PostJob() {
 
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 gap-2 h-auto p-2 bg-gray-50">
-          <TabsTrigger 
-            value="basic" 
+          <TabsTrigger
+            value="basic"
             className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
           >
             <FileText className="h-4 w-4" />
@@ -223,8 +223,8 @@ export default function PostJob() {
               <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
             )}
           </TabsTrigger>
-          <TabsTrigger 
-            value="details" 
+          <TabsTrigger
+            value="details"
             className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
           >
             <Briefcase className="h-4 w-4" />
@@ -341,8 +341,8 @@ export default function PostJob() {
                     name="location"
                     id="location"
                     className={cn(errors.location && "border-red-500")}
-                    placeholder="Ej: Cancún, Quintana Roo" 
-                    value={formData.location} 
+                    placeholder="Ej: Cancún, Quintana Roo"
+                    value={formData.location}
                   />
                   {errors.location && (
                     <p className="text-xs text-red-500">{errors.location}</p>
@@ -355,7 +355,7 @@ export default function PostJob() {
                       <SelectValue className="w-full" placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(data) && data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
+                      {Array.isArray(data.data) && data.data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   {errors.state && (
