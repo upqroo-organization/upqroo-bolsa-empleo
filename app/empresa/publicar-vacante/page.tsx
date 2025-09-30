@@ -355,7 +355,7 @@ export default function PostJob() {
                       <SelectValue className="w-full" placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(data.data) && data.data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
+                      {data?.data && Array.isArray(data.data) && data.data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   {errors.state && (
