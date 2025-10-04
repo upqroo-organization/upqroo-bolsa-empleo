@@ -3,9 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import {
   Users,
   Building2,
@@ -15,37 +12,19 @@ import {
   Target,
   Clock,
   CheckCircle,
-  Star,
   ArrowRight,
-  Mail,
-  Phone,
-  MapPin,
   Award,
   Zap,
   Shield,
   BarChart3,
+  FileText,
+  UserCheck,
+  Mail,
+  Settings,
 } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
 
 export default function EmpresasLanding() {
-  const [formData, setFormData] = useState({
-    companyName: '',
-    email: '',
-    phone: '',
-    message: ''
-  })
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Aquí puedes agregar la lógica para enviar el formulario
-    console.log('Form submitted:', formData)
-  }
 
   const stats = [
     { icon: Users, value: "10,000+", label: "Estudiantes Activos", color: "text-primary" },
@@ -87,72 +66,7 @@ export default function EmpresasLanding() {
     }
   ]
 
-  const testimonials = [
-    {
-      name: "María González",
-      position: "Directora de RRHH",
-      company: "TechSolutions México",
-      content: "UPQROO nos ha ayudado a encontrar desarrolladores junior excepcionales. La calidad de los candidatos es impresionante.",
-      rating: 5
-    },
-    {
-      name: "Carlos Mendoza",
-      position: "CEO",
-      company: "InnovaCorp",
-      content: "La plataforma es muy fácil de usar y hemos contratado a 15 estudiantes en los últimos 6 meses. Altamente recomendado.",
-      rating: 5
-    },
-    {
-      name: "Ana Rodríguez",
-      position: "Gerente de Talento",
-      company: "Digital Dynamics",
-      content: "Los estudiantes de UPQROO llegan con una preparación técnica sólida y muchas ganas de aprender y crecer.",
-      rating: 5
-    }
-  ]
 
-  const plans = [
-    {
-      name: "Básico",
-      price: "Gratis",
-      description: "Perfecto para empresas que están comenzando",
-      features: [
-        "Hasta 3 vacantes activas",
-        "Acceso a base de candidatos",
-        "Soporte por email",
-        "Estadísticas básicas"
-      ],
-      popular: false
-    },
-    {
-      name: "Profesional",
-      price: "$2,999/mes",
-      description: "Ideal para empresas en crecimiento",
-      features: [
-        "Vacantes ilimitadas",
-        "Búsqueda avanzada de candidatos",
-        "Soporte prioritario",
-        "Análisis detallados",
-        "Gestión de equipo",
-        "Branding personalizado"
-      ],
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Contactar",
-      description: "Para grandes empresas con necesidades específicas",
-      features: [
-        "Todo lo del plan Profesional",
-        "Integración con ATS",
-        "Gerente de cuenta dedicado",
-        "Reportes personalizados",
-        "API access",
-        "Capacitación personalizada"
-      ],
-      popular: false
-    }
-  ]
 
   return (
     <div className="min-h-screen bg-white">
@@ -166,17 +80,14 @@ export default function EmpresasLanding() {
             </div>
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900">Características</a>
-              <a href="#testimonials" className="text-gray-600 hover:text-gray-900">Testimonios</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900">Precios</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900">Contacto</a>
+              <a href="#registro" className="text-gray-600 hover:text-gray-900">Cómo Registrarse</a>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-                Contacto
-              </Button>
-              <Button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-                Solicitar Demo
-              </Button>
+              <Link href="/signup">
+                <Button>
+                  Registrarse
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -196,7 +107,7 @@ export default function EmpresasLanding() {
                 <br />que tu empresa necesita
               </h1>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Conecta con estudiantes y egresados de la Universidad Politécnica de Quintana Roo. 
+                Conecta con estudiantes y egresados de la Universidad Politécnica de Quintana Roo.
                 Accede a profesionales especializados en tecnología, ingeniería y más.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -298,172 +209,158 @@ export default function EmpresasLanding() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 bg-white">
+      {/* Registration Process Section */}
+      <section id="registro" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Lo que dicen nuestras empresas
+              ¿Cómo registrar tu empresa?
             </h2>
-            <p className="text-xl text-gray-600">
-              Más de 500 empresas confían en nosotros para encontrar talento
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Sigue estos sencillos pasos para unirte a nuestra plataforma y comenzar a encontrar el mejor talento
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="font-semibold text-gray-600">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-gray-900">{testimonial.name}</div>
-                      <div className="text-sm text-gray-500">{testimonial.position}</div>
-                      <div className="text-sm text-gray-500">{testimonial.company}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Planes que se adaptan a tu empresa
-            </h2>
-            <p className="text-xl text-gray-600">
-              Desde startups hasta grandes corporaciones, tenemos el plan perfecto para ti
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative border-0 shadow-lg ${plan.popular ? 'ring-2 ring-primary' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground">Más Popular</Badge>
-                  </div>
-                )}
-                <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <div className="text-4xl font-bold text-gray-900 mb-2">{plan.price}</div>
-                  <CardDescription>{plan.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-500" />
-                        <span className="text-gray-600">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button className={`w-full ${plan.popular ? '' : 'variant-outline'}`}>
-                    {plan.price === "Contactar" ? "Contactar Ventas" : "Comenzar Ahora"}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                ¿Listo para encontrar tu próximo gran talento?
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Nuestro equipo está aquí para ayudarte a comenzar. Contáctanos y descubre cómo podemos 
-                ayudar a tu empresa a crecer con el mejor talento universitario.
+          {/* Registration Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-primary">1</span>
+              </div>
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Completa el Formulario</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Proporciona la información básica de tu empresa: nombre, RFC, contacto y descripción
               </p>
+              <Link href="/signup">
+                <Button size="sm" className="mt-2">
+                  Ir al Registro
+                  <ArrowRight className="ml-2 h-3 w-3" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-secondary">2</span>
+              </div>
+              <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <UserCheck className="h-6 w-6 text-secondary" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Revisión y Aprobación</h3>
+              <p className="text-gray-600 text-sm">
+                El equipo de UPQROO revisará tu solicitud en 1-2 días hábiles para garantizar la calidad
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-accent">3</span>
+              </div>
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Settings className="h-6 w-6 text-accent" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">¡Listo para Publicar!</h3>
+              <p className="text-gray-600 text-sm">
+                Una vez aprobada, podrás acceder a tu panel y comenzar a publicar vacantes inmediatamente
+              </p>
+            </div>
+          </div>
+
+          {/* Requirements Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Requisitos para el Registro</h3>
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span>empresas@upqroo.edu.mx</span>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">Información Empresarial Básica</p>
+                    <p className="text-sm text-gray-600">Nombre legal de la empresa, RFC válido y datos de contacto</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <span>+52 (998) 123-4567</span>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">Correo Electrónico Corporativo</p>
+                    <p className="text-sm text-gray-600">Dirección de email oficial de la empresa (no Gmail, Yahoo, etc.)</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  <span>Cancún, Quintana Roo, México</span>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">Persona de Contacto</p>
+                    <p className="text-sm text-gray-600">Nombre y cargo del responsable de recursos humanos o reclutamiento</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-gray-900">Constancia Fiscal (Opcional)</p>
+                    <p className="text-sm text-gray-600">Documento que acelera el proceso de validación</p>
+                  </div>
                 </div>
               </div>
             </div>
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Solicita una Demo</CardTitle>
-                <CardDescription>
-                  Completa el formulario y nos pondremos en contacto contigo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
+
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Beneficios del Registro</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-primary rounded-full mt-0.5 flex-shrink-0"></div>
                   <div>
-                    <Label htmlFor="companyName">Nombre de la Empresa</Label>
-                    <Input
-                      id="companyName"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <p className="font-medium text-gray-900">Acceso Gratuito</p>
+                    <p className="text-sm text-gray-600">Publica hasta 3 vacantes sin costo alguno</p>
                   </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-secondary rounded-full mt-0.5 flex-shrink-0"></div>
                   <div>
-                    <Label htmlFor="email">Email Corporativo</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
+                    <p className="font-medium text-gray-900">Base de Candidatos Calificados</p>
+                    <p className="text-sm text-gray-600">Acceso directo a estudiantes y egresados de UPQROO</p>
                   </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-accent rounded-full mt-0.5 flex-shrink-0"></div>
                   <div>
-                    <Label htmlFor="phone">Teléfono</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
+                    <p className="font-medium text-gray-900">Gestión Simplificada</p>
+                    <p className="text-sm text-gray-600">Panel intuitivo para gestionar vacantes y postulaciones</p>
                   </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-destructive rounded-full mt-0.5 flex-shrink-0"></div>
                   <div>
-                    <Label htmlFor="message">Mensaje</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      rows={4}
-                      placeholder="Cuéntanos sobre tus necesidades de reclutamiento..."
-                    />
+                    <p className="font-medium text-gray-900">Soporte Especializado</p>
+                    <p className="text-sm text-gray-600">Acompañamiento del equipo de coordinación de UPQROO</p>
                   </div>
-                  <Button type="submit" className="w-full">
-                    Solicitar Demo
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mt-16">
+            <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                ¿Listo para encontrar tu próximo gran talento?
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                Únete a más de 500 empresas que ya confían en UPQROO para encontrar a los mejores profesionales jóvenes de México
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/signup">
+                  <Button size="lg" className="w-full sm:w-auto">
+                    Registrar mi Empresa
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
-                </form>
-              </CardContent>
-            </Card>
+                </Link>
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  ¿Tienes preguntas? Contáctanos
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>

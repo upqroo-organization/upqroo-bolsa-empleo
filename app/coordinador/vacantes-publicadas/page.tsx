@@ -17,6 +17,22 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import {
   Briefcase,
   Search,
   ArrowLeft,
@@ -32,11 +48,19 @@ import {
   AlertCircle,
   Grid3X3,
   List,
+  FileText,
+  Phone,
+  Mail,
+  GraduationCap,
+  Download,
 } from "lucide-react"
 
 interface Vacante {
   id: string
   title: string
+  description?: string
+  requirements?: string
+  benefits?: string
   company: {
     name: string
     sector: string
@@ -58,6 +82,21 @@ interface Vacante {
   state?: string
 }
 
+interface Postulante {
+  id: string
+  user: {
+    name: string
+    email: string
+    phone?: string
+  }
+  status: string
+  appliedDate: string
+  cvUrl?: string
+  career?: string
+  semester?: string
+  gpa?: number
+}
+
 export default function VacantesPublicadas() {
   const router = useRouter()
   const [vacantes, setVacantes] = useState<Vacante[]>([])
@@ -68,6 +107,12 @@ export default function VacantesPublicadas() {
   const [typeFilter, setTypeFilter] = useState("all")
   const [modalityFilter, setModalityFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
+  
+  // Modal states
+  const [selectedVacante, setSelectedVacante] = useState<Vacante | null>(null)
+  const [postulantes, setPostulantes] = useState<Postulante[]>([])
+  const [loadingPostulantes, setLoadingPostulantes] = useState(false)
+  const [showPostulantes, setShowPostulantes] = useState(false)
 
   useEffect(() => {
     fetchVacantes()
@@ -92,6 +137,73 @@ export default function VacantesPublicadas() {
       setError(err instanceof Error ? err.message : "Error al cargar los datos")
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPostulantes = async (vacanteId: string) => {
+    try {
+      setLoadingPostulantes(true)
+      const response = await fetch(`/api/coordinador/vacantes/${vacanteId}/postulantes`)
+      
+      if (!response.ok) {
+        throw new Error("Error al cargar los postulantes")
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        setPostulantes(result.data)
+      } else {
+        setPostulantes([])
+      }
+    } catch (err) {
+      console.error("Error fetching postulantes:", err)
+      setPostulantes([])
+    } finally {
+      setLoadingPostulantes(false)
+    }
+  }
+
+  const handleVerDetalles = (vacante: Vacante) => {
+    setSelectedVacante(vacante)
+  }
+
+  const handleVerPostulantes = (vacante: Vacante) => {
+    setSelectedVacante(vacante)
+    fetchPostulantes(vacante.id)
+    setShowPostulantes(true)
+  }
+
+  const getPostulanteStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800"
+      case "reviewed":
+        return "bg-blue-100 text-blue-800"
+      case "interview":
+        return "bg-purple-100 text-purple-800"
+      case "hired":
+        return "bg-green-100 text-green-800"
+      case "rejected":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getPostulanteStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Pendiente"
+      case "reviewed":
+        return "Revisado"
+      case "interview":
+        return "Entrevista"
+      case "hired":
+        return "Contratado"
+      case "rejected":
+        return "Rechazado"
+      default:
+        return status
     }
   }
 
@@ -461,13 +573,225 @@ export default function VacantesPublicadas() {
                 )}
 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver Detalles
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Users className="h-4 w-4" />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleVerDetalles(vacante)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Detalles
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl">{selectedVacante?.title}</DialogTitle>
+                        <DialogDescription className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          {selectedVacante?.company.name} • {selectedVacante?.company.sector}
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      {selectedVacante && (
+                        <div className="space-y-6">
+                          {/* Basic Info */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm">{selectedVacante.location}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm">{formatSalary(selectedVacante.salaryMin, selectedVacante.salaryMax)}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm">Publicada: {formatDate(selectedVacante.createdDate)}</span>
+                              </div>
+                              {selectedVacante.deadline && (
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">Expira: {formatDate(selectedVacante.deadline)}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getStatusColor(selectedVacante.status)}>
+                                  {getStatusLabel(selectedVacante.status)}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge variant="secondary" className="text-xs">
+                                  {getTypeLabel(selectedVacante.type)}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {getModalityLabel(selectedVacante.modality)}
+                                </Badge>
+                              </div>
+                              {selectedVacante.career && (
+                                <div className="flex items-center gap-2">
+                                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">{selectedVacante.career}</span>
+                                </div>
+                              )}
+                              {selectedVacante.numberOfPositions && (
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">{selectedVacante.numberOfPositions} posiciones</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Stats */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="text-center p-4 bg-blue-50 rounded-lg">
+                              <p className="text-2xl font-bold text-blue-600">{selectedVacante.applicationsCount}</p>
+                              <p className="text-sm text-muted-foreground">Postulaciones</p>
+                            </div>
+                            <div className="text-center p-4 bg-purple-50 rounded-lg">
+                              <p className="text-2xl font-bold text-purple-600">{selectedVacante.interviewsCount}</p>
+                              <p className="text-sm text-muted-foreground">Entrevistas</p>
+                            </div>
+                            <div className="text-center p-4 bg-green-50 rounded-lg">
+                              <p className="text-2xl font-bold text-green-600">{selectedVacante.hiresCount}</p>
+                              <p className="text-sm text-muted-foreground">Contratados</p>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          {selectedVacante.description && (
+                            <div>
+                              <h3 className="font-semibold mb-2">Descripción del Puesto</h3>
+                              <div className="text-sm text-muted-foreground whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
+                                {selectedVacante.description}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Requirements */}
+                          {selectedVacante.requirements && (
+                            <div>
+                              <h3 className="font-semibold mb-2">Requisitos</h3>
+                              <div className="text-sm text-muted-foreground whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
+                                {selectedVacante.requirements}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Benefits */}
+                          {selectedVacante.benefits && (
+                            <div>
+                              <h3 className="font-semibold mb-2">Beneficios</h3>
+                              <div className="text-sm text-muted-foreground whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
+                                {selectedVacante.benefits}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+
+                  <Sheet open={showPostulantes} onOpenChange={setShowPostulantes}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={() => handleVerPostulantes(vacante)}>
+                        <Users className="h-4 w-4" />
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-full sm:max-w-2xl">
+                      <SheetHeader>
+                        <SheetTitle>Postulantes - {selectedVacante?.title}</SheetTitle>
+                        <SheetDescription>
+                          Lista de candidatos que se han postulado a esta vacante
+                        </SheetDescription>
+                      </SheetHeader>
+                      
+                      <div className="mt-6 space-y-4">
+                        {loadingPostulantes ? (
+                          <div className="space-y-4">
+                            {[1, 2, 3].map((i) => (
+                              <div key={i} className="p-4 border rounded-lg">
+                                <Skeleton className="h-4 w-32 mb-2" />
+                                <Skeleton className="h-3 w-48 mb-2" />
+                                <Skeleton className="h-3 w-24" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : postulantes.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No hay postulantes</h3>
+                            <p className="text-muted-foreground">
+                              Aún no se han recibido postulaciones para esta vacante
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {postulantes.map((postulante) => (
+                              <Card key={postulante.id}>
+                                <CardContent className="p-4">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold">{postulante.user.name}</h4>
+                                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                        <Mail className="h-3 w-3" />
+                                        {postulante.user.email}
+                                      </div>
+                                      {postulante.user.phone && (
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                          <Phone className="h-3 w-3" />
+                                          {postulante.user.phone}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <Badge className={getPostulanteStatusColor(postulante.status)}>
+                                      {getPostulanteStatusLabel(postulante.status)}
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-4 text-sm">
+                                    {postulante.career && (
+                                      <div className="flex items-center gap-2">
+                                        <GraduationCap className="h-3 w-3 text-muted-foreground" />
+                                        <span>{postulante.career}</span>
+                                      </div>
+                                    )}
+                                    {postulante.semester && (
+                                      <div className="flex items-center gap-2">
+                                        <FileText className="h-3 w-3 text-muted-foreground" />
+                                        <span>Semestre {postulante.semester}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="h-3 w-3 text-muted-foreground" />
+                                      <span>Postulado: {formatDate(postulante.appliedDate)}</span>
+                                    </div>
+                                    {postulante.gpa && (
+                                      <div className="flex items-center gap-2">
+                                        <CheckCircle className="h-3 w-3 text-muted-foreground" />
+                                        <span>Promedio: {postulante.gpa}</span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {postulante.cvUrl && (
+                                    <div className="mt-3 pt-3 border-t">
+                                      <Button variant="outline" size="sm" asChild>
+                                        <a href={postulante.cvUrl} target="_blank" rel="noopener noreferrer">
+                                          <Download className="h-3 w-3 mr-2" />
+                                          Descargar CV
+                                        </a>
+                                      </Button>
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 </div>
               </CardContent>
             </Card>
