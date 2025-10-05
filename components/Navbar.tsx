@@ -55,6 +55,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Inicio', href: '/coordinador' },
     { name: 'Encuestas de empleabilidad', href: '/coordinador/encuestas' },
     { name: 'Validar Empresas', href: '/coordinador/validar-empresa' },
+    { name: 'Plantillas de Correo', href: '/coordinador/plantillas-email' },
   ]
 };
 
@@ -107,16 +108,16 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-6">
             {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href} 
+              <Link
+                key={link.href}
+                href={link.href}
                 className="hover:text-gray-500 text-black hover:underline flex items-center gap-2 transition-colors"
               >
                 {link.name}
                 {/* Show notification badge for Encuestas link for companies */}
                 {role === 'company' && link.href === '/empresa/encuestas' && totalPendingSurveys > 0 && (
-                  <Badge 
-                    variant="destructive" 
+                  <Badge
+                    variant="destructive"
                     className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold"
                   >
                     {totalPendingSurveys > 99 ? '99+' : totalPendingSurveys}
@@ -213,7 +214,7 @@ export default function Navbar() {
 
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
           onClick={closeMobileMenu}
         />
@@ -282,8 +283,8 @@ export default function Navbar() {
                   <span className="font-medium">{link.name}</span>
                   {/* Show notification badge for Encuestas link for companies */}
                   {role === 'company' && link.href === '/empresa/encuestas' && totalPendingSurveys > 0 && (
-                    <Badge 
-                      variant="destructive" 
+                    <Badge
+                      variant="destructive"
                       className="h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs font-bold"
                     >
                       {totalPendingSurveys > 99 ? '99+' : totalPendingSurveys}
@@ -328,11 +329,11 @@ export default function Navbar() {
                 Cerrar sesión
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={() => {
                   handleGoogleSignIn();
                   closeMobileMenu();
-                }} 
+                }}
                 className='w-full text-white'
               >
                 Iniciar sesión

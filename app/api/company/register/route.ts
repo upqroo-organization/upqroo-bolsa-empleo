@@ -4,18 +4,19 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { 
-      name, 
-      email, 
-      password, 
-      state, 
-      phone, 
-      rfc, 
-      sector, 
-      direccion, 
-      description, 
-      contactName, 
-      contactPosition 
+    const {
+      name,
+      email,
+      password,
+      state,
+      phone,
+      rfc,
+      sector,
+      direccion,
+      description,
+      contactName,
+      contactPosition,
+      companyType
     } = await req.json();
 
     // Validate required fields
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     const existing = await prisma.company.findUnique({ where: { email } });
     if (existing) {
       return NextResponse.json(
-        { error: "Ya existe una empresa con ese correo electrónico" }, 
+        { error: "Ya existe una empresa con ese correo electrónico" },
         { status: 400 }
       );
     }
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       const existingRFC = await prisma.company.findUnique({ where: { rfc } });
       if (existingRFC) {
         return NextResponse.json(
-          { error: "Ya existe una empresa con ese RFC" }, 
+          { error: "Ya existe una empresa con ese RFC" },
           { status: 400 }
         );
       }
@@ -74,6 +75,7 @@ export async function POST(req: Request) {
         description: description || null,
         contactName: contactName || null,
         contactPosition: contactPosition || null,
+        companyType: companyType,
         contactEmail: email, // Use company email as contact email
         isApprove: false, // Companies start as unapproved
         state: {
@@ -89,8 +91,8 @@ export async function POST(req: Request) {
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Empresa registrada exitosamente. Tu cuenta será revisada por el equipo de coordinación.",
       company: {
         id: newCompany.id,
