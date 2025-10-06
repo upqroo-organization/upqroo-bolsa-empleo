@@ -28,7 +28,7 @@ model company {
   contactPhone    String? // Phone number of the primary contact person
   contactPosition String? // Position of the primary contact person
   companyRole     String? // Role of the primary contact person in the company
-
+  companyType     String? 
   // Fiscal document (Constancia de situación fiscal)
   fiscalDocumentUrl String? // URL to the uploaded fiscal document (PDF or image)
 

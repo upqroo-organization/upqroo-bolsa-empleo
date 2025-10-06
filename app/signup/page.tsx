@@ -28,6 +28,9 @@ export default function RegisterPage() {
     email: "",
     telefono: "",
     sector: "",
+    tamaño: "",
+    sociedad: "",
+    paginaWeb: "",
     direccion: "",
     descripcion: "",
     contactoNombre: "",
@@ -41,7 +44,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
-  
+
   // Fiscal document state
   const [fiscalDocument, setFiscalDocument] = useState<File | null>(null)
   const [fiscalError, setFiscalError] = useState<string | null>(null)
@@ -119,6 +122,16 @@ export default function RegisterPage() {
     return password.length >= 8
   }
 
+  const validateURL = (url: string): boolean => {
+    if (!url) return true // Optional field
+    try {
+      new URL(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
 
@@ -145,6 +158,20 @@ export default function RegisterPage() {
       newErrors.telefono = 'El teléfono debe tener exactamente 10 dígitos'
     }
 
+    // New required fields
+    if (!empresa.tamaño) {
+      newErrors.tamaño = 'El tamaño de la empresa es requerido'
+    }
+
+    if (!empresa.sociedad) {
+      newErrors.sociedad = 'El tipo de sociedad es requerido'
+    }
+
+    // Optional website validation
+    if (empresa.paginaWeb && !validateURL(empresa.paginaWeb)) {
+      newErrors.paginaWeb = 'La URL debe tener un formato válido (ej: https://www.empresa.com)'
+    }
+
     if (!empresa.contactoNombre.trim()) {
       newErrors.contactoNombre = 'El nombre del contacto es requerido'
     }
@@ -163,6 +190,11 @@ export default function RegisterPage() {
 
     if (!empresa.state) {
       newErrors.state = 'El estado es requerido'
+    }
+
+    // Fiscal document is now required
+    if (!fiscalDocument) {
+      newErrors.fiscalDocument = 'La constancia de situación fiscal es obligatoria'
     }
 
     if (!aceptaTerminos) {
@@ -196,6 +228,9 @@ export default function RegisterPage() {
           phone: empresa.telefono,
           rfc: empresa.rfc,
           sector: empresa.sector,
+          size: empresa.tamaño,
+          companyType: empresa.sociedad,
+          website: empresa.paginaWeb,
           direccion: empresa.direccion,
           description: empresa.descripcion,
           contactName: empresa.contactoNombre,
@@ -211,13 +246,8 @@ export default function RegisterPage() {
         return
       }
 
-      if (fiscalDocument) {
-        toast.success("¡Cuenta creada exitosamente! Podrás subir tu constancia fiscal después de iniciar sesión.")
-      } else {
-        toast.success("¡Cuenta creada exitosamente!")
-      }
-
-      toast.success("Serás redirigido al login.")
+      toast.success("¡Cuenta creada exitosamente!")
+      toast.success("Tu constancia fiscal se subirá automáticamente. Serás redirigido al login.")
       setTimeout(() => {
         router.push("/login?empresa=1")
       }, 1500)
@@ -283,9 +313,9 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="company-name">Nombre de la Empresa *</Label>
-                      <Input 
-                        id="company-name" 
-                        value={empresa.nombre} 
+                      <Input
+                        id="company-name"
+                        value={empresa.nombre}
                         onChange={e => handleChange("nombre", e.target.value)}
                         className={cn(errors.nombre && "border-red-500")}
                         placeholder="Ej: Tecnología Innovadora S.A. de C.V."
@@ -296,9 +326,9 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="rfc">RFC *</Label>
-                      <Input 
-                        id="rfc" 
-                        value={empresa.rfc} 
+                      <Input
+                        id="rfc"
+                        value={empresa.rfc}
                         onChange={e => handleChange("rfc", e.target.value.toUpperCase())}
                         className={cn(errors.rfc && "border-red-500")}
                         placeholder="ABC123456XYZ"
@@ -315,10 +345,10 @@ export default function RegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="email">Correo Electrónico Corporativo *</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      value={empresa.email} 
+                    <Input
+                      id="email"
+                      type="email"
+                      value={empresa.email}
                       onChange={e => handleChange("email", e.target.value)}
                       className={cn(errors.email && "border-red-500")}
                       placeholder="contacto@empresa.com"
@@ -331,9 +361,9 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Teléfono *</Label>
-                      <Input 
-                        id="phone" 
-                        value={empresa.telefono} 
+                      <Input
+                        id="phone"
+                        value={empresa.telefono}
                         onChange={e => handleChange("telefono", e.target.value.replace(/\D/g, ''))}
                         className={cn(errors.telefono && "border-red-500")}
                         placeholder="5551234567"
@@ -364,10 +394,62 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="company-size">Tamaño de la Empresa *</Label>
+                      <Select onValueChange={(value) => handleChange("tamaño", value)}>
+                        <SelectTrigger className={cn(errors.tamaño && "border-red-500")}>
+                          <SelectValue placeholder="Seleccionar tamaño" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pequeña">Pequeña (1-50 empleados)</SelectItem>
+                          <SelectItem value="mediana">Mediana (51-250 empleados)</SelectItem>
+                          <SelectItem value="grande">Grande (250+ empleados)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.tamaño && (
+                        <p className="text-xs text-red-500">{errors.tamaño}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="company-type">Tipo de Sociedad *</Label>
+                      <Select onValueChange={(value) => handleChange("sociedad", value)}>
+                        <SelectTrigger className={cn(errors.sociedad && "border-red-500")}>
+                          <SelectValue placeholder="Seleccionar tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="publica">Pública</SelectItem>
+                          <SelectItem value="privada">Privada</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.sociedad && (
+                        <p className="text-xs text-red-500">{errors.sociedad}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Página Web</Label>
+                    <Input
+                      id="website"
+                      type="url"
+                      value={empresa.paginaWeb}
+                      onChange={e => handleChange("paginaWeb", e.target.value)}
+                      className={cn(errors.paginaWeb && "border-red-500")}
+                      placeholder="https://www.empresa.com"
+                    />
+                    {errors.paginaWeb && (
+                      <p className="text-xs text-red-500">{errors.paginaWeb}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      URL completa de su sitio web (opcional)
+                    </p>
+                  </div>
+
                   <div className="space-y-2">
                     <Label>Estado *</Label>
-                    <StateSelect 
-                      value={empresa.state} 
+                    <StateSelect
+                      value={empresa.state}
                       onChange={(id) => handleChange("state", id)}
                       className={cn(errors.state && "border-red-500")}
                     />
@@ -378,9 +460,9 @@ export default function RegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="address">Dirección Completa</Label>
-                    <Textarea 
-                      id="address" 
-                      value={empresa.direccion} 
+                    <Textarea
+                      id="address"
+                      value={empresa.direccion}
                       onChange={e => handleChange("direccion", e.target.value)}
                       placeholder="Calle, número, colonia, ciudad, código postal"
                       rows={3}
@@ -389,9 +471,9 @@ export default function RegisterPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="description">Descripción de la Empresa</Label>
-                    <Textarea 
-                      id="description" 
-                      value={empresa.descripcion} 
+                    <Textarea
+                      id="description"
+                      value={empresa.descripcion}
                       onChange={e => handleChange("descripcion", e.target.value)}
                       placeholder="Describe brevemente tu empresa, servicios y cultura organizacional"
                       rows={4}
@@ -401,9 +483,9 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="contact-name">Nombre del Contacto *</Label>
-                      <Input 
-                        id="contact-name" 
-                        value={empresa.contactoNombre} 
+                      <Input
+                        id="contact-name"
+                        value={empresa.contactoNombre}
                         onChange={e => handleChange("contactoNombre", e.target.value)}
                         className={cn(errors.contactoNombre && "border-red-500")}
                         placeholder="Nombre y Apellido"
@@ -414,9 +496,9 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contact-position">Cargo del Contacto</Label>
-                      <Input 
-                        id="contact-position" 
-                        value={empresa.contactoPuesto} 
+                      <Input
+                        id="contact-position"
+                        value={empresa.contactoPuesto}
                         onChange={e => handleChange("contactoPuesto", e.target.value)}
                         placeholder="Gerente de Recursos Humanos"
                       />
@@ -424,15 +506,21 @@ export default function RegisterPage() {
                   </div>
 
                   {/* Fiscal Document Section */}
-                  <div className="space-y-4 p-4 border rounded-lg bg-green-50 border-green-200">
+                  <div className="space-y-4 p-4 border rounded-lg bg-red-50 border-red-200">
                     <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-green-600" />
-                      <Label className="text-green-800 font-medium">Constancia de Situación Fiscal</Label>
+                      <FileText className="h-5 w-5 text-red-600" />
+                      <Label className="text-red-800 font-medium">Constancia de Situación Fiscal *</Label>
                     </div>
-                    <p className="text-sm text-green-700">
-                      Selecciona tu constancia de situación fiscal. Se subirá automáticamente después de crear tu cuenta para acelerar el proceso de validación.
+                    <p className="text-sm text-red-700">
+                      <strong>OBLIGATORIO:</strong> Debes subir tu constancia de situación fiscal para completar el registro. Sin este documento no podrás crear tu cuenta empresarial.
                     </p>
-                    
+
+                    {errors.fiscalDocument && (
+                      <div className="text-sm text-red-600 bg-red-100 p-2 rounded border border-red-300">
+                        {errors.fiscalDocument}
+                      </div>
+                    )}
+
                     {fiscalError && (
                       <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
                         {fiscalError}
@@ -509,10 +597,10 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="password">Contraseña *</Label>
-                      <Input 
-                        id="password" 
-                        type="password" 
-                        value={empresa.password} 
+                      <Input
+                        id="password"
+                        type="password"
+                        value={empresa.password}
                         onChange={e => handleChange("password", e.target.value)}
                         className={cn(errors.password && "border-red-500")}
                         placeholder="Mínimo 8 caracteres"
@@ -523,10 +611,10 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirmar Contraseña *</Label>
-                      <Input 
-                        id="confirm-password" 
-                        type="password" 
-                        value={empresa.confirmPassword} 
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={empresa.confirmPassword}
                         onChange={e => handleChange("confirmPassword", e.target.value)}
                         className={cn(errors.confirmPassword && "border-red-500")}
                         placeholder="Repite tu contraseña"
@@ -539,15 +627,15 @@ export default function RegisterPage() {
 
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="terms" 
-                        checked={aceptaTerminos} 
+                      <Checkbox
+                        id="terms"
+                        checked={aceptaTerminos}
                         onCheckedChange={() => {
                           setAceptaTerminos(!aceptaTerminos)
                           if (errors.terms) {
                             setErrors(prev => ({ ...prev, terms: '' }))
                           }
-                        }} 
+                        }}
                       />
                       <Label htmlFor="terms" className="text-sm">
                         He leído y acepto la<Link href="/terms" target="_blank" className="underline text-blue-500">política de privacidad</Link>
