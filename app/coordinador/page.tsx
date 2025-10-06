@@ -37,7 +37,9 @@ import {
   XCircle,
   FileText,
   Download,
+  Mail,
 } from "lucide-react"
+import { EmailCampaignModal } from "@/components/coordinator/EmailCampaignModal"
 
 interface DashboardData {
   statistics: {
@@ -94,14 +96,8 @@ export default function CoordinatorDashboard() {
   const [validating, setValidating] = useState(false)
   const [comments, setComments] = useState("")
 
-  // Email dialog states
-  // const [emailDialog, setEmailDialog] = useState(false)
-  // const [sendingEmail, setSendingEmail] = useState(false)
-  // const [emailData, setEmailData] = useState({
-  //   to: '',
-  //   subject: '',
-  //   message: ''
-  // })
+  // Email campaign dialog state
+  const [emailCampaignDialog, setEmailCampaignDialog] = useState(false)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -192,11 +188,11 @@ export default function CoordinatorDashboard() {
   //                 <h1 style="color: #2563eb; margin: 0; font-size: 24px;">UPQROO Bolsa de Trabajo</h1>
   //                 <h2 style="color: #374151; margin: 10px 0 0 0; font-size: 18px;">${emailData.subject}</h2>
   //               </div>
-                
+
   //               <div style="color: #374151; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">
   //                 ${emailData.message}
   //               </div>
-                
+
   //               <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
   //                 <div style="text-align: center;">
   //                   <p style="color: #374151; margin: 0; font-size: 16px;">
@@ -366,73 +362,16 @@ export default function CoordinatorDashboard() {
           <h1 className="text-3xl font-bold text-primary">Inicio Coordinador</h1>
           <p className="text-muted-foreground">Supervisión y gestión de la bolsa de trabajo universitaria</p>
         </div>
-        {/* <div className="flex items-center space-x-2">
-          <Dialog open={emailDialog} onOpenChange={setEmailDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Mail className="h-4 w-4 mr-2" />
-                Enviar Correo
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Enviar Correo Electrónico</DialogTitle>
-                <DialogDescription>
-                  Envía un correo personalizado usando la plantilla institucional
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email-to">Destinatario</Label>
-                  <Input
-                    id="email-to"
-                    type="email"
-                    value={emailData.to}
-                    onChange={(e) => setEmailData(prev => ({ ...prev, to: e.target.value }))}
-                    placeholder="correo@ejemplo.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email-subject">Asunto</Label>
-                  <Input
-                    id="email-subject"
-                    type="text"
-                    value={emailData.subject}
-                    onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
-                    placeholder="Asunto del correo"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email-message">Mensaje</Label>
-                  <Textarea
-                    id="email-message"
-                    value={emailData.message}
-                    onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
-                    placeholder="Escribe tu mensaje aquí..."
-                    rows={6}
-                    className="resize-none"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setEmailDialog(false)}
-                  disabled={sendingEmail}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleSendEmail}
-                  disabled={sendingEmail || !emailData.to || !emailData.subject || !emailData.message}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  {sendingEmail ? 'Enviando...' : 'Enviar Correo'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div> */}
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setEmailCampaignDialog(true)}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Enviar Correo Masivo
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -454,8 +393,8 @@ export default function CoordinatorDashboard() {
           }
 
           return (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105"
               onClick={() => router.push(getRoute(stat.title))}
             >
@@ -757,6 +696,12 @@ export default function CoordinatorDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Email Campaign Modal */}
+      <EmailCampaignModal
+        open={emailCampaignDialog}
+        onOpenChange={setEmailCampaignDialog}
+      />
 
       {/* Quick Actions */}
       {/* <Card>

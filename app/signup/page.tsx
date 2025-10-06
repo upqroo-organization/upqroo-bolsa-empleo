@@ -10,13 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Chrome, Building2, FileText, Upload, Trash2, CheckCircle } from "lucide-react"
+import { Chrome, Building2, FileText, Upload, Trash2, CheckCircle, Info } from "lucide-react"
 import LogoUpqroo from "@/assets/logo_upqroo.svg"
 import StateSelect from "@/components/StateSelector"
 import { toast } from 'sonner'
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRef } from "react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -325,10 +330,15 @@ export default function RegisterPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="rfc">RFC *</Label>
-                      <Input
-                        id="rfc"
-                        value={empresa.rfc}
+                      <Label htmlFor="rfc">RFC * <Tooltip>
+  <TooltipTrigger> <Info size={16}/></TooltipTrigger>
+  <TooltipContent>
+ <p>Registro Federal de Contribuyentes</p>
+  </TooltipContent>
+</Tooltip></Label>
+                      <Input 
+                        id="rfc" 
+                        value={empresa.rfc} 
                         onChange={e => handleChange("rfc", e.target.value.toUpperCase())}
                         className={cn(errors.rfc && "border-red-500")}
                         placeholder="ABC123456XYZ"

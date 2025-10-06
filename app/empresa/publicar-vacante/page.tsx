@@ -19,6 +19,7 @@ import {
   Briefcase,
   AlertCircle,
   CalendarIcon,
+  Info,
 } from "lucide-react"
 import {
   Popover,
@@ -33,6 +34,11 @@ import { useFetch } from "@/hooks/useFetch"
 import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function PostJob() {
   const { data: user } = useSession()
@@ -472,9 +478,15 @@ export default function PostJob() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="deadline" className="text-sm font-medium">
+                <label htmlFor="deadline" className="text-sm font-medium flex items-center gap-2">
                   Fecha límite
-                </label>
+                  <Tooltip>
+                  <TooltipTrigger> <Info size={16}/></TooltipTrigger>
+                  <TooltipContent>
+                 <p>Fecha limite que se mostrara la vacante. Despues de la fecha seleccionada la vacante se borrara automaticamente</p>
+                  </TooltipContent>
+                </Tooltip>
+                </label> 
 
                 <Popover>
                   <PopoverTrigger asChild>

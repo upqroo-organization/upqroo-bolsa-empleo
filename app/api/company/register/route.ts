@@ -12,13 +12,11 @@ export async function POST(req: Request) {
       phone,
       rfc,
       sector,
-      size,
-      companyType,
-      website,
       direccion,
       description,
       contactName,
-      contactPosition
+      contactPosition,
+      companyType
     } = await req.json();
 
     // Validate required fields
@@ -80,6 +78,7 @@ export async function POST(req: Request) {
         description: description || null,
         contactName: contactName || null,
         contactPosition: contactPosition || null,
+        companyType: companyType,
         contactEmail: email, // Use company email as contact email
         isApprove: false, // Companies start as unapproved
         roleId: companyRole.id,
