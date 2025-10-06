@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle, Plus, X } from "lucide-react";
+import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle, Plus, X, Info } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -22,6 +22,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 export default function StudentProfile() {
   const { user, loading, error, isAuthenticated, updating, updateUser } = useCurrentUser();
@@ -690,7 +696,14 @@ export default function StudentProfile() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Experiencia Laboral</CardTitle>
+                  <CardTitle className="flex items-center gap-2">Experiencia Laboral 
+                    <Tooltip>
+                  <TooltipTrigger> <Info size={16}/></TooltipTrigger>
+                  <TooltipContent>
+                 <p>Para agregar una experiencia laboral dabes dar click en editar perfil</p>
+                  </TooltipContent>
+                </Tooltip>
+                  </CardTitle>
                   <CardDescription>Historial de empleos, prácticas y proyectos</CardDescription>
                 </div>
                 {isEditing && (
