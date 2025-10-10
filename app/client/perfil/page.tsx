@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle, Plus, X, Info } from "lucide-react";
+import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle, Plus, X, Info, Check, ChevronsUpDown } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -26,7 +26,22 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Careers } from "@/types/vacantes";
 
 
 export default function StudentProfile() {
@@ -65,6 +80,9 @@ export default function StudentProfile() {
   // Confirmation modals state
   const [showPhotoDeleteDialog, setShowPhotoDeleteDialog] = useState(false);
   const [showCvDeleteDialog, setShowCvDeleteDialog] = useState(false);
+
+  // Career combobox state
+  const [careerOpen, setCareerOpen] = useState(false);
 
   // Initialize form data when user data is loaded
   useEffect(() => {
@@ -664,13 +682,53 @@ export default function StudentProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="career">Carrera</Label>
-                  <Input
-                    id="career"
-                    value={formData.career}
-                    onChange={(e) => setFormData(prev => ({ ...prev, career: e.target.value }))}
-                    disabled={!isEditing}
-                    placeholder="Ej: Ingeniería en Sistemas Computacionales"
-                  />
+                  <Popover open={careerOpen} onOpenChange={setCareerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={careerOpen}
+                        className="w-full justify-between"
+                        disabled={!isEditing}
+                      >
+                        {formData.career
+                          ? Object.entries(Careers).find(([, value]) => value === formData.career)?.[1] || formData.career
+                          : "Selecciona tu carrera..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar carrera..." />
+                        <CommandList>
+                          <CommandEmpty>No se encontró la carrera.</CommandEmpty>
+                          <CommandGroup>
+                            {Object.entries(Careers).map(([, value]) => (
+                              <CommandItem
+                                key={value}
+                                value={value}
+                                onSelect={(currentValue) => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    career: currentValue === formData.career ? "" : currentValue
+                                  }));
+                                  setCareerOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.career === value ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {value}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="period">Período/Semestre Actual</Label>
@@ -696,13 +754,13 @@ export default function StudentProfile() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">Experiencia Laboral 
+                  <CardTitle className="flex items-center gap-2">Experiencia Laboral
                     <Tooltip>
-                  <TooltipTrigger> <Info size={16}/></TooltipTrigger>
-                  <TooltipContent>
-                 <p>Para agregar una experiencia laboral dabes dar click en editar perfil</p>
-                  </TooltipContent>
-                </Tooltip>
+                      <TooltipTrigger> <Info size={16} /></TooltipTrigger>
+                      <TooltipContent>
+                        <p>Para agregar una experiencia laboral dabes dar click en editar perfil</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                   <CardDescription>Historial de empleos, prácticas y proyectos</CardDescription>
                 </div>

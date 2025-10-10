@@ -3,9 +3,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendEmailDirect } from '@/lib/emailService';
-import { COMPANY_REGISTER_INVITATION } from './email-template';
+import { COMPANY_REGISTER_INVITATION, EmpresasApiResponse } from './email-template';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get all approved companies
-    const companies = await prisma.company.findMany({
+    // Get all approved companies from database
+    const internalCompanies = await prisma.company.findMany({
       where: {
         approvalStatus: 'approved'
       },
@@ -38,11 +38,49 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Fetch external companies from API
+    let externalCompanies: Array<{
+      id: string;
+      name: string;
+      email: string;
+      contactName: string | null;
+      industry: string | null;
+      state: { name: string } | null;
+      isExternal: boolean;
+    }> = [];
+
+    try {
+      const response = await fetch(process.env.EMPRESAS_API!);
+      if (response.ok) {
+        const apiCompanies: EmpresasApiResponse = await response.json();
+        externalCompanies = apiCompanies.map(company => ({
+          id: `external_${company.id_empresa}`,
+          name: company.empresa_nombre,
+          email: company.empresa_email,
+          contactName: null, // External API doesn't provide contact names
+          industry: company.empresa_tamano, // Using company size as industry
+          state: null, // External API doesn't provide state info
+          isExternal: true
+        }));
+      }
+    } catch (error) {
+      console.warn('Error fetching external companies:', error);
+      // Continue without external companies if API fails
+    }
+
+    // Combine internal and external companies
+    const allCompanies = [
+      ...internalCompanies.map(company => ({ ...company, isExternal: false })),
+      ...externalCompanies
+    ].sort((a, b) => a.name.localeCompare(b.name));
+
     return NextResponse.json({
       success: true,
       data: {
-        companies,
-        totalCompanies: companies.length
+        companies: allCompanies,
+        totalCompanies: allCompanies.length,
+        internalCount: internalCompanies.length,
+        externalCount: externalCompanies.length
       }
     });
   } catch (error) {
@@ -65,19 +103,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { subject, message, template, templateData, companyIds, customEmails } = await request.json();
+    const { companyIds, customEmails, templateData } = await request.json();
 
-    if (!subject || !message) {
-      return NextResponse.json(
-        { error: 'Asunto y mensaje son requeridos' },
-        { status: 400 }
-      );
-    }
+    // Separate internal and external company IDs
+    const internalCompanyIds = (companyIds || []).filter((id: string) => !id.startsWith('external_'));
+    const externalCompanyIds = (companyIds || []).filter((id: string) => id.startsWith('external_'));
 
-    // Get companies to send emails to
-    const companies = await prisma.company.findMany({
+    // Get internal companies from database
+    const internalCompanies = await prisma.company.findMany({
       where: {
-        id: { in: companyIds || [] },
+        id: { in: internalCompanyIds },
         approvalStatus: 'approved'
       },
       select: {
@@ -87,6 +122,38 @@ export async function POST(request: NextRequest) {
         contactName: true
       }
     });
+
+    // Get external companies from API
+    let externalCompanies: Array<{
+      id: string;
+      name: string;
+      email: string;
+      contactName: string | null;
+    }> = [];
+
+    if (externalCompanyIds.length > 0) {
+      try {
+        const response = await fetch(process.env.EMPRESAS_API!);
+        if (response.ok) {
+          const apiCompanies: EmpresasApiResponse = await response.json();
+          const selectedExternalIds = externalCompanyIds.map(id => parseInt(id.replace('external_', '')));
+
+          externalCompanies = apiCompanies
+            .filter(company => selectedExternalIds.includes(company.id_empresa))
+            .map(company => ({
+              id: `external_${company.id_empresa}`,
+              name: company.empresa_nombre,
+              email: company.empresa_email,
+              contactName: null
+            }));
+        }
+      } catch (error) {
+        console.warn('Error fetching external companies for sending:', error);
+      }
+    }
+
+    // Combine all companies
+    const companies = [...internalCompanies, ...externalCompanies];
 
     // Validate that we have at least one recipient
     const totalRecipients = companies.length + (customEmails?.length || 0);
@@ -103,28 +170,27 @@ export async function POST(request: NextRequest) {
       errors: [] as string[]
     };
 
+    // Prepare the template with replacements
+    const prepareTemplate = (companyName: string, contactName: string) => {
+      let template = COMPANY_REGISTER_INVITATION;
+
+      // Replace template variables with form data or company data
+      const finalContactName = templateData?.contactName || contactName || 'Estimado/a';
+
+      template = template.replace(/{{Nombre del representante \/ Empresa}}/g, finalContactName);
+      template = template.replace(/{{UNIVERSIDAD}}/g, 'Universidad Politécnica de Quintana Roo');
+
+      return template;
+    };
+
     // Send emails to all companies
     for (const company of companies) {
       try {
-        const emailData = {
-          companyName: company.name,
-          contactName: company.contactName || 'Estimado/a',
-          ...templateData
-        };
-
-        const emailOptions = template && template !== "none" ? {
+        const emailOptions = {
           to: company.email,
-          subject: subject,
-          template,
-          templateData: emailData,
-          // Provide fallback content in case template doesn't exist
-          html: COMPANY_REGISTER_INVITATION,
-          text: `${subject}\n\nEstimado/a ${company.contactName || 'representante de ' + company.name},\n\n${message}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
-        } : {
-          to: company.email,
-          subject: subject,
-          html: COMPANY_REGISTER_INVITATION,
-          text: `${subject}\n\nEstimado/a ${company.contactName || 'representante de ' + company.name},\n\n${message}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+          subject: 'Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO',
+          html: prepareTemplate(company.name, company.contactName || ''),
+          text: `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${company.contactName || 'representante de ' + company.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
         };
 
         const result = await sendEmailDirect(emailOptions);
@@ -135,7 +201,7 @@ export async function POST(request: NextRequest) {
           results.failed++;
           results.errors.push(`${company.name}: ${result.error}`);
         }
-      } catch (error) {
+      } catch {
         results.failed++;
         results.errors.push(`${company.name}: Error al enviar correo`);
       }
@@ -145,25 +211,11 @@ export async function POST(request: NextRequest) {
     if (customEmails && customEmails.length > 0) {
       for (const customEmail of customEmails) {
         try {
-          const emailData = {
-            companyName: customEmail.name,
-            contactName: customEmail.name,
-            ...templateData
-          };
-
-          const emailOptions = template && template !== "none" ? {
+          const emailOptions = {
             to: customEmail.email,
-            subject: subject,
-            template,
-            templateData: emailData,
-            // Provide fallback content in case template doesn't exist
-            html: COMPANY_REGISTER_INVITATION,
-            text: `${subject}\n\nEstimado/a ${customEmail.name},\n\n${message}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
-          } : {
-            to: customEmail.email,
-            subject: subject,
-            html: COMPANY_REGISTER_INVITATION,
-            text: `${subject}\n\nEstimado/a ${customEmail.name},\n\n${message}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+            subject: 'Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO',
+            html: prepareTemplate(customEmail.name, customEmail.name),
+            text: `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${customEmail.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
           };
 
           const result = await sendEmailDirect(emailOptions);
@@ -174,7 +226,7 @@ export async function POST(request: NextRequest) {
             results.failed++;
             results.errors.push(`${customEmail.name} (${customEmail.email}): ${result.error}`);
           }
-        } catch (error) {
+        } catch {
           results.failed++;
           results.errors.push(`${customEmail.name} (${customEmail.email}): Error al enviar correo`);
         }

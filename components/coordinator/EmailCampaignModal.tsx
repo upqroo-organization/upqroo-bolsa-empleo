@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "sonner"
@@ -16,13 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Tabs,
   TabsContent,
@@ -38,8 +31,6 @@ import {
 } from "@/components/ui/card"
 import {
   Mail,
-  Users,
-  Eye,
   Send,
   Building2,
   CheckCircle,
@@ -59,15 +50,7 @@ interface Company {
   state: {
     name: string
   } | null
-}
-
-interface EmailTemplate {
-  id: string
-  name: string
-  subject: string
-  description: string
-  variables: string[]
-  content: string
+  isExternal?: boolean
 }
 
 interface EmailCampaignModalProps {
@@ -84,29 +67,19 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
   const [companies, setCompanies] = useState<Company[]>([])
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
   const [companyFilter, setCompanyFilter] = useState("")
+  const [internalCount, setInternalCount] = useState(0)
+  const [externalCount, setExternalCount] = useState(0)
 
   // Custom emails data
   const [customEmails, setCustomEmails] = useState<Array<{ email: string; name: string }>>([])
   const [newEmail, setNewEmail] = useState("")
   const [newName, setNewName] = useState("")
 
-  // Templates data
-  const [templates, setTemplates] = useState<EmailTemplate[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("none")
-
-  // Email composition
+  // Email composition - simplified for single template
   const [emailData, setEmailData] = useState({
-    subject: "",
-    message: "",
-    templateData: {} as Record<string, string>
+    companyName: "",
+    contactName: ""
   })
-
-  // Preview and results
-  const [previewData, setPreviewData] = useState<{
-    subject: string
-    content: string
-    recipient: Company | null
-  } | null>(null)
 
   const [sendResults, setSendResults] = useState<{
     totalCompanies: number
@@ -116,11 +89,10 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
     errors: string[]
   } | null>(null)
 
-  // Load companies and templates when modal opens
+  // Load companies when modal opens
   useEffect(() => {
     if (open) {
       loadCompanies()
-      loadTemplates()
     }
   }, [open])
 
@@ -133,6 +105,8 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
       if (result.success) {
         setCompanies(result.data.companies)
         setSelectedCompanies(result.data.companies.map((c: Company) => c.id))
+        setInternalCount(result.data.internalCount || 0)
+        setExternalCount(result.data.externalCount || 0)
       } else {
         toast.error("Error al cargar empresas")
       }
@@ -141,43 +115,6 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
       toast.error("Error de conexión")
     } finally {
       setLoading(false)
-    }
-  }
-
-  const loadTemplates = async () => {
-    try {
-      const response = await fetch("/api/coordinador/email-templates")
-      const result = await response.json()
-
-      if (result.success) {
-        setTemplates(result.data)
-      }
-    } catch (error) {
-      console.error("Error loading templates:", error)
-    }
-  }
-
-  const handleTemplateSelect = (templateId: string) => {
-    if (templateId === "none") {
-      setSelectedTemplate("none")
-      setEmailData(prev => ({
-        ...prev,
-        subject: "",
-        message: "",
-        templateData: {}
-      }))
-      return
-    }
-
-    const template = templates.find(t => t.id === templateId)
-    if (template) {
-      setSelectedTemplate(templateId)
-      setEmailData(prev => ({
-        ...prev,
-        subject: template.subject,
-        message: template.content,
-        templateData: {}
-      }))
     }
   }
 
@@ -237,59 +174,11 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
     setCustomEmails(prev => prev.filter(e => e.email !== emailToRemove))
   }
 
-  const generatePreview = () => {
-    if (!emailData.subject || !emailData.message || (selectedCompanies.length === 0 && customEmails.length === 0)) {
-      toast.error("Complete todos los campos requeridos y seleccione al menos un destinatario")
-      return
-    }
 
-    // Use company for preview if available, otherwise use first custom email
-    const sampleCompany = companies.find(c => selectedCompanies.includes(c.id))
-    if (!sampleCompany && customEmails.length === 0) return
-
-    let previewContent = emailData.message
-    let previewSubject = emailData.subject
-
-    // Replace template variables
-    if (selectedTemplate && selectedTemplate !== "none") {
-      const template = templates.find(t => t.id === selectedTemplate)
-      if (template) {
-        template.variables.forEach(variable => {
-          const value = emailData.templateData[variable] || `[${variable}]`
-          previewContent = previewContent.replace(new RegExp(`{{${variable}}}`, 'g'), value)
-          previewSubject = previewSubject.replace(new RegExp(`{{${variable}}}`, 'g'), value)
-        })
-      }
-    }
-
-    // Replace company-specific variables
-    if (sampleCompany) {
-      previewContent = previewContent.replace(/{{companyName}}/g, sampleCompany.name)
-      previewContent = previewContent.replace(/{{contactName}}/g, sampleCompany.contactName || 'Estimado/a')
-    } else {
-      // For custom emails, use generic placeholders
-      previewContent = previewContent.replace(/{{companyName}}/g, customEmails[0]?.name || 'Empresa')
-      previewContent = previewContent.replace(/{{contactName}}/g, 'Estimado/a')
-    }
-
-    setPreviewData({
-      subject: previewSubject,
-      content: previewContent,
-      recipient: sampleCompany || {
-        id: 'custom',
-        name: customEmails[0]?.name || 'Email personalizado',
-        email: customEmails[0]?.email || '',
-        contactName: customEmails[0]?.name || null,
-        industry: null,
-        state: null
-      }
-    })
-    setActiveTab("preview")
-  }
 
   const handleSendEmails = async () => {
-    if (!emailData.subject || !emailData.message || (selectedCompanies.length === 0 && customEmails.length === 0)) {
-      toast.error("Complete todos los campos requeridos y seleccione al menos un destinatario")
+    if ((selectedCompanies.length === 0 && customEmails.length === 0)) {
+      toast.error("Seleccione al menos un destinatario")
       return
     }
 
@@ -301,12 +190,9 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          subject: emailData.subject,
-          message: emailData.message,
-          template: selectedTemplate !== "none" ? selectedTemplate : null,
-          templateData: emailData.templateData,
           companyIds: selectedCompanies,
-          customEmails: customEmails
+          customEmails: customEmails,
+          templateData: emailData
         })
       })
 
@@ -330,14 +216,14 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
 
   const resetModal = () => {
     setActiveTab("compose")
-    setSelectedTemplate("none")
-    setEmailData({ subject: "", message: "", templateData: {} })
-    setPreviewData(null)
+    setEmailData({ companyName: "", contactName: "" })
     setSendResults(null)
     setCompanyFilter("")
     setCustomEmails([])
     setNewEmail("")
     setNewName("")
+    setInternalCount(0)
+    setExternalCount(0)
   }
 
   const handleClose = () => {
@@ -363,96 +249,81 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="compose">Redactar</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2">
+            {/* <TabsTrigger value="compose">Configurar</TabsTrigger> */}
             <TabsTrigger value="recipients">Destinatarios</TabsTrigger>
-            <TabsTrigger value="preview" disabled={!previewData}>Vista Previa</TabsTrigger>
             <TabsTrigger value="results" disabled={!sendResults}>Resultados</TabsTrigger>
           </TabsList>
 
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
             <TabsContent value="compose" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Plantillas</CardTitle>
-                    <CardDescription>Selecciona una plantilla predefinida</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar plantilla..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Sin plantilla</SelectItem>
-                        {templates.map(template => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    {selectedTemplate && selectedTemplate !== "none" && (
-                      <div className="mt-4 space-y-3">
-                        <p className="text-sm text-muted-foreground">
-                          {templates.find(t => t.id === selectedTemplate)?.description}
-                        </p>
-
-                        {templates.find(t => t.id === selectedTemplate)?.variables.map(variable => (
-                          <div key={variable}>
-                            <Label htmlFor={variable} className="text-sm">
-                              {variable.charAt(0).toUpperCase() + variable.slice(1)}
-                            </Label>
-                            <Input
-                              id={variable}
-                              value={emailData.templateData[variable] || ""}
-                              onChange={(e) => setEmailData(prev => ({
-                                ...prev,
-                                templateData: {
-                                  ...prev.templateData,
-                                  [variable]: e.target.value
-                                }
-                              }))}
-                              placeholder={`Ingrese ${variable}`}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Composición</CardTitle>
-                    <CardDescription>Redacta tu mensaje personalizado</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Configuración del Email</CardTitle>
+                  <CardDescription>
+                    Se enviará la plantilla de invitación a registro con los datos personalizados
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="subject">Asunto</Label>
+                      <Label htmlFor="companyName">Nombre de la empresa (opcional)</Label>
                       <Input
-                        id="subject"
-                        value={emailData.subject}
-                        onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
-                        placeholder="Asunto del correo"
+                        id="companyName"
+                        value={emailData.companyName}
+                        onChange={(e) => setEmailData(prev => ({ ...prev, companyName: e.target.value }))}
+                        placeholder="Ej: Empresa ABC (se usará el nombre registrado si se deja vacío)"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Si se deja vacío, se usará el nombre de cada empresa registrada
+                      </p>
                     </div>
 
                     <div>
-                      <Label htmlFor="message">Mensaje</Label>
-                      <Textarea
-                        id="message"
-                        value={emailData.message}
-                        onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
-                        placeholder="Escribe tu mensaje aquí..."
-                        rows={8}
-                        className="resize-none"
+                      <Label htmlFor="contactName">Nombre del contacto (opcional)</Label>
+                      <Input
+                        id="contactName"
+                        value={emailData.contactName}
+                        onChange={(e) => setEmailData(prev => ({ ...prev, contactName: e.target.value }))}
+                        placeholder="Ej: Sr./Sra. García (se usará el contacto registrado si se deja vacío)"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Si se deja vacío, se usará el contacto de cada empresa o &quot;Estimado/a&quot;
+                      </p>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Plantilla que se enviará:</h4>
+                    <p className="text-sm text-blue-800">
+                      &quot;Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO&quot;
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      La plantilla incluye información sobre los beneficios de registrarse,
+                      enlace de registro y datos de contacto de la universidad.
+                    </p>
+                  </div>
+
+                  {(internalCount > 0 || externalCount > 0) && (
+                    <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-2">Empresas disponibles:</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-gray-600 rounded-full"></div>
+                          <span>{internalCount} empresas registradas</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                          <span>{externalCount} empresas externas</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Las empresas externas provienen de la base de datos de empresas que ya trabajan con la universidad.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="recipients" className="space-y-4">
@@ -462,10 +333,14 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Building2 className="h-5 w-5" />
-                      Empresas Registradas
+                      Empresas Disponibles
                     </CardTitle>
                     <CardDescription>
                       {selectedCount} de {companies.length} empresas seleccionadas
+                      <br />
+                      <span className="text-xs">
+                        {internalCount} registradas • {externalCount} externas
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -493,9 +368,16 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
                               checked={selectedCompanies.includes(company.id)}
                               onCheckedChange={() => handleCompanyToggle(company.id)}
                             />
-                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            <Building2 className={`h-4 w-4 ${company.isExternal ? 'text-blue-600' : 'text-muted-foreground'}`} />
                             <div className="flex-1">
-                              <p className="font-medium">{company.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium">{company.name}</p>
+                                {company.isExternal && (
+                                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                    Externa
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-muted-foreground">{company.email}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 {company.industry && (
@@ -587,166 +469,7 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
               </div>
             </TabsContent>
 
-            <TabsContent value="preview" className="space-y-4">
-              {previewData && (
-                <div className="space-y-4">
-                  {/* Email Client Header */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Eye className="h-5 w-5" />
-                        Vista Previa del Correo
-                      </CardTitle>
-                      <CardDescription>
-                        Así verá el correo: {previewData.recipient?.name} ({previewData.recipient?.email})
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
 
-                  {/* Email Preview Container */}
-                  <div className="bg-gray-100 p-4 rounded-lg">
-                    <div className="bg-white rounded-lg shadow-sm border max-w-2xl mx-auto">
-                      {/* Email Header */}
-                      <div className="border-b bg-gray-50 px-6 py-4 rounded-t-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                              <Mail className="h-4 w-4 text-white" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">Universidad Politécnica de Quintana Roo</p>
-                              <p className="text-xs text-muted-foreground">coordinacion@upqroo.edu.mx</p>
-                            </div>
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date().toLocaleDateString('es-MX', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Para:</span>
-                            <span>{previewData.recipient?.contactName || 'Estimado/a'} &lt;{previewData.recipient?.email}&gt;</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Asunto:</span>
-                            <span className="font-medium">{previewData.subject}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Email Body */}
-                      <div className="px-6 py-6">
-                        <div className="prose prose-sm max-w-none">
-                          <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                            {previewData.content}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Email Footer */}
-                      <div className="border-t bg-gray-50 px-6 py-4 rounded-b-lg">
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <p className="font-medium">Universidad Politécnica de Quintana Roo</p>
-                          <p>Coordinación de Vinculación Empresarial</p>
-                          <p>Av. Arco Bicentenario, Mza. 1, Lote 1, Sm. 255, Cancún, Q.R.</p>
-                          <p>Tel: (998) 000-0000 | coordinacion@upqroo.edu.mx</p>
-                          <div className="pt-2 border-t mt-3">
-                            <p className="text-xs">
-                              Este correo fue enviado desde la plataforma de Bolsa de Trabajo Universitaria de UPQROO.
-                              Si no desea recibir más correos de este tipo, puede contactarnos para darse de baja.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Preview Controls */}
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">Información del destinatario de ejemplo:</p>
-                          <div className="text-xs text-muted-foreground space-y-1">
-                            <p>• Empresa: {previewData.recipient?.name}</p>
-                            <p>• Contacto: {previewData.recipient?.contactName || 'No especificado'}</p>
-                            <p>• Email: {previewData.recipient?.email}</p>
-                            {previewData.recipient?.industry && (
-                              <p>• Industria: {previewData.recipient.industry}</p>
-                            )}
-                            {previewData.recipient?.state && (
-                              <p>• Estado: {previewData.recipient.state.name}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setActiveTab("compose")}
-                          >
-                            Editar
-                          </Button>
-                          <Select
-                            value={previewData.recipient?.id || ""}
-                            onValueChange={(companyId) => {
-                              const newRecipient = companies.find(c => c.id === companyId && selectedCompanies.includes(c.id))
-                              if (newRecipient) {
-                                // Regenerate preview with new recipient
-                                let previewContent = emailData.message
-                                let previewSubject = emailData.subject
-
-                                // Replace template variables
-                                if (selectedTemplate && selectedTemplate !== "none") {
-                                  const template = templates.find(t => t.id === selectedTemplate)
-                                  if (template) {
-                                    template.variables.forEach(variable => {
-                                      const value = emailData.templateData[variable] || `[${variable}]`
-                                      previewContent = previewContent.replace(new RegExp(`{{${variable}}}`, 'g'), value)
-                                      previewSubject = previewSubject.replace(new RegExp(`{{${variable}}}`, 'g'), value)
-                                    })
-                                  }
-                                }
-
-                                // Replace company-specific variables
-                                previewContent = previewContent.replace(/{{companyName}}/g, newRecipient.name)
-                                previewContent = previewContent.replace(/{{contactName}}/g, newRecipient.contactName || 'Estimado/a')
-
-                                setPreviewData({
-                                  subject: previewSubject,
-                                  content: previewContent,
-                                  recipient: newRecipient
-                                })
-                              }
-                            }}
-                          >
-                            <SelectTrigger className="w-48">
-                              <SelectValue placeholder="Cambiar empresa ejemplo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {companies.filter(c => selectedCompanies.includes(c.id)).map(company => (
-                                <SelectItem key={company.id} value={company.id}>
-                                  {company.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </TabsContent>
 
             <TabsContent value="results" className="space-y-4">
               {sendResults && (
@@ -844,7 +567,7 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
               {customEmails.length} emails personalizados
             </div>
             <div className="flex items-center gap-2 font-medium text-foreground">
-              <Users className="h-4 w-4" />
+              <UserPlus className="h-4 w-4" />
               {totalRecipients} total
             </div>
           </div>
@@ -854,14 +577,7 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
               Cerrar
             </Button>
 
-            {activeTab === "compose" && (
-              <Button onClick={generatePreview} disabled={!emailData.subject || !emailData.message}>
-                <Eye className="h-4 w-4 mr-2" />
-                Vista Previa
-              </Button>
-            )}
-
-            {activeTab === "preview" && (
+            {(activeTab === "compose" || activeTab === "recipients") && (
               <Button onClick={handleSendEmails} disabled={sending || totalRecipients === 0}>
                 {sending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
