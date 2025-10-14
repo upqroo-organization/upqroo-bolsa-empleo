@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/es';
 import { getEnumLabelSafe } from "@/utils"
+import Image from 'next/image'
 
 dayjs.extend(relativeTime);
 dayjs.locale('es');
@@ -54,8 +55,8 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
             </div>
           </div>
           <div className="flex gap-2 self-start">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => onShare?.(vacante)}
               className="h-8 w-8 p-0"
@@ -66,6 +67,18 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
         </div>
       </CardHeader>
       <CardContent className="pt-0">
+        {/* Job Image */}
+        {vacante.imageUrl && (
+          <div className="relative w-full h-32 sm:h-40 rounded-lg overflow-hidden bg-gray-100 mb-4">
+            <Image
+              src={`/${vacante.imageUrl}`}
+              alt={`Imagen de ${vacante.title}`}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )}
+
         <div className="space-y-3 sm:space-y-4">
           {/* Badges and Salary Section */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -100,7 +113,7 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             {isAuthenticated && hasApplied ? (
-              <Button 
+              <Button
                 className="flex-1 text-sm"
                 variant="outline"
                 disabled
@@ -110,7 +123,7 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
                 Ya aplicaste
               </Button>
             ) : (
-              <Button 
+              <Button
                 className="flex-1 text-sm"
                 onClick={() => onApply?.(vacante.id)}
                 size="sm"
@@ -118,7 +131,7 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
                 Postularme
               </Button>
             )}
-            <Button 
+            <Button
               variant="outline"
               onClick={() => onViewDetails?.(vacante)}
               className="sm:w-auto text-sm"

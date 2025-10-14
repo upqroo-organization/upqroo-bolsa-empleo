@@ -8,6 +8,7 @@ import { getEnumLabelSafe } from "@/utils"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/es'
+import Image from 'next/image'
 
 dayjs.extend(relativeTime)
 dayjs.locale('es')
@@ -22,14 +23,14 @@ interface JobDetailsDrawerProps {
   onShare: (vacante: VacanteInterface) => void
 }
 
-export default function JobDetailsDrawer({ 
-  vacante, 
+export default function JobDetailsDrawer({
+  vacante,
   hasApplied = false,
   isAuthenticated = false,
-  isOpen, 
-  onClose, 
-  onApply, 
-  onShare 
+  isOpen,
+  onClose,
+  onApply,
+  onShare
 }: JobDetailsDrawerProps) {
   if (!vacante) return null
 
@@ -47,6 +48,18 @@ export default function JobDetailsDrawer({
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
+          {/* Job Image */}
+          {vacante.imageUrl && (
+            <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
+              <Image
+                src={`/${vacante.imageUrl}`}
+                alt={`Imagen de ${vacante.title}`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
+
           {/* Basic Info */}
           <div className="space-y-3">
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -81,9 +94,9 @@ export default function JobDetailsDrawer({
             {(vacante.salaryMin || vacante.salaryMax) && (
               <div className="flex items-center gap-1 text-green-600 font-semibold">
                 <DollarSign className="h-4 w-4" />
-                {vacante.salaryMin && vacante.salaryMax 
+                {vacante.salaryMin && vacante.salaryMax
                   ? `$${vacante.salaryMin.toLocaleString()} - $${vacante.salaryMax.toLocaleString()}`
-                  : vacante.salaryMin 
+                  : vacante.salaryMin
                     ? `Desde $${vacante.salaryMin.toLocaleString()}`
                     : `Hasta $${vacante.salaryMax?.toLocaleString()}`
                 }
@@ -147,7 +160,7 @@ export default function JobDetailsDrawer({
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
             {isAuthenticated && hasApplied ? (
-              <Button 
+              <Button
                 className="flex-1"
                 variant="outline"
                 disabled
@@ -156,15 +169,15 @@ export default function JobDetailsDrawer({
                 Ya aplicaste
               </Button>
             ) : (
-              <Button 
-                className="flex-1" 
+              <Button
+                className="flex-1"
                 onClick={() => onApply(vacante.id)}
               >
                 Postularme
               </Button>
             )}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onShare(vacante)}
             >
               <Share2 className="h-4 w-4 mr-2" />
