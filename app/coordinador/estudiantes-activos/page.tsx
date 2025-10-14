@@ -26,7 +26,7 @@ import {
   GraduationCap,
   MapPin,
   Phone,
-  Download,
+  Eye,
   Filter,
   Grid3X3,
   List,
@@ -66,7 +66,7 @@ export default function EstudiantesActivos() {
     try {
       setLoading(true)
       const response = await fetch("/api/coordinador/estudiantes-activos")
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar los estudiantes")
       }
@@ -120,11 +120,11 @@ export default function EstudiantesActivos() {
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.career.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.career.toLowerCase().includes(searchTerm.toLowerCase())
+
     const matchesStatus = statusFilter === "all" || student.status === statusFilter
-    
+
     return matchesSearch && matchesStatus
   })
 
@@ -323,14 +323,8 @@ export default function EstudiantesActivos() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg">{student.name}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {student.career}
-                      </CardDescription>
                     </div>
                   </div>
-                  <Badge className={getStatusColor(student.status)}>
-                    {getStatusLabel(student.status)}
-                  </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -374,9 +368,19 @@ export default function EstudiantesActivos() {
 
                 <div className="flex gap-2 pt-2">
                   {student.cvUrl && (
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Download className="h-4 w-4 mr-2" />
-                      Descargar CV
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        // Extract filename from cvUrl and construct API URL
+                        const filename = student.cvUrl.split('/').pop() || student.cvUrl
+                        const apiUrl = `/api/uploads/cvs/${filename}`
+                        window.open(apiUrl, '_blank')
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver CV
                     </Button>
                   )}
                 </div>
@@ -455,8 +459,17 @@ export default function EstudiantesActivos() {
                       </TableCell>
                       <TableCell className="text-center">
                         {student.cvUrl ? (
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              // Extract filename from cvUrl and construct API URL
+                              const filename = student.cvUrl.split('/').pop() || student.cvUrl
+                              const apiUrl = `/api/uploads/cvs/${filename}`
+                              window.open(apiUrl, '_blank')
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
                           </Button>
                         ) : (
                           <span className="text-xs text-muted-foreground">Sin CV</span>
