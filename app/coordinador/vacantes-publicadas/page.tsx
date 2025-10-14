@@ -267,16 +267,37 @@ export default function VacantesPublicadas() {
   }
 
   const getModalityLabel = (modality: string) => {
-    switch (modality) {
-      case "onSite":
+    console.log('Translating modality:', modality)
+    switch (modality?.toLowerCase()) {
+      case "onsite":
+      case "on-site":
+      case "presencial":
         return "Presencial"
       case "remote":
+      case "remoto":
         return "Remoto"
       case "hybrid":
+      case "hibrido":
+      case "híbrido":
         return "Híbrido"
+      case "":
+      case null:
+      case undefined:
+        return ""
       default:
         return modality
     }
+  }
+
+  const getRealStatus = (vacante: Vacante) => {
+    if (vacante.deadline) {
+      const now = new Date()
+      const deadline = new Date(vacante.deadline)
+      if (deadline < now && vacante.status === "active") {
+        return "expired"
+      }
+    }
+    return vacante.status
   }
 
   const filteredVacantes = vacantes.filter(vacante => {
@@ -509,8 +530,8 @@ export default function VacantesPublicadas() {
                       {vacante.company.name}
                     </CardDescription>
                   </div>
-                  <Badge className={getStatusColor(vacante.status)}>
-                    {getStatusLabel(vacante.status)}
+                  <Badge className={getStatusColor(getRealStatus(vacante))}>
+                    {getStatusLabel(getRealStatus(vacante))}
                   </Badge>
                 </div>
               </CardHeader>
@@ -565,7 +586,7 @@ export default function VacantesPublicadas() {
                   </div>
                 </div>
 
-                {vacante.status === "expired" && (
+                {getRealStatus(vacante) === "expired" && (
                   <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg text-red-700 text-xs">
                     <AlertCircle className="h-3 w-3" />
                     <span>Esta vacante ha expirado</span>
@@ -615,8 +636,8 @@ export default function VacantesPublicadas() {
                             </div>
                             <div className="space-y-3">
                               <div className="flex items-center gap-2">
-                                <Badge className={getStatusColor(selectedVacante.status)}>
-                                  {getStatusLabel(selectedVacante.status)}
+                                <Badge className={getStatusColor(getRealStatus(selectedVacante))}>
+                                  {getStatusLabel(getRealStatus(selectedVacante))}
                                 </Badge>
                               </div>
                               <div className="flex gap-2">
@@ -843,8 +864,8 @@ export default function VacantesPublicadas() {
                         <span className="text-sm">{formatSalary(vacante.salaryMin, vacante.salaryMax)}</span>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(vacante.status)}>
-                          {getStatusLabel(vacante.status)}
+                        <Badge className={getStatusColor(getRealStatus(vacante))}>
+                          {getStatusLabel(getRealStatus(vacante))}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -883,7 +904,7 @@ export default function VacantesPublicadas() {
                             <span className="text-sm text-muted-foreground">
                               {formatDate(vacante.deadline)}
                             </span>
-                            {vacante.status === "expired" && (
+                            {getRealStatus(vacante) === "expired" && (
                               <AlertCircle className="h-3 w-3 text-red-500" />
                             )}
                           </div>

@@ -177,13 +177,23 @@ export default function ColocacionesExitosas() {
   }
 
   const getModalityLabel = (modality: string) => {
-    switch (modality) {
-      case "onSite":
+    console.log('Translating modality in colocaciones:', modality)
+    switch (modality?.toLowerCase()) {
+      case "onsite":
+      case "on-site":
+      case "presencial":
         return "Presencial"
       case "remote":
+      case "remoto":
         return "Remoto"
       case "hybrid":
+      case "hibrido":
+      case "híbrido":
         return "Híbrido"
+      case "":
+      case null:
+      case undefined:
+        return ""
       default:
         return modality
     }

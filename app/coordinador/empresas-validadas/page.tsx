@@ -135,7 +135,26 @@ export default function EmpresasValidadas() {
       case "large":
         return "Grande"
       default:
-        return size
+        return size === "No especificado" ? "" : size
+    }
+  }
+
+  const getSectorLabel = (sector: string) => {
+    switch (sector) {
+      case "tech":
+        return "Tecnología"
+      case "tourism":
+        return "Turismo"
+      case "manufacturing":
+        return "Manufactura"
+      case "services":
+        return "Servicios"
+      case "retail":
+        return "Comercio"
+      case "other":
+        return "Otro"
+      default:
+        return sector === "No especificado" ? "" : sector
     }
   }
 
@@ -298,9 +317,9 @@ export default function EmpresasValidadas() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los sectores</SelectItem>
-                {sectors.map((sector) => (
+                {sectors.filter(sector => sector && sector !== "No especificado").map((sector) => (
                   <SelectItem key={sector} value={sector}>
-                    {sector}
+                    {getSectorLabel(sector) || sector}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -311,7 +330,7 @@ export default function EmpresasValidadas() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tamaños</SelectItem>
-                {sizes.map((size) => (
+                {sizes.filter(size => size && size !== "No especificado" && getSizeLabel(size)).map((size) => (
                   <SelectItem key={size} value={size}>
                     {getSizeLabel(size)}
                   </SelectItem>
@@ -374,15 +393,19 @@ export default function EmpresasValidadas() {
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg">{company.name}</CardTitle>
-                      <CardDescription className="text-sm">
-                        {company.sector}
-                      </CardDescription>
+                      {getSectorLabel(company.sector) && (
+                        <CardDescription className="text-sm">
+                          {getSectorLabel(company.sector)}
+                        </CardDescription>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Badge className={getSizeColor(company.size)}>
-                      {getSizeLabel(company.size)}
-                    </Badge>
+                    {getSizeLabel(company.size) && (
+                      <Badge className={getSizeColor(company.size)}>
+                        {getSizeLabel(company.size)}
+                      </Badge>
+                    )}
                     {company.fiscalDocumentUrl && (
                       <Badge variant="outline" className="text-xs">
                         <FileText className="h-3 w-3 mr-1" />
@@ -498,7 +521,7 @@ export default function EmpresasValidadas() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{company.sector}</span>
+                        <span className="text-sm">{getSectorLabel(company.sector) || company.sector}</span>
                       </TableCell>
                       <TableCell>
                         <Badge className={getSizeColor(company.size)}>
