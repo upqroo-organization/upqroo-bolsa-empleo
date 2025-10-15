@@ -8,7 +8,7 @@ import { getEnumLabelSafe } from "@/utils"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/es'
-import Image from 'next/image'
+import { ExpandableImage } from "@/components/ui/expandable-image"
 
 dayjs.extend(relativeTime)
 dayjs.locale('es')
@@ -48,18 +48,6 @@ export default function JobDetailsDrawer({
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
-          {/* Job Image */}
-          {vacante.imageUrl && (
-            <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
-              <Image
-                src={`/${vacante.imageUrl}`}
-                alt={`Imagen de ${vacante.title}`}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-
           {/* Basic Info */}
           <div className="space-y-3">
             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -106,27 +94,47 @@ export default function JobDetailsDrawer({
 
           <Separator />
 
-          {/* Summary */}
-          {vacante.summary && (
-            <div>
-              <h3 className="font-semibold mb-2">Resumen</h3>
-              <p className="text-sm text-gray-700">{vacante.summary}</p>
-            </div>
-          )}
+          {/* Content Section - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Content - Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Summary */}
+              {vacante.summary && (
+                <div>
+                  <h3 className="font-semibold mb-2">Resumen</h3>
+                  <p className="text-sm text-gray-700">{vacante.summary}</p>
+                </div>
+              )}
 
-          {/* Description */}
-          <div>
-            <h3 className="font-semibold mb-2">Descripción del puesto</h3>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.description}</p>
+              {/* Description */}
+              <div>
+                <h3 className="font-semibold mb-2">Descripción del puesto</h3>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.description}</p>
+              </div>
+
+              {/* Responsibilities */}
+              {vacante.responsibilities && (
+                <div>
+                  <h3 className="font-semibold mb-2">Responsabilidades</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.responsibilities}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Job Image - Right Column */}
+            {vacante.imageUrl && (
+              <div className="lg:col-span-1">
+                <div className="sticky top-4">
+                  <ExpandableImage
+                    src={`/${vacante.imageUrl}`}
+                    alt={`Imagen de ${vacante.title}`}
+                    containerClassName="relative w-full h-48 lg:h-64 rounded-lg overflow-hidden bg-gray-100 border"
+                    objectFit="contain"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Responsibilities */}
-          {vacante.responsibilities && (
-            <div>
-              <h3 className="font-semibold mb-2">Responsabilidades</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.responsibilities}</p>
-            </div>
-          )}
 
           <Separator />
 

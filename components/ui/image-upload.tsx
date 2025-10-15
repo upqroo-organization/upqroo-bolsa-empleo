@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import Image from 'next/image'
+import { ExpandableImage } from '@/components/ui/expandable-image'
 
 interface ImageUploadProps {
   currentImageUrl?: string | null
@@ -111,14 +111,12 @@ export function ImageUpload({
         <CardContent className="p-4">
           {currentImageUrl ? (
             <div className="space-y-4">
-              <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100">
-                <Image
-                  src={`/${currentImageUrl}`}
-                  alt="Imagen actual"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              <ExpandableImage
+                src={`/${currentImageUrl}`}
+                alt="Imagen actual"
+                containerClassName="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 border"
+                objectFit="contain"
+              />
               <div className="flex gap-2">
                 <Button
                   type="button"
