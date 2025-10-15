@@ -43,7 +43,6 @@ import {
   Grid3X3,
   List,
   Mail,
-  Phone,
   Clock,
   Star,
   FileText,
@@ -91,7 +90,7 @@ export default function ColocacionesExitosas() {
   const [sectorFilter, setSectorFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
-  
+
   // Modal state
   const [selectedColocacion, setSelectedColocacion] = useState<Colocacion | null>(null)
 
@@ -103,7 +102,7 @@ export default function ColocacionesExitosas() {
     try {
       setLoading(true)
       const response = await fetch("/api/coordinador/colocaciones-exitosas")
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar las colocaciones")
       }
@@ -297,14 +296,14 @@ export default function ColocacionesExitosas() {
 
   const filteredColocaciones = colocaciones.filter(colocacion => {
     const matchesSearch = colocacion.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         colocacion.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         colocacion.vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         colocacion.student.career.toLowerCase().includes(searchTerm.toLowerCase())
-    
+      colocacion.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      colocacion.vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      colocacion.student.career.toLowerCase().includes(searchTerm.toLowerCase())
+
     const matchesCareer = careerFilter === "all" || colocacion.student.career === careerFilter
     const matchesSector = sectorFilter === "all" || colocacion.company.sector === sectorFilter
     const matchesStatus = statusFilter === "all" || colocacion.status === statusFilter
-    
+
     return matchesSearch && matchesCareer && matchesSector && matchesStatus
   })
 
@@ -619,7 +618,7 @@ export default function ColocacionesExitosas() {
                           Información completa del estudiante, empresa y vacante
                         </DialogDescription>
                       </DialogHeader>
-                      
+
                       {selectedColocacion && (
                         <div className="space-y-6">
                           {/* Student Information */}
@@ -649,7 +648,7 @@ export default function ColocacionesExitosas() {
                                   </div>
                                 </div>
                               </div>
-                              
+
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center gap-2">
                                   <GraduationCap className="h-4 w-4 text-muted-foreground" />
@@ -678,7 +677,7 @@ export default function ColocacionesExitosas() {
                                   {getSectorLabel(selectedColocacion.company.sector)}
                                 </Badge>
                               </div>
-                              
+
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center gap-2">
                                   <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -712,7 +711,7 @@ export default function ColocacionesExitosas() {
                                   </Badge>
                                 </div>
                               </div>
-                              
+
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center gap-2">
                                   <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -742,7 +741,7 @@ export default function ColocacionesExitosas() {
                                   </Badge>
                                   <p className="text-sm text-muted-foreground">Estado Actual</p>
                                 </div>
-                                
+
                                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                                   <div className="flex items-center gap-2 justify-center mb-2">
                                     <Calendar className="h-4 w-4 text-blue-600" />
@@ -752,7 +751,7 @@ export default function ColocacionesExitosas() {
                                   </div>
                                   <p className="text-sm text-muted-foreground">Fecha de Contratación</p>
                                 </div>
-                                
+
                                 {selectedColocacion.startDate && (
                                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                                     <div className="flex items-center gap-2 justify-center mb-2">
@@ -764,18 +763,17 @@ export default function ColocacionesExitosas() {
                                     <p className="text-sm text-muted-foreground">Fecha de Inicio</p>
                                   </div>
                                 )}
-                                
+
                                 {selectedColocacion.performance && (
                                   <div className="text-center p-4 bg-yellow-50 rounded-lg">
                                     <div className="flex items-center justify-center gap-1 mb-2">
                                       {[...Array(5)].map((_, i) => (
                                         <Star
                                           key={i}
-                                          className={`h-4 w-4 ${
-                                            i < getPerformanceStars(selectedColocacion.performance)
+                                          className={`h-4 w-4 ${i < getPerformanceStars(selectedColocacion.performance)
                                               ? "text-yellow-500 fill-current"
                                               : "text-gray-300"
-                                          }`}
+                                            }`}
                                         />
                                       ))}
                                       <span className="ml-2 font-semibold text-yellow-600">

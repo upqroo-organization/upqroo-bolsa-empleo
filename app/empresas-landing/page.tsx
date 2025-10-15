@@ -19,7 +19,6 @@ import {
   BarChart3,
   FileText,
   UserCheck,
-  Mail,
   Settings,
 } from "lucide-react"
 import Link from "next/link"

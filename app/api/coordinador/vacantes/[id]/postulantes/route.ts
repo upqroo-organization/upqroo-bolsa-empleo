@@ -2,11 +2,11 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const vacanteId = params.id
+    const { id: vacanteId } = await params
 
     // Verificar que la vacante existe
     const vacante = await prisma.vacante.findUnique({

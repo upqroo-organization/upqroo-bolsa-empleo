@@ -12,6 +12,8 @@ export async function POST(req: Request) {
       phone,
       rfc,
       sector,
+      size,
+      website,
       direccion,
       description,
       contactName,
@@ -78,7 +80,6 @@ export async function POST(req: Request) {
         description: description || null,
         contactName: contactName || null,
         contactPosition: contactPosition || null,
-        companyType: companyType,
         contactEmail: email, // Use company email as contact email
         isApprove: false, // Companies start as unapproved
         roleId: companyRole.id,
