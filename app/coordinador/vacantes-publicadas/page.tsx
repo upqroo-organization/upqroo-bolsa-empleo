@@ -797,11 +797,18 @@ export default function VacantesPublicadas() {
 
                                   {postulante.cvUrl && (
                                     <div className="mt-3 pt-3 border-t">
-                                      <Button variant="outline" size="sm" asChild>
-                                        <a href={postulante.cvUrl} target="_blank" rel="noopener noreferrer">
-                                          <Download className="h-3 w-3 mr-2" />
-                                          Descargar CV
-                                        </a>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => {
+                                          // Extract filename from cvUrl and construct API URL
+                                          const filename = postulante.cvUrl?.split('/').pop() || postulante.cvUrl
+                                          const apiUrl = `/api/uploads/cvs/${filename}`
+                                          window.open(apiUrl, '_blank')
+                                        }}
+                                      >
+                                        <Eye className="h-3 w-3 mr-2" />
+                                        Ver CV
                                       </Button>
                                     </div>
                                   )}

@@ -199,6 +199,85 @@ export default function ColocacionesExitosas() {
     }
   }
 
+  const getSectorLabel = (sector: string) => {
+    console.log('Translating sector in colocaciones:', sector)
+    switch (sector?.toLowerCase()) {
+      case "technology":
+      case "tech":
+        return "Tecnología"
+      case "healthcare":
+      case "health":
+        return "Salud"
+      case "finance":
+      case "financial":
+        return "Finanzas"
+      case "education":
+        return "Educación"
+      case "manufacturing":
+        return "Manufactura"
+      case "retail":
+        return "Comercio"
+      case "construction":
+        return "Construcción"
+      case "automotive":
+        return "Automotriz"
+      case "telecommunications":
+      case "telecom":
+        return "Telecomunicaciones"
+      case "energy":
+        return "Energía"
+      case "agriculture":
+        return "Agricultura"
+      case "tourism":
+        return "Turismo"
+      case "logistics":
+        return "Logística"
+      case "consulting":
+        return "Consultoría"
+      case "marketing":
+        return "Marketing"
+      case "real estate":
+        return "Bienes Raíces"
+      case "food":
+      case "food & beverage":
+        return "Alimentos y Bebidas"
+      case "entertainment":
+        return "Entretenimiento"
+      case "government":
+        return "Gobierno"
+      case "non-profit":
+        return "Sin Fines de Lucro"
+      case "":
+      case null:
+      case undefined:
+        return ""
+      default:
+        return sector
+    }
+  }
+
+  const getSizeLabel = (size: string) => {
+    console.log('Translating size in colocaciones:', size)
+    switch (size?.toLowerCase()) {
+      case "startup":
+        return "Startup"
+      case "small":
+        return "Pequeña"
+      case "medium":
+        return "Mediana"
+      case "large":
+        return "Grande"
+      case "enterprise":
+        return "Empresa"
+      case "":
+      case null:
+      case undefined:
+        return ""
+      default:
+        return size
+    }
+  }
+
   const getPerformanceColor = (performance?: number) => {
     if (!performance) return "bg-gray-100 text-gray-800"
     if (performance >= 90) return "bg-green-100 text-green-800"
@@ -480,7 +559,7 @@ export default function ColocacionesExitosas() {
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">{colocacion.company.name}</span>
                     <Badge variant="outline" className="text-xs">
-                      {colocacion.company.sector}
+                      {getSectorLabel(colocacion.company.sector)}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2">
@@ -596,18 +675,18 @@ export default function ColocacionesExitosas() {
                               <div>
                                 <h3 className="font-semibold text-lg">{selectedColocacion.company.name}</h3>
                                 <Badge variant="outline" className="mt-1">
-                                  {selectedColocacion.company.sector}
+                                  {getSectorLabel(selectedColocacion.company.sector)}
                                 </Badge>
                               </div>
                               
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center gap-2">
                                   <Building2 className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm">Sector: {selectedColocacion.company.sector}</span>
+                                  <span className="text-sm">Sector: {getSectorLabel(selectedColocacion.company.sector)}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Users className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-sm">Tamaño: {selectedColocacion.company.size}</span>
+                                  <span className="text-sm">Tamaño: {getSizeLabel(selectedColocacion.company.size)}</span>
                                 </div>
                               </div>
                             </CardContent>
@@ -785,7 +864,7 @@ export default function ColocacionesExitosas() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{colocacion.company.name}</p>
-                          <p className="text-xs text-muted-foreground">{colocacion.company.sector}</p>
+                          <p className="text-xs text-muted-foreground">{getSectorLabel(colocacion.company.sector)}</p>
                         </div>
                       </TableCell>
                       <TableCell>

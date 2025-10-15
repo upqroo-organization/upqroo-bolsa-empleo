@@ -72,6 +72,66 @@ type Statistics = {
   total: number
 }
 
+// Translation function for industry sectors
+const getSectorLabel = (sector: string | null) => {
+  if (!sector) return 'No especificado'
+  
+  console.log('Translating sector in validar-empresa:', sector)
+  switch (sector.toLowerCase()) {
+    case "technology":
+    case "tech":
+      return "Tecnología"
+    case "healthcare":
+    case "health":
+      return "Salud"
+    case "finance":
+    case "financial":
+      return "Finanzas"
+    case "education":
+      return "Educación"
+    case "manufacturing":
+      return "Manufactura"
+    case "retail":
+      return "Comercio"
+    case "construction":
+      return "Construcción"
+    case "automotive":
+      return "Automotriz"
+    case "telecommunications":
+    case "telecom":
+      return "Telecomunicaciones"
+    case "energy":
+      return "Energía"
+    case "agriculture":
+      return "Agricultura"
+    case "tourism":
+      return "Turismo"
+    case "logistics":
+      return "Logística"
+    case "consulting":
+      return "Consultoría"
+    case "marketing":
+      return "Marketing"
+    case "real estate":
+      return "Bienes Raíces"
+    case "food":
+    case "food & beverage":
+      return "Alimentos y Bebidas"
+    case "entertainment":
+      return "Entretenimiento"
+    case "government":
+      return "Gobierno"
+    case "non-profit":
+      return "Sin Fines de Lucro"
+    case "services":
+      return "Servicios"
+    case "other":
+      return "Otro"
+    default:
+      return sector
+  }
+}
+
 export default function ValidateCompanies() {
   const [activeTab, setActiveTab] = useState("pending")
   const [searchTerm, setSearchTerm] = useState("")
@@ -360,7 +420,7 @@ export default function ValidateCompanies() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center">
                             <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">{company.industry || 'No especificado'}</span>
+                            <span className="truncate">{getSectorLabel(company.industry)}</span>
                           </div>
                           <div className="flex items-center">
                             <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
@@ -440,7 +500,7 @@ export default function ValidateCompanies() {
                                 <Label>Información Empresarial</Label>
                                 <div className="mt-1 space-y-1">
                                   <p className="text-sm">RFC: {company.rfc || 'No especificado'}</p>
-                                  <p className="text-sm">Sector: {company.industry || 'No especificado'}</p>
+                                  <p className="text-sm">Sector: {getSectorLabel(company.industry)}</p>
                                   <p className="text-sm">Estado: {company.state?.name || 'No especificado'}</p>
                                   <p className="text-sm">Registrada: {new Date(company.createdAt).toLocaleDateString('es-ES')}</p>
                                 </div>
@@ -569,7 +629,7 @@ export default function ValidateCompanies() {
                           </Badge>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                          <span className="truncate">{company.industry || 'No especificado'}</span>
+                          <span className="truncate">{getSectorLabel(company.industry)}</span>
                           <span className="truncate">{company.state?.name || 'No especificado'}</span>
                           <span className="truncate">Aprobada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</span>
                         </div>
@@ -630,7 +690,7 @@ export default function ValidateCompanies() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center">
                             <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                            <span className="truncate">{company.industry || 'No especificado'}</span>
+                            <span className="truncate">{getSectorLabel(company.industry)}</span>
                           </div>
                           <div className="flex items-center">
                             <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
@@ -708,7 +768,7 @@ export default function ValidateCompanies() {
                                 <Label>Información Empresarial</Label>
                                 <div className="mt-1 space-y-1">
                                   <p className="text-sm">RFC: {company.rfc || 'No especificado'}</p>
-                                  <p className="text-sm">Sector: {company.industry || 'No especificado'}</p>
+                                  <p className="text-sm">Sector: {getSectorLabel(company.industry)}</p>
                                   <p className="text-sm">Estado: {company.state?.name || 'No especificado'}</p>
                                   <p className="text-sm">Registrada: {new Date(company.createdAt).toLocaleDateString('es-ES')}</p>
                                   <p className="text-sm">Rechazada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</p>
@@ -833,7 +893,7 @@ export default function ValidateCompanies() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center">
                             <Building2 className="h-4 w-4 mr-1" />
-                            {company.industry || 'No especificado'}
+                            {getSectorLabel(company.industry)}
                           </div>
                           <div className="flex items-center">
                             <Mail className="h-4 w-4 mr-1" />
