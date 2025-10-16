@@ -52,7 +52,6 @@ import {
   Phone,
   Mail,
   GraduationCap,
-  Download,
 } from "lucide-react"
 
 interface Vacante {
@@ -107,7 +106,7 @@ export default function VacantesPublicadas() {
   const [typeFilter, setTypeFilter] = useState("all")
   const [modalityFilter, setModalityFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
-  
+
   // Modal states
   const [selectedVacante, setSelectedVacante] = useState<Vacante | null>(null)
   const [postulantes, setPostulantes] = useState<Postulante[]>([])
@@ -122,7 +121,7 @@ export default function VacantesPublicadas() {
     try {
       setLoading(true)
       const response = await fetch("/api/coordinador/vacantes-publicadas")
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar las vacantes")
       }
@@ -144,7 +143,7 @@ export default function VacantesPublicadas() {
     try {
       setLoadingPostulantes(true)
       const response = await fetch(`/api/coordinador/vacantes/${vacanteId}/postulantes`)
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar los postulantes")
       }
@@ -302,14 +301,14 @@ export default function VacantesPublicadas() {
 
   const filteredVacantes = vacantes.filter(vacante => {
     const matchesSearch = vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vacante.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vacante.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (vacante.career && vacante.career.toLowerCase().includes(searchTerm.toLowerCase()))
-    
+      vacante.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vacante.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (vacante.career && vacante.career.toLowerCase().includes(searchTerm.toLowerCase()))
+
     const matchesStatus = statusFilter === "all" || vacante.status === statusFilter
     const matchesType = typeFilter === "all" || vacante.type === typeFilter
     const matchesModality = modalityFilter === "all" || vacante.modality === modalityFilter
-    
+
     return matchesSearch && matchesStatus && matchesType && matchesModality
   })
 
@@ -609,7 +608,7 @@ export default function VacantesPublicadas() {
                           {selectedVacante?.company.name} • {selectedVacante?.company.sector}
                         </DialogDescription>
                       </DialogHeader>
-                      
+
                       {selectedVacante && (
                         <div className="space-y-6">
                           {/* Basic Info */}
@@ -726,7 +725,7 @@ export default function VacantesPublicadas() {
                           Lista de candidatos que se han postulado a esta vacante
                         </SheetDescription>
                       </SheetHeader>
-                      
+
                       <div className="mt-6 space-y-4">
                         {loadingPostulantes ? (
                           <div className="space-y-4">
@@ -769,7 +768,7 @@ export default function VacantesPublicadas() {
                                       {getPostulanteStatusLabel(postulante.status)}
                                     </Badge>
                                   </div>
-                                  
+
                                   <div className="grid grid-cols-2 gap-4 text-sm">
                                     {postulante.career && (
                                       <div className="flex items-center gap-2">
@@ -797,9 +796,9 @@ export default function VacantesPublicadas() {
 
                                   {postulante.cvUrl && (
                                     <div className="mt-3 pt-3 border-t">
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
                                         onClick={() => {
                                           // Extract filename from cvUrl and construct API URL
                                           const filename = postulante.cvUrl?.split('/').pop() || postulante.cvUrl
