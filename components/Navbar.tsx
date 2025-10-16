@@ -55,7 +55,7 @@ const navLinksByRole: Record<string, { name: string; href: string }[]> = {
     { name: 'Inicio', href: '/coordinador' },
     { name: 'Encuestas de empleabilidad', href: '/coordinador/encuestas' },
     { name: 'Validar Empresas', href: '/coordinador/validar-empresa' },
-    { name: 'Plantillas de Correo', href: '/coordinador/plantillas-email' },
+    // { name: 'Plantillas de Correo', href: '/coordinador/plantillas-email' },
   ]
 };
 
