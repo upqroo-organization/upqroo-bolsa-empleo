@@ -80,11 +80,11 @@ export default function StudentDashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Fetch upcoming events
-  const { events: upcomingEvents } = useEvents({ 
-    limit: 3, 
-    upcoming: true 
+  const { events: upcomingEvents } = useEvents({
+    limit: 3,
+    upcoming: true
   })
 
   useEffect(() => {
@@ -102,13 +102,13 @@ export default function StudentDashboard() {
     try {
       setLoading(true)
       const response = await fetch("/api/client/dashboard")
-      
+
       if (!response.ok) {
         throw new Error("Error al cargar los datos del dashboard")
       }
 
       const result = await response.json()
-      
+
       if (result.success) {
         setDashboardData(result.data)
       } else {
@@ -190,7 +190,7 @@ export default function StudentDashboard() {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
@@ -273,9 +273,6 @@ export default function StudentDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon">
-            <Bell className="h-4 w-4" />
-          </Button>
           <Link href="/vacantes">
             <Button>
               <Search className="mr-2 h-4 w-4" />

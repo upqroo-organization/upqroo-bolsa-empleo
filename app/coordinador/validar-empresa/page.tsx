@@ -75,7 +75,7 @@ type Statistics = {
 // Translation function for industry sectors
 const getSectorLabel = (sector: string | null) => {
   if (!sector) return 'No especificado'
-  
+
   console.log('Translating sector in validar-empresa:', sector)
   switch (sector.toLowerCase()) {
     case "technology":
@@ -645,11 +645,106 @@ export default function ValidateCompanies() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                      <Eye className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Ver Perfil</span>
-                      <span className="sm:hidden">Perfil</span>
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                          <Eye className="h-4 w-4 mr-2" />
+                          <span className="hidden sm:inline">Ver Perfil</span>
+                          <span className="sm:hidden">Perfil</span>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>{company.name}</DialogTitle>
+                          <DialogDescription>Información completa de la empresa</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Contacto Principal</Label>
+                              <div className="mt-1 space-y-1">
+                                <p className="font-medium">{company.contactName || 'No especificado'}</p>
+                                <p className="text-sm text-muted-foreground">{company.contactPosition || 'No especificado'}</p>
+                                <div className="flex items-center text-sm">
+                                  <Mail className="h-3 w-3 mr-1" />
+                                  {company.contactEmail || company.email}
+                                </div>
+                                <div className="flex items-center text-sm">
+                                  <Phone className="h-3 w-3 mr-1" />
+                                  {company.contactPhone || company.phone || 'No especificado'}
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Información Empresarial</Label>
+                              <div className="mt-1 space-y-1">
+                                <p className="text-sm">RFC: {company.rfc || 'No especificado'}</p>
+                                <p className="text-sm">Sector: {getSectorLabel(company.industry)}</p>
+                                <p className="text-sm">Estado: {company.state?.name || 'No especificado'}</p>
+                                <p className="text-sm">Registrada: {new Date(company.createdAt).toLocaleDateString('es-ES')}</p>
+                                <p className="text-sm">Aprobada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Descripción</Label>
+                            <p className="text-sm mt-1">{company.description || 'Sin descripción proporcionada'}</p>
+                          </div>
+                          {company.address && (
+                            <div>
+                              <Label>Dirección</Label>
+                              <p className="text-sm mt-1">{company.address}</p>
+                            </div>
+                          )}
+                          <div>
+                            <Label>Constancia de Situación Fiscal</Label>
+                            <div className="mt-1">
+                              {company.fiscalDocumentUrl ? (
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-green-600" />
+                                  <span className="text-sm text-green-600">Documento disponible</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      const filename = company.fiscalDocumentUrl?.split('/').pop()
+                                      if (filename) {
+                                        window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                                      }
+                                    }}
+                                  >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    Ver
+                                  </Button>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">No disponible</p>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Vacantes Publicadas</Label>
+                            <div className="mt-1">
+                              <p className="text-sm text-blue-600">{company.vacantes.length} vacantes activas</p>
+                              {company.vacantes.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {company.vacantes.slice(0, 3).map((vacante) => (
+                                    <div key={vacante.id} className="text-xs text-muted-foreground">
+                                      • {vacante.title} - {new Date(vacante.createdAt).toLocaleDateString('es-ES')}
+                                    </div>
+                                  ))}
+                                  {company.vacantes.length > 3 && (
+                                    <p className="text-xs text-muted-foreground">
+                                      ... y {company.vacantes.length - 3} más
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
@@ -912,10 +1007,109 @@ export default function ValidateCompanies() {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver Detalles
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalles
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>{company.name}</DialogTitle>
+                            <DialogDescription>Información completa de la empresa</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Contacto Principal</Label>
+                                <div className="mt-1 space-y-1">
+                                  <p className="font-medium">{company.contactName || 'No especificado'}</p>
+                                  <p className="text-sm text-muted-foreground">{company.contactPosition || 'No especificado'}</p>
+                                  <div className="flex items-center text-sm">
+                                    <Mail className="h-3 w-3 mr-1" />
+                                    {company.contactEmail || company.email}
+                                  </div>
+                                  <div className="flex items-center text-sm">
+                                    <Phone className="h-3 w-3 mr-1" />
+                                    {company.contactPhone || company.phone || 'No especificado'}
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <Label>Información Empresarial</Label>
+                                <div className="mt-1 space-y-1">
+                                  <p className="text-sm">RFC: {company.rfc || 'No especificado'}</p>
+                                  <p className="text-sm">Sector: {getSectorLabel(company.industry)}</p>
+                                  <p className="text-sm">Estado: {company.state?.name || 'No especificado'}</p>
+                                  <p className="text-sm">Registrada: {new Date(company.createdAt).toLocaleDateString('es-ES')}</p>
+                                  {company.isApprove && (
+                                    <p className="text-sm">Aprobada: {new Date(company.updatedAt).toLocaleDateString('es-ES')}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div>
+                              <Label>Descripción</Label>
+                              <p className="text-sm mt-1">{company.description || 'Sin descripción proporcionada'}</p>
+                            </div>
+                            {company.address && (
+                              <div>
+                                <Label>Dirección</Label>
+                                <p className="text-sm mt-1">{company.address}</p>
+                              </div>
+                            )}
+                            <div>
+                              <Label>Constancia de Situación Fiscal</Label>
+                              <div className="mt-1">
+                                {company.fiscalDocumentUrl ? (
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm text-green-600">Documento disponible</span>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        const filename = company.fiscalDocumentUrl?.split('/').pop()
+                                        if (filename) {
+                                          window.open(`/api/uploads/fiscal-documents/${filename}`, '_blank')
+                                        }
+                                      }}
+                                    >
+                                      <Download className="h-3 w-3 mr-1" />
+                                      Ver
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm text-muted-foreground">No disponible</p>
+                                )}
+                              </div>
+                            </div>
+                            {company.isApprove && (
+                              <div>
+                                <Label>Vacantes Publicadas</Label>
+                                <div className="mt-1">
+                                  <p className="text-sm text-blue-600">{company.vacantes.length} vacantes activas</p>
+                                  {company.vacantes.length > 0 && (
+                                    <div className="mt-2 space-y-1">
+                                      {company.vacantes.slice(0, 3).map((vacante) => (
+                                        <div key={vacante.id} className="text-xs text-muted-foreground">
+                                          • {vacante.title} - {new Date(vacante.createdAt).toLocaleDateString('es-ES')}
+                                        </div>
+                                      ))}
+                                      {company.vacantes.length > 3 && (
+                                        <p className="text-xs text-muted-foreground">
+                                          ... y {company.vacantes.length - 3} más
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                       {!company.isApprove && (
                         <Button size="sm" onClick={() => {
                           setSelectedCompany(company)

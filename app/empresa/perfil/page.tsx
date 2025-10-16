@@ -59,7 +59,7 @@ export default function CompanyProfile() {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [formData, setFormData] = useState<Partial<Company>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   // Fiscal document upload state
   const [fiscalUploading, setFiscalUploading] = useState(false)
   const [fiscalDeleting, setFiscalDeleting] = useState(false)
@@ -74,7 +74,7 @@ export default function CompanyProfile() {
     try {
       const response = await fetch('/api/company/me')
       const result = await response.json()
-      
+
       if (result.success) {
         setCompany(result.data)
         setFormData(result.data)
@@ -92,10 +92,17 @@ export default function CompanyProfile() {
   const fetchStates = async () => {
     try {
       const response = await fetch('/api/states')
-      const data = await response.json()
-      setStates(data)
+      const result = await response.json()
+
+      if (result.success && Array.isArray(result.data)) {
+        setStates(result.data)
+      } else {
+        console.error('Invalid states response:', result)
+        setStates([])
+      }
     } catch (error) {
       console.error('Error fetching states:', error)
+      setStates([])
     }
   }
 
@@ -300,7 +307,7 @@ export default function CompanyProfile() {
 
   const calculateCompletionPercentage = () => {
     if (!company) return 0
-    
+
     const fields = [
       company.name,
       company.description,
@@ -313,7 +320,7 @@ export default function CompanyProfile() {
       company.industry,
       company.size
     ]
-    
+
     const filledFields = fields.filter(field => field && field.trim() !== '').length
     return Math.round((filledFields / fields.length) * 100)
   }
@@ -422,9 +429,9 @@ export default function CompanyProfile() {
                       className="hidden"
                     />
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingLogo}
                       >
@@ -436,9 +443,9 @@ export default function CompanyProfile() {
                         {formData.logoUrl ? 'Cambiar Logo' : 'Subir Logo'}
                       </Button>
                       {formData.logoUrl && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={handleLogoDelete}
                           disabled={uploadingLogo}
                         >
@@ -454,17 +461,17 @@ export default function CompanyProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="companyName">Nombre de la Empresa *</Label>
-                      <Input 
-                        id="companyName" 
-                        value={formData.name || ''} 
+                      <Input
+                        id="companyName"
+                        value={formData.name || ''}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="rfc">RFC</Label>
-                      <Input 
-                        id="rfc" 
-                        value={formData.rfc || ''} 
+                      <Input
+                        id="rfc"
+                        value={formData.rfc || ''}
                         onChange={(e) => handleInputChange('rfc', e.target.value)}
                       />
                     </div>
@@ -473,8 +480,8 @@ export default function CompanyProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="industry">Sector Industrial</Label>
-                      <Select 
-                        value={formData.industry || ''} 
+                      <Select
+                        value={formData.industry || ''}
                         onValueChange={(value) => handleInputChange('industry', value)}
                       >
                         <SelectTrigger>
@@ -492,8 +499,8 @@ export default function CompanyProfile() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="size">Tamaño de la Empresa</Label>
-                      <Select 
-                        value={formData.size || ''} 
+                      <Select
+                        value={formData.size || ''}
                         onValueChange={(value) => handleInputChange('size', value)}
                       >
                         <SelectTrigger>
@@ -512,10 +519,10 @@ export default function CompanyProfile() {
 
                   <div className="space-y-2">
                     <Label htmlFor="websiteUrl">Sitio Web</Label>
-                    <Input 
-                      id="websiteUrl" 
+                    <Input
+                      id="websiteUrl"
                       type="url"
-                      value={formData.websiteUrl || ''} 
+                      value={formData.websiteUrl || ''}
                       onChange={(e) => handleInputChange('websiteUrl', e.target.value)}
                       placeholder="https://www.ejemplo.com"
                     />
@@ -547,10 +554,10 @@ export default function CompanyProfile() {
 
               <div className="space-y-2">
                 <Label htmlFor="fundationDate">Fecha de Fundación</Label>
-                <Input 
-                  id="fundationDate" 
+                <Input
+                  id="fundationDate"
                   type="date"
-                  value={formData.fundationDate ? new Date(formData.fundationDate).toISOString().split('T')[0] : ''} 
+                  value={formData.fundationDate ? new Date(formData.fundationDate).toISOString().split('T')[0] : ''}
                   onChange={(e) => handleInputChange('fundationDate', e.target.value)}
                 />
               </div>
@@ -572,10 +579,10 @@ export default function CompanyProfile() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Correo Electrónico Principal *</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={company.email} 
+                  <Input
+                    id="email"
+                    type="email"
+                    value={company.email}
                     disabled
                     className="bg-muted"
                   />
@@ -583,9 +590,9 @@ export default function CompanyProfile() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Teléfono Principal</Label>
-                  <Input 
-                    id="phone" 
-                    value={formData.phone || ''} 
+                  <Input
+                    id="phone"
+                    value={formData.phone || ''}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="(999) 123-4567"
                   />
@@ -606,17 +613,17 @@ export default function CompanyProfile() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">Ciudad</Label>
-                  <Input 
-                    id="city" 
-                    value={formData.city || ''} 
+                  <Input
+                    id="city"
+                    value={formData.city || ''}
                     onChange={(e) => handleInputChange('city', e.target.value)}
                     placeholder="Ciudad"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="state">Estado</Label>
-                  <Select 
-                    value={formData.stateId?.toString() || ''} 
+                  <Select
+                    value={formData.stateId?.toString() || ''}
                     onValueChange={(value) => handleInputChange('stateId', value ? parseInt(value) : null)}
                   >
                     <SelectTrigger>
@@ -633,18 +640,18 @@ export default function CompanyProfile() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="country">País</Label>
-                  <Input 
-                    id="country" 
-                    value={formData.country || ''} 
+                  <Input
+                    id="country"
+                    value={formData.country || ''}
                     onChange={(e) => handleInputChange('country', e.target.value)}
                     placeholder="México"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zipCode">Código Postal</Label>
-                  <Input 
-                    id="zipCode" 
-                    value={formData.zipCode || ''} 
+                  <Input
+                    id="zipCode"
+                    value={formData.zipCode || ''}
                     onChange={(e) => handleInputChange('zipCode', e.target.value)}
                     placeholder="77500"
                   />
@@ -660,18 +667,18 @@ export default function CompanyProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="contactName">Nombre Completo</Label>
-                      <Input 
-                        id="contactName" 
-                        value={formData.contactName || ''} 
+                      <Input
+                        id="contactName"
+                        value={formData.contactName || ''}
                         onChange={(e) => handleInputChange('contactName', e.target.value)}
                         placeholder="Nombre del contacto"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contactPosition">Cargo</Label>
-                      <Input 
-                        id="contactPosition" 
-                        value={formData.contactPosition || ''} 
+                      <Input
+                        id="contactPosition"
+                        value={formData.contactPosition || ''}
                         onChange={(e) => handleInputChange('contactPosition', e.target.value)}
                         placeholder="Gerente de Recursos Humanos"
                       />
@@ -680,19 +687,19 @@ export default function CompanyProfile() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="contactEmail">Correo Electrónico</Label>
-                      <Input 
-                        id="contactEmail" 
-                        type="email" 
-                        value={formData.contactEmail || ''} 
+                      <Input
+                        id="contactEmail"
+                        type="email"
+                        value={formData.contactEmail || ''}
                         onChange={(e) => handleInputChange('contactEmail', e.target.value)}
                         placeholder="contacto@empresa.com"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="contactPhone">Teléfono Directo</Label>
-                      <Input 
-                        id="contactPhone" 
-                        value={formData.contactPhone || ''} 
+                      <Input
+                        id="contactPhone"
+                        value={formData.contactPhone || ''}
                         onChange={(e) => handleInputChange('contactPhone', e.target.value)}
                         placeholder="(999) 123-4567"
                       />
@@ -700,9 +707,9 @@ export default function CompanyProfile() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="companyRole">Rol en la Empresa</Label>
-                    <Input 
-                      id="companyRole" 
-                      value={formData.companyRole || ''} 
+                    <Input
+                      id="companyRole"
+                      value={formData.companyRole || ''}
                       onChange={(e) => handleInputChange('companyRole', e.target.value)}
                       placeholder="Descripción del rol"
                     />
@@ -848,21 +855,20 @@ export default function CompanyProfile() {
                   <Label>Estado de Aprobación</Label>
                   <div className="p-3 border rounded-lg">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${
-                        company.approvalStatus === 'approved' ? 'bg-green-500' :
+                      <div className={`w-3 h-3 rounded-full ${company.approvalStatus === 'approved' ? 'bg-green-500' :
                         company.approvalStatus === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
-                      }`} />
+                        }`} />
                       <span className="font-medium">
                         {company.approvalStatus === 'approved' ? 'Aprobada' :
-                         company.approvalStatus === 'pending' ? 'Pendiente' : 'Rechazada'}
+                          company.approvalStatus === 'pending' ? 'Pendiente' : 'Rechazada'}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {company.approvalStatus === 'approved' 
+                      {company.approvalStatus === 'approved'
                         ? 'Tu empresa está aprobada para publicar vacantes'
                         : company.approvalStatus === 'pending'
-                        ? 'Tu empresa está siendo revisada por un coordinador'
-                        : 'Tu empresa ha sido rechazada. Contacta al coordinador para más información'
+                          ? 'Tu empresa está siendo revisada por un coordinador'
+                          : 'Tu empresa ha sido rechazada. Contacta al coordinador para más información'
                       }
                     </p>
                   </div>
@@ -885,7 +891,7 @@ export default function CompanyProfile() {
                 <Alert>
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>Información importante:</strong> Mientras tu empresa esté pendiente de aprobación, 
+                    <strong>Información importante:</strong> Mientras tu empresa esté pendiente de aprobación,
                     no podrás publicar vacantes. Un coordinador revisará tu información pronto.
                   </AlertDescription>
                 </Alert>
@@ -895,7 +901,7 @@ export default function CompanyProfile() {
                 <Alert>
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>¡Felicidades!</strong> Tu empresa está aprobada. Ya puedes publicar vacantes 
+                    <strong>¡Felicidades!</strong> Tu empresa está aprobada. Ya puedes publicar vacantes
                     y gestionar postulantes en la plataforma.
                   </AlertDescription>
                 </Alert>
@@ -907,8 +913,8 @@ export default function CompanyProfile() {
       </Tabs>
 
       <div className="flex justify-end gap-4 pt-6">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={() => {
             setFormData(company)
             toast.info('Cambios descartados')

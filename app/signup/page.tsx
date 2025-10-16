@@ -223,25 +223,33 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
+      // Create FormData to handle both JSON data and file upload
+      const formData = new FormData()
+
+      // Add company data
+      formData.append('name', empresa.nombre)
+      formData.append('email', empresa.email)
+      formData.append('password', empresa.password)
+      formData.append('phone', empresa.telefono)
+      formData.append('rfc', empresa.rfc)
+      formData.append('sector', empresa.sector)
+      formData.append('size', empresa.tamaño)
+      formData.append('companyType', empresa.sociedad)
+      formData.append('website', empresa.paginaWeb)
+      formData.append('direccion', empresa.direccion)
+      formData.append('description', empresa.descripcion)
+      formData.append('contactName', empresa.contactoNombre)
+      formData.append('contactPosition', empresa.contactoPuesto)
+      formData.append('state', empresa.state?.toString() || '')
+
+      // Add fiscal document if present
+      if (fiscalDocument) {
+        formData.append('fiscalDocument', fiscalDocument)
+      }
+
       const res = await fetch("/api/company/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: empresa.nombre,
-          email: empresa.email,
-          password: empresa.password,
-          phone: empresa.telefono,
-          rfc: empresa.rfc,
-          sector: empresa.sector,
-          size: empresa.tamaño,
-          companyType: empresa.sociedad,
-          website: empresa.paginaWeb,
-          direccion: empresa.direccion,
-          description: empresa.descripcion,
-          contactName: empresa.contactoNombre,
-          contactPosition: empresa.contactoPuesto,
-          state: empresa.state
-        }),
+        body: formData, // Send FormData instead of JSON
       })
 
       const data = await res.json()
@@ -252,7 +260,10 @@ export default function RegisterPage() {
       }
 
       toast.success("¡Cuenta creada exitosamente!")
-      toast.success("Tu constancia fiscal se subirá automáticamente. Serás redirigido al login.")
+      if (fiscalDocument) {
+        toast.success("Tu constancia fiscal se ha subido correctamente.")
+      }
+      toast.info("Serás redirigido al login.")
       setTimeout(() => {
         router.push("/login?empresa=1")
       }, 1500)
@@ -331,14 +342,14 @@ export default function RegisterPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="rfc">RFC * <Tooltip>
-  <TooltipTrigger> <Info size={16}/></TooltipTrigger>
-  <TooltipContent>
- <p>Registro Federal de Contribuyentes</p>
-  </TooltipContent>
-</Tooltip></Label>
-                      <Input 
-                        id="rfc" 
-                        value={empresa.rfc} 
+                        <TooltipTrigger> <Info size={16} /></TooltipTrigger>
+                        <TooltipContent>
+                          <p>Registro Federal de Contribuyentes</p>
+                        </TooltipContent>
+                      </Tooltip></Label>
+                      <Input
+                        id="rfc"
+                        value={empresa.rfc}
                         onChange={e => handleChange("rfc", e.target.value.toUpperCase())}
                         className={cn(errors.rfc && "border-red-500")}
                         placeholder="ABC123456XYZ"
@@ -522,7 +533,7 @@ export default function RegisterPage() {
                       <Label className="text-red-800 font-medium">Constancia de Situación Fiscal *</Label>
                     </div>
                     <p className="text-sm text-red-700">
-                      <strong>OBLIGATORIO:</strong> Debes subir tu constancia de situación fiscal para completar el registro. Sin este documento no podrás crear tu cuenta empresarial.
+                      La constancia de situación fiscal es requerida para validar tu empresa. Sin este documento no podrás completar el registro.
                     </p>
 
                     {errors.fiscalDocument && (
@@ -567,11 +578,11 @@ export default function RegisterPage() {
                       </div>
                     ) : (
                       // No document - show upload area
-                      <div className="border-2 border-dashed border-green-300 rounded-lg p-6 text-center bg-white">
-                        <FileText className="h-10 w-10 text-green-400 mx-auto mb-3" />
-                        <p className="text-green-700 mb-2">Selecciona tu constancia fiscal</p>
-                        <p className="text-sm text-green-600 mb-4">
-                          Se subirá automáticamente después del registro
+                      <div className="border-2 border-dashed border-red-300 rounded-lg p-6 text-center bg-white">
+                        <FileText className="h-10 w-10 text-red-400 mx-auto mb-3" />
+                        <p className="text-red-700 mb-2 font-medium">Documento requerido</p>
+                        <p className="text-sm text-red-600 mb-4">
+                          Debes seleccionar tu constancia fiscal para continuar
                         </p>
                       </div>
                     )}
@@ -590,16 +601,16 @@ export default function RegisterPage() {
                         onClick={() => fiscalInputRef.current?.click()}
                         variant={fiscalDocument ? "outline" : "default"}
                         size="sm"
-                        className="w-full sm:w-auto"
+                        className={cn(
+                          "w-full sm:w-auto",
+                          !fiscalDocument && "bg-red-600 hover:bg-red-700 text-white"
+                        )}
                       >
                         <Upload className="h-4 w-4 mr-2" />
                         {fiscalDocument ? 'Cambiar Documento' : 'Seleccionar Constancia Fiscal'}
                       </Button>
-                      <p className="text-xs text-green-600 text-center">
+                      <p className="text-xs text-red-600 text-center font-medium">
                         Formatos: PDF, JPG, PNG, WEBP • Máximo 10MB
-                      </p>
-                      <p className="text-xs text-blue-600 text-center font-medium">
-                        💡 También podrás subir este documento después de iniciar sesión
                       </p>
                     </div>
                   </div>
@@ -658,9 +669,23 @@ export default function RegisterPage() {
 
                   {error && <p className="text-red-600 text-sm">{error}</p>}
 
-                  <Button className="w-full cursor-pointer" size="lg" disabled={loading}>
-                    {loading ? "Creando cuenta..." : "Crear Cuenta Empresarial"}
+                  <Button
+                    className="w-full cursor-pointer"
+                    size="lg"
+                    disabled={loading || !fiscalDocument}
+                  >
+                    {loading ? "Creando cuenta..." :
+                      !fiscalDocument ? "SELECCIONA TU CONSTANCIA FISCAL PRIMERO" :
+                        "Crear Cuenta Empresarial"}
                   </Button>
+
+                  {!fiscalDocument && (
+                    <div className="bg-red-50 p-3 rounded-lg border border-red-200">
+                      <p className="text-sm text-red-700 text-center font-medium">
+                        ⚠️ Debes subir tu constancia de situación fiscal antes de continuar
+                      </p>
+                    </div>
+                  )}
 
                   <div className="bg-yellow-50 p-4 rounded-lg mt-4">
                     <p className="text-sm text-yellow-800">
