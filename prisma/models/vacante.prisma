@@ -27,6 +27,7 @@ model Vacante {
   status             String    @default("active") // active, paused, expired
   requirements       String?   @db.Text // Job requirements
   benefits           String?   @db.Text // Job benefits
+  imageUrl           String? // URL to the job offer image
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

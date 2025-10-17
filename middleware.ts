@@ -30,6 +30,11 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith("/client") && token?.role !== "student" && token?.role !== "external") {
     return NextResponse.redirect(new URL("/redirect", req.url));
   }
+  // Skip authentication for public landing page
+  if (pathname === "/empresas-landing") {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/empresa")) {
     if (token?.role !== "company") {
       return NextResponse.redirect(new URL("/redirect", req.url));

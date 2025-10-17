@@ -26,7 +26,17 @@ export async function getFeaturedJobs(limit: number = 6): Promise<FeaturedJob[]>
       where: {
         isMock: false, // Only real jobs, not mock data
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        location: true,
+        salaryMin: true,
+        salaryMax: true,
+        type: true,
+        modality: true,
+        career: true,
+        createdAt: true,
         company: {
           select: {
             name: true,
@@ -80,7 +90,7 @@ export async function getJobsStats() {
 
     // Calculate real placement rate based on hired applications vs total applications
     // If no applications exist, show 0% instead of a mock rate
-    const placementRate = totalApplications > 0 
+    const placementRate = totalApplications > 0
       ? Math.round((successfulPlacements / totalApplications) * 100)
       : 0
 

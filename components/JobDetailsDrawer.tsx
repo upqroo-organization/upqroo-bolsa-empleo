@@ -8,6 +8,7 @@ import { getEnumLabelSafe } from "@/utils"
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/es'
+import { ExpandableImage } from "@/components/ui/expandable-image"
 
 dayjs.extend(relativeTime)
 dayjs.locale('es')
@@ -22,14 +23,14 @@ interface JobDetailsDrawerProps {
   onShare: (vacante: VacanteInterface) => void
 }
 
-export default function JobDetailsDrawer({ 
-  vacante, 
+export default function JobDetailsDrawer({
+  vacante,
   hasApplied = false,
   isAuthenticated = false,
-  isOpen, 
-  onClose, 
-  onApply, 
-  onShare 
+  isOpen,
+  onClose,
+  onApply,
+  onShare
 }: JobDetailsDrawerProps) {
   if (!vacante) return null
 
@@ -81,9 +82,9 @@ export default function JobDetailsDrawer({
             {(vacante.salaryMin || vacante.salaryMax) && (
               <div className="flex items-center gap-1 text-green-600 font-semibold">
                 <DollarSign className="h-4 w-4" />
-                {vacante.salaryMin && vacante.salaryMax 
+                {vacante.salaryMin && vacante.salaryMax
                   ? `$${vacante.salaryMin.toLocaleString()} - $${vacante.salaryMax.toLocaleString()}`
-                  : vacante.salaryMin 
+                  : vacante.salaryMin
                     ? `Desde $${vacante.salaryMin.toLocaleString()}`
                     : `Hasta $${vacante.salaryMax?.toLocaleString()}`
                 }
@@ -93,27 +94,47 @@ export default function JobDetailsDrawer({
 
           <Separator />
 
-          {/* Summary */}
-          {vacante.summary && (
-            <div>
-              <h3 className="font-semibold mb-2">Resumen</h3>
-              <p className="text-sm text-gray-700">{vacante.summary}</p>
-            </div>
-          )}
+          {/* Content Section - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Content - Left Column */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Summary */}
+              {vacante.summary && (
+                <div>
+                  <h3 className="font-semibold mb-2">Resumen</h3>
+                  <p className="text-sm text-gray-700">{vacante.summary}</p>
+                </div>
+              )}
 
-          {/* Description */}
-          <div>
-            <h3 className="font-semibold mb-2">Descripción del puesto</h3>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.description}</p>
+              {/* Description */}
+              <div>
+                <h3 className="font-semibold mb-2">Descripción del puesto</h3>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.description}</p>
+              </div>
+
+              {/* Responsibilities */}
+              {vacante.responsibilities && (
+                <div>
+                  <h3 className="font-semibold mb-2">Responsabilidades</h3>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.responsibilities}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Job Image - Right Column */}
+            {vacante.imageUrl && (
+              <div className="lg:col-span-1">
+                <div className="sticky top-4">
+                  <ExpandableImage
+                    src={`/${vacante.imageUrl}`}
+                    alt={`Imagen de ${vacante.title}`}
+                    containerClassName="relative w-full h-48 lg:h-64 rounded-lg overflow-hidden bg-gray-100 border"
+                    objectFit="contain"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Responsibilities */}
-          {vacante.responsibilities && (
-            <div>
-              <h3 className="font-semibold mb-2">Responsabilidades</h3>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{vacante.responsibilities}</p>
-            </div>
-          )}
 
           <Separator />
 
@@ -147,7 +168,7 @@ export default function JobDetailsDrawer({
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
             {isAuthenticated && hasApplied ? (
-              <Button 
+              <Button
                 className="flex-1"
                 variant="outline"
                 disabled
@@ -156,15 +177,15 @@ export default function JobDetailsDrawer({
                 Ya aplicaste
               </Button>
             ) : (
-              <Button 
-                className="flex-1" 
+              <Button
+                className="flex-1"
                 onClick={() => onApply(vacante.id)}
               >
                 Postularme
               </Button>
             )}
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onShare(vacante)}
             >
               <Share2 className="h-4 w-4 mr-2" />

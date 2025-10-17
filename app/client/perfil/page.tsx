@@ -4,13 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle } from "lucide-react";
+import { Upload, Edit, Save, Loader2, FileText, Trash2, Download, AlertCircle, Plus, X, Info, Check, ChevronsUpDown } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -21,6 +22,27 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Careers } from "@/types/vacantes";
+
 
 export default function StudentProfile() {
   const { user, loading, error, isAuthenticated, updating, updateUser } = useCurrentUser();
@@ -28,8 +50,21 @@ export default function StudentProfile() {
   const [formData, setFormData] = useState({
     name: '',
     username: '',
+    career: '',
+    period: '',
   });
-  
+
+  // Experience state
+  const [experiences, setExperiences] = useState<Array<{
+    id?: string;
+    title: string;
+    description: string;
+    initialDate: string;
+    endDate: string;
+    companyName: string;
+    jobRole: string;
+  }>>([]);
+
   // CV upload state
   const [cvUploading, setCvUploading] = useState(false);
   const [cvDeleting, setCvDeleting] = useState(false);
@@ -46,13 +81,31 @@ export default function StudentProfile() {
   const [showPhotoDeleteDialog, setShowPhotoDeleteDialog] = useState(false);
   const [showCvDeleteDialog, setShowCvDeleteDialog] = useState(false);
 
+  // Career combobox state
+  const [careerOpen, setCareerOpen] = useState(false);
+
   // Initialize form data when user data is loaded
   useEffect(() => {
     if (user) {
       setFormData({
         name: user.name || '',
         username: user.username || '',
+        career: user.career || '',
+        period: user.period?.toString() || '',
       });
+
+      // Load job experiences
+      if (user.jobExperience) {
+        setExperiences(user.jobExperience.map(exp => ({
+          id: exp.id,
+          title: exp.title,
+          description: exp.description,
+          initialDate: exp.initialDate.split('T')[0], // Convert to YYYY-MM-DD format
+          endDate: exp.endDate.split('T')[0],
+          companyName: exp.companyName,
+          jobRole: exp.jobRole,
+        })));
+      }
     }
   }, [user]);
 
@@ -64,20 +117,51 @@ export default function StudentProfile() {
       return;
     }
 
-    const result = await updateUser({
+    // Prepare data for API
+    const updateData = {
       name: formData.name.trim(),
       username: formData.username.trim(),
-    });
+      career: formData.career.trim() || null,
+      period: formData.period ? parseInt(formData.period) : null,
+      jobExperience: experiences.map(exp => ({
+        id: exp.id,
+        title: exp.title.trim(),
+        description: exp.description.trim(),
+        initialDate: exp.initialDate,
+        endDate: exp.endDate,
+        companyName: exp.companyName.trim(),
+        jobRole: exp.jobRole.trim(),
+      })),
+    };
 
-    if (result.success) {
-      toast.success('Perfil actualizado', {
-        description: result.message || 'Tu información personal ha sido actualizada correctamente'
+    try {
+      const response = await fetch('/api/usuarios/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
       });
-      setIsEditing(false);
-    } else {
-      toast.error('Error al actualizar', {
-        description: result.error || 'No se pudo actualizar tu perfil. Intenta nuevamente.'
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('Perfil actualizado', {
+          description: result.message || 'Tu información ha sido actualizada correctamente'
+        });
+        setIsEditing(false);
+        // Refresh user data
+        window.location.reload();
+      } else {
+        toast.error('Error al actualizar', {
+          description: result.error || 'No se pudo actualizar tu perfil. Intenta nuevamente.'
+        });
+      }
+    } catch (error) {
+      toast.error('Error de conexión', {
+        description: 'No se pudo conectar con el servidor. Verifica tu conexión.'
       });
+      console.error('Update error:', error);
     }
   };
 
@@ -86,7 +170,24 @@ export default function StudentProfile() {
       setFormData({
         name: user.name || '',
         username: user.username || '',
+        career: user.career || '',
+        period: user.period?.toString() || '',
       });
+
+      // Reset experiences
+      if (user.jobExperience) {
+        setExperiences(user.jobExperience.map(exp => ({
+          id: exp.id,
+          title: exp.title,
+          description: exp.description,
+          initialDate: exp.initialDate.split('T')[0],
+          endDate: exp.endDate.split('T')[0],
+          companyName: exp.companyName,
+          jobRole: exp.jobRole,
+        })));
+      } else {
+        setExperiences([]);
+      }
     }
     setIsEditing(false);
   };
@@ -304,15 +405,37 @@ export default function StudentProfile() {
 
   const getPhotoUrl = (imageUrl: string | null) => {
     if (!imageUrl) return undefined;
-    
+
     // If it's a local upload, serve through our API
     if (imageUrl.startsWith('uploads/photos/')) {
       const filename = imageUrl.split('/').pop();
       return `/api/uploads/photos/${filename}`;
     }
-    
+
     // If it's from OAuth provider (Google, etc.), use as-is
     return imageUrl;
+  };
+
+  // Experience management functions
+  const addExperience = () => {
+    setExperiences(prev => [...prev, {
+      title: '',
+      description: '',
+      initialDate: '',
+      endDate: '',
+      companyName: '',
+      jobRole: '',
+    }]);
+  };
+
+  const removeExperience = (index: number) => {
+    setExperiences(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateExperience = (index: number, field: string, value: string) => {
+    setExperiences(prev => prev.map((exp, i) =>
+      i === index ? { ...exp, [field]: value } : exp
+    ));
   };
 
   if (loading) {
@@ -399,11 +522,10 @@ export default function StudentProfile() {
       </div>
 
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 h-auto p-1">
           <TabsTrigger value="personal" className="text-xs sm:text-sm">Personal</TabsTrigger>
           <TabsTrigger value="academic" className="text-xs sm:text-sm">Académico</TabsTrigger>
           <TabsTrigger value="experience" className="text-xs sm:text-sm">Experiencia</TabsTrigger>
-          <TabsTrigger value="skills" className="text-xs sm:text-sm">Habilidades</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs sm:text-sm col-span-2 sm:col-span-1">Documentos</TabsTrigger>
         </TabsList>
 
@@ -431,8 +553,8 @@ export default function StudentProfile() {
                     className="hidden"
                   />
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => photoInputRef.current?.click()}
                       disabled={!isEditing || photoUploading || photoDeleting}
                     >
@@ -449,8 +571,8 @@ export default function StudentProfile() {
                       )}
                     </Button>
                     {user.image && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setShowPhotoDeleteDialog(true)}
                         disabled={!isEditing || photoUploading || photoDeleting}
                         className="text-red-600 hover:text-red-700"
@@ -549,50 +671,211 @@ export default function StudentProfile() {
           </Card>
         </TabsContent>
 
-        {/* Academic Information - Placeholder for now */}
+        {/* Academic Information */}
         <TabsContent value="academic" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Información Académica</CardTitle>
               <CardDescription>Detalles de tu formación universitaria</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Esta sección estará disponible próximamente.</p>
-                <p className="text-sm">Aquí podrás gestionar tu información académica.</p>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="career">Carrera</Label>
+                  <Popover open={careerOpen} onOpenChange={setCareerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={careerOpen}
+                        className="w-full justify-between"
+                        disabled={!isEditing}
+                      >
+                        {formData.career
+                          ? Object.entries(Careers).find(([, value]) => value === formData.career)?.[1] || formData.career
+                          : "Selecciona tu carrera..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar carrera..." />
+                        <CommandList>
+                          <CommandEmpty>No se encontró la carrera.</CommandEmpty>
+                          <CommandGroup>
+                            {Object.entries(Careers).map(([, value]) => (
+                              <CommandItem
+                                key={value}
+                                value={value}
+                                onSelect={(currentValue) => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    career: currentValue === formData.career ? "" : currentValue
+                                  }));
+                                  setCareerOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.career === value ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {value}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="period">Período/Semestre Actual</Label>
+                  <Input
+                    id="period"
+                    type="number"
+                    min="1"
+                    max="12"
+                    value={formData.period}
+                    onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
+                    disabled={!isEditing}
+                    placeholder="Ej: 8"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Experience - Placeholder for now */}
+        {/* Experience */}
         <TabsContent value="experience" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Experiencia Laboral</CardTitle>
-              <CardDescription>Historial de empleos, prácticas y proyectos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Esta sección estará disponible próximamente.</p>
-                <p className="text-sm">Aquí podrás gestionar tu experiencia laboral.</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">Experiencia Laboral
+                    <Tooltip>
+                      <TooltipTrigger> <Info size={16} /></TooltipTrigger>
+                      <TooltipContent>
+                        <p>Para agregar una experiencia laboral dabes dar click en editar perfil</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                  <CardDescription>Historial de empleos, prácticas y proyectos</CardDescription>
+                </div>
+                {isEditing && (
+                  <Button onClick={addExperience} size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Experiencia
+                  </Button>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {experiences.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No has agregado experiencia laboral aún</p>
+                  <p className="text-sm">Agrega tu experiencia profesional, prácticas o proyectos relevantes</p>
+                  {isEditing && (
+                    <Button onClick={addExperience} className="mt-4" variant="outline">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Agregar Primera Experiencia
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {experiences.map((experience, index) => (
+                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium">
+                          {experience.title || `Experiencia ${index + 1}`}
+                        </h3>
+                        {isEditing && (
+                          <Button
+                            onClick={() => removeExperience(index)}
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
 
-        {/* Skills - Placeholder for now */}
-        <TabsContent value="skills" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Habilidades Técnicas</CardTitle>
-              <CardDescription>Tecnologías, herramientas y competencias</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Esta sección estará disponible próximamente.</p>
-                <p className="text-sm">Aquí podrás gestionar tus habilidades técnicas.</p>
-              </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`title-${index}`}>Título del Puesto</Label>
+                          <Input
+                            id={`title-${index}`}
+                            value={experience.title}
+                            onChange={(e) => updateExperience(index, 'title', e.target.value)}
+                            disabled={!isEditing}
+                            placeholder="Ej: Desarrollador Frontend"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`jobRole-${index}`}>Rol/Departamento</Label>
+                          <Input
+                            id={`jobRole-${index}`}
+                            value={experience.jobRole}
+                            onChange={(e) => updateExperience(index, 'jobRole', e.target.value)}
+                            disabled={!isEditing}
+                            placeholder="Ej: Desarrollo de Software"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`companyName-${index}`}>Empresa/Organización</Label>
+                        <Input
+                          id={`companyName-${index}`}
+                          value={experience.companyName}
+                          onChange={(e) => updateExperience(index, 'companyName', e.target.value)}
+                          disabled={!isEditing}
+                          placeholder="Ej: Tech Solutions S.A."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`initialDate-${index}`}>Fecha de Inicio</Label>
+                          <Input
+                            id={`initialDate-${index}`}
+                            type="date"
+                            value={experience.initialDate}
+                            onChange={(e) => updateExperience(index, 'initialDate', e.target.value)}
+                            disabled={!isEditing}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`endDate-${index}`}>Fecha de Fin</Label>
+                          <Input
+                            id={`endDate-${index}`}
+                            type="date"
+                            value={experience.endDate}
+                            onChange={(e) => updateExperience(index, 'endDate', e.target.value)}
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`description-${index}`}>Descripción</Label>
+                        <Textarea
+                          id={`description-${index}`}
+                          value={experience.description}
+                          onChange={(e) => updateExperience(index, 'description', e.target.value)}
+                          disabled={!isEditing}
+                          placeholder="Describe tus responsabilidades, logros y tecnologías utilizadas..."
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -729,7 +1012,7 @@ export default function StudentProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar foto de perfil?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente tu foto de perfil actual. 
+              Esta acción eliminará permanentemente tu foto de perfil actual.
               No podrás recuperarla una vez eliminada.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -761,7 +1044,7 @@ export default function StudentProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Eliminar currículum?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción eliminará permanentemente tu currículum actual. 
+              Esta acción eliminará permanentemente tu currículum actual.
               No podrás recuperarlo una vez eliminado y tendrás que subirlo nuevamente.
             </AlertDialogDescription>
           </AlertDialogHeader>

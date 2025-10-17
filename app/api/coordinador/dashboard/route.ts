@@ -31,7 +31,10 @@ export async function GET() {
             prisma.user.count({
                 where: {
                     role: {
-                        name: 'student'
+                        name: {
+                            in: ['student', 'external', 'graduate']
+                        }
+
                     }
                 }
             }),

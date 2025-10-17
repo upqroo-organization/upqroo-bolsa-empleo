@@ -16,6 +16,7 @@ export interface VacanteInterface {
   isMock: boolean
   applicationProcess: string | null
   deadline: string | null // o Date si la parseas
+  imageUrl: string | null // URL to the job offer image
   createdAt: string // o Date si la parseas
   updatedAt: string // o Date si la parseas
   state: {

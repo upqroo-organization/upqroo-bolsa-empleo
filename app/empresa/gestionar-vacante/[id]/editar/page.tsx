@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface State {
   id: number;
@@ -43,6 +44,7 @@ interface JobData {
   career: string | null;
   applicationProcess: string | null;
   stateId: number | null;
+  imageUrl: string | null;
 }
 
 export default function EditJobPage() {
@@ -70,7 +72,8 @@ export default function EditJobPage() {
     deadline: '',
     career: '',
     applicationProcess: '',
-    stateId: null
+    stateId: null,
+    imageUrl: null
   });
 
   useEffect(() => {
@@ -90,7 +93,7 @@ export default function EditJobPage() {
       try {
         const response = await fetch(`/api/empresa/vacantes/${params.id}`);
         const data = await response.json();
-        
+
         if (data.success) {
           const job = data.data;
           setJobData({
@@ -111,9 +114,10 @@ export default function EditJobPage() {
             deadline: job.deadline ? new Date(job.deadline).toISOString().split('T')[0] : '',
             career: job.career || '',
             applicationProcess: job.applicationProcess || '',
-            stateId: job.stateId
+            stateId: job.stateId,
+            imageUrl: job.imageUrl || null
           });
-          
+
           // Set the date for the calendar
           if (job.deadline) {
             setDate(new Date(job.deadline));
@@ -169,7 +173,7 @@ export default function EditJobPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         toast.success('Vacante actualizada correctamente');
         router.push('/empresa/gestionar-vacante');
@@ -486,6 +490,16 @@ export default function EditJobPage() {
                     </PopoverContent>
                   </Popover>
                 </div>
+
+                <ImageUpload
+                  currentImageUrl={jobData.imageUrl}
+                  onImageUploaded={(imageUrl) => handleInputChange('imageUrl', imageUrl)}
+                  onImageDeleted={() => handleInputChange('imageUrl', null)}
+                  uploadEndpoint={`/api/empresa/vacantes/${params.id}/image`}
+                  deleteEndpoint={`/api/empresa/vacantes/${params.id}/image`}
+                  label="Imagen de la Vacante"
+                  description="Sube una imagen para mejorar la presentación de tu vacante"
+                />
               </CardContent>
             </Card>
           </TabsContent>
