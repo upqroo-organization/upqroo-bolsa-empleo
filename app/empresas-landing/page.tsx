@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,29 +5,42 @@ import {
   Users,
   Building2,
   Briefcase,
-  TrendingUp,
   Search,
   Target,
-  Clock,
   CheckCircle,
   ArrowRight,
-  Award,
   Zap,
-  Shield,
   BarChart3,
   FileText,
   UserCheck,
   Settings,
 } from "lucide-react"
 import Link from "next/link"
+import { getJobsStats } from "@/lib/featured-jobs"
 
-export default function EmpresasLanding() {
+export default async function EmpresasLanding() {
+  // Fetch real statistics from database
+  const jobsStats = await getJobsStats()
 
   const stats = [
-    { icon: Users, value: "10,000+", label: "Estudiantes Activos", color: "text-primary" },
-    { icon: Building2, value: "500+", label: "Empresas Registradas", color: "text-secondary" },
-    { icon: Briefcase, value: "2,000+", label: "Vacantes Publicadas", color: "text-accent" },
-    { icon: TrendingUp, value: "85%", label: "Tasa de Éxito", color: "text-destructive" },
+    {
+      icon: Users,
+      value: jobsStats.totalUsers > 0 ? `${jobsStats.totalUsers.toLocaleString()}+` : "0",
+      label: "Estudiantes Activos",
+      color: "text-primary"
+    },
+    {
+      icon: Building2,
+      value: jobsStats.totalCompanies > 0 ? `${jobsStats.totalCompanies.toLocaleString()}+` : "0",
+      label: "Empresas Registradas",
+      color: "text-secondary"
+    },
+    {
+      icon: Briefcase,
+      value: jobsStats.totalJobs > 0 ? `${jobsStats.totalJobs.toLocaleString()}+` : "0",
+      label: "Vacantes Publicadas",
+      color: "text-accent"
+    },
   ]
 
   const features = [
@@ -48,21 +59,11 @@ export default function EmpresasLanding() {
       title: "Análisis Detallados",
       description: "Obtén métricas completas sobre tus vacantes y el rendimiento de tus contrataciones."
     },
-    {
-      icon: Shield,
-      title: "Proceso Seguro",
-      description: "Plataforma segura y confiable con validación de empresas y estudiantes."
-    },
-    {
-      icon: Clock,
-      title: "Soporte 24/7",
-      description: "Nuestro equipo está disponible para ayudarte en todo el proceso de reclutamiento."
-    },
-    {
-      icon: Award,
-      title: "Talento Certificado",
-      description: "Estudiantes con formación técnica especializada y certificaciones actualizadas."
-    }
+    // {
+    //   icon: Shield,
+    //   title: "Proceso Seguro",
+    //   description: "Plataforma segura y confiable con validación de empresas y estudiantes."
+    // }
   ]
 
 
@@ -74,19 +75,21 @@ export default function EmpresasLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <Building2 className="h-8 w-8 text-primary" />
+              <img src="/logo_upqroo_150.png" alt="upqroo logo" className="w-10" />
               <span className="text-xl font-bold text-gray-900">UPQROO Empleos</span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900">Características</a>
-              <a href="#registro" className="text-gray-600 hover:text-gray-900">Cómo Registrarse</a>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/signup">
-                <Button>
-                  Registrarse
-                </Button>
-              </Link>
+            <div className="flex gap-6">
+              <div className="hidden md:flex items-center space-x-4">
+                <a href="#features" className="text-gray-600 hover:text-gray-900">Características</a>
+                <a href="#registro" className="text-gray-600 hover:text-gray-900">Cómo Registrarse</a>
+              </div>
+              <div className="flex items-center gap-4">
+                <Link href="/signup">
+                  <Button>
+                    Registrarse
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -97,9 +100,9 @@ export default function EmpresasLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
+              {/* <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
                 #1 Plataforma de Empleo Universitario
-              </Badge>
+              </Badge> */}
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Encuentra el
                 <span className="text-primary"> talento joven</span>
@@ -116,9 +119,9 @@ export default function EmpresasLanding() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                {/* <Button variant="outline" size="lg" className="w-full sm:w-auto">
                   Ver Demo
-                </Button>
+                </Button> */}
               </div>
             </div>
             <div className="relative">
@@ -137,7 +140,7 @@ export default function EmpresasLanding() {
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="text-sm">Desarrollador Frontend React</span>
+                    <span className="text-sm">Fisico Terapeuta</span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -149,7 +152,7 @@ export default function EmpresasLanding() {
                     <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="text-sm">Analista de Datos</span>
+                    <span className="text-sm">Biotecnologos</span>
                   </div>
                 </div>
               </div>
@@ -161,7 +164,7 @@ export default function EmpresasLanding() {
       {/* Stats Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="flex justify-center mb-4">
@@ -297,7 +300,7 @@ export default function EmpresasLanding() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium text-gray-900">Constancia Fiscal (Opcional)</p>
+                    <p className="font-medium text-gray-900">Constancia Fiscal</p>
                     <p className="text-sm text-gray-600">Documento que acelera el proceso de validación</p>
                   </div>
                 </div>
@@ -317,7 +320,7 @@ export default function EmpresasLanding() {
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 bg-secondary rounded-full mt-0.5 flex-shrink-0"></div>
                   <div>
-                    <p className="font-medium text-gray-900">Base de Candidatos Calificados</p>
+                    <p className="font-medium text-gray-900">Base de Estudiantes y Egresados</p>
                     <p className="text-sm text-gray-600">Acceso directo a estudiantes y egresados de UPQROO</p>
                   </div>
                 </div>
@@ -345,9 +348,9 @@ export default function EmpresasLanding() {
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 ¿Listo para encontrar tu próximo gran talento?
               </h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              {/* <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
                 Únete a más de 500 empresas que ya confían en UPQROO para encontrar a los mejores profesionales jóvenes de México
-              </p>
+              </p> */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/signup">
                   <Button size="lg" className="w-full sm:w-auto">
@@ -355,9 +358,6 @@ export default function EmpresasLanding() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                  ¿Tienes preguntas? Contáctanos
-                </Button>
               </div>
             </div>
           </div>
@@ -365,48 +365,28 @@ export default function EmpresasLanding() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-primary text-primary-foreground py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="text-center space-y-4">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Building2 className="h-8 w-8 text-secondary" />
-                <span className="text-xl font-bold">UPQROO Empleos</span>
-              </div>
-              <p className="text-gray-400">
-                Conectando el mejor talento universitario con las empresas más innovadoras de México.
-              </p>
+              <Link href="https://upqroo.edu.mx/" target="_blank" className="flex items-center justify-center space-x-2">
+                <div className="h-8 w-8 bg-primary-foreground rounded-lg flex items-center justify-center">
+                  <img src="/logo_upqroo_150.png" alt="logo_pequeño_upqroo" className="w-6 h-6" />
+                </div>
+                <span className="text-xl font-bold text-primary-foreground">UPQROO</span>
+              </Link>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">Empresa</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Acerca de</a></li>
-                <li><a href="#" className="hover:text-white">Carreras</a></li>
-                <li><a href="#" className="hover:text-white">Prensa</a></li>
-                <li><a href="#" className="hover:text-white">Blog</a></li>
-              </ul>
+            <p className="text-primary-foreground/80">
+              © 2025 Universidad Politécnica de Quintana Roo. Todos los derechos reservados.
+            </p>
+            <div className="flex justify-center space-x-6 text-sm text-primary-foreground/70">
+              <a href="/terms" className="hover:text-primary-foreground transition-colors">
+                Aviso de Privacidad
+              </a>
+              <a href="/autores" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">
+                Autores
+              </a>
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">Recursos</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Centro de Ayuda</a></li>
-                <li><a href="#" className="hover:text-white">Guías</a></li>
-                <li><a href="#" className="hover:text-white">API</a></li>
-                <li><a href="#" className="hover:text-white">Webinars</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Privacidad</a></li>
-                <li><a href="#" className="hover:text-white">Términos</a></li>
-                <li><a href="#" className="hover:text-white">Cookies</a></li>
-                <li><a href="#" className="hover:text-white">Seguridad</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Universidad Politécnica de Quintana Roo. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

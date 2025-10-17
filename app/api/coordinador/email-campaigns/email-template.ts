@@ -59,7 +59,7 @@ export const COMPANY_REGISTER_INVITATION = `
 
               <p style="text-align:center; margin:20px 0;">
                 <!-- Button -->
-                <a href="http://redtalento.upqroo.edu.mx/signup" target="_blank"
+                <a href="${process.env.NEXTAUTH_URL}/empresas-landing" target="_blank"
                    style="background-color:#622120; color:#ffffff; border:1px solid #622120; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:600; display:inline-block;">
                   Registrarse gratuitamente
                 </a>
