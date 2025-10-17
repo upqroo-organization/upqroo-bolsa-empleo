@@ -15,16 +15,16 @@ import { Spinner } from "@/components/Spinner"
 import ApplicationCard from "@/components/ApplicationCard"
 import JobApplicationDrawer from "@/components/JobApplicationDrawer"
 export default function MyApplications() {
-  const { 
-    applications, 
-    isLoading, 
-    error, 
-    getStatusCount, 
-    getActiveCount, 
-    getApplicationsByStatus, 
-    getActiveApplications 
+  const {
+    applications,
+    isLoading,
+    error,
+    getStatusCount,
+    getActiveCount,
+    getApplicationsByStatus,
+    getActiveApplications
   } = useMyApplications()
-  
+
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [sortBy, setSortBy] = useState("recent")
@@ -34,12 +34,12 @@ export default function MyApplications() {
   // Filter and sort applications
   const filteredApplications = applications
     .filter(app => {
-      const matchesSearch = searchTerm === "" || 
+      const matchesSearch = searchTerm === "" ||
         app.vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         app.vacante.company.name.toLowerCase().includes(searchTerm.toLowerCase())
-      
+
       const matchesStatus = statusFilter === "all" || app.status === statusFilter
-      
+
       return matchesSearch && matchesStatus
     })
     .sort((a, b) => {
@@ -66,7 +66,7 @@ export default function MyApplications() {
     {
       icon: Clock,
       value: getStatusCount("pending"),
-      label: "Pendientes",
+      label: "Activas",
       color: "text-yellow-600",
       bgColor: "bg-yellow-100",
     },
@@ -117,7 +117,7 @@ export default function MyApplications() {
           </Button>
         </Link>
       </div>
-      
+
       {/* Job Application Drawer */}
       <JobApplicationDrawer
         application={selectedApplication}
@@ -171,8 +171,8 @@ export default function MyApplications() {
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Buscar por empresa o puesto..." 
+              <Input
+                placeholder="Buscar por empresa o puesto..."
                 className="pl-10 h-12"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,7 +184,7 @@ export default function MyApplications() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
-                <SelectItem value="pending">Pendientes</SelectItem>
+                <SelectItem value="pending">Activas</SelectItem>
                 <SelectItem value="accepted">Aceptadas</SelectItem>
                 <SelectItem value="rejected">Rechazadas</SelectItem>
               </SelectContent>
@@ -234,7 +234,7 @@ export default function MyApplications() {
               <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold mb-2">No hay postulaciones</h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm || statusFilter !== "all" 
+                {searchTerm || statusFilter !== "all"
                   ? "No se encontraron postulaciones con los filtros aplicados"
                   : "Aún no has aplicado a ninguna vacante"
                 }
@@ -248,8 +248,8 @@ export default function MyApplications() {
             </div>
           ) : (
             filteredApplications.map((application) => (
-              <ApplicationCard 
-                key={application.id} 
+              <ApplicationCard
+                key={application.id}
                 application={application}
                 onViewDetails={(app) => {
                   setSelectedApplication(app)
@@ -275,8 +275,8 @@ export default function MyApplications() {
             </div>
           ) : (
             getActiveApplications().map((application) => (
-              <ApplicationCard 
-                key={application.id} 
+              <ApplicationCard
+                key={application.id}
                 application={application}
                 onViewDetails={(app) => {
                   setSelectedApplication(app)
@@ -318,12 +318,12 @@ export default function MyApplications() {
                   <Alert className="mb-4">
                     <Calendar className="h-4 w-4" />
                     <AlertDescription>
-                      <strong>¡Felicidades!</strong> Tu postulación ha sido aceptada. 
+                      <strong>¡Felicidades!</strong> Tu postulación ha sido aceptada.
                       La empresa se pondrá en contacto contigo pronto.
                     </AlertDescription>
                   </Alert>
                   <div className="flex gap-3">
-                    <Button 
+                    <Button
                       size="sm"
                       onClick={() => {
                         setSelectedApplication(application)
@@ -373,13 +373,13 @@ export default function MyApplications() {
                 <CardContent>
                   <Alert className="mb-4">
                     <AlertDescription>
-                      Esta postulación no fue seleccionada. No te desanimes, 
+                      Esta postulación no fue seleccionada. No te desanimes,
                       sigue aplicando a más oportunidades.
                     </AlertDescription>
                   </Alert>
                   <div className="flex gap-3">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => {
                         setSelectedApplication(application)

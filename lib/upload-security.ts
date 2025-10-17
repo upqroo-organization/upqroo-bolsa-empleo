@@ -6,7 +6,7 @@ export interface AccessControlOptions {
   userId: string;
   userRole: string;
   fileOwnerId: string;
-  fileType: 'cv' | 'photo' | 'fiscal-document';
+  fileType: 'cv' | 'photo' | 'fiscal-document' | 'job-image';
 }
 
 export async function checkFileAccess(options: AccessControlOptions): Promise<boolean> {
@@ -47,6 +47,10 @@ export async function checkFileAccess(options: AccessControlOptions): Promise<bo
     case 'photo':
       // Only coordinators and the user itself can access photos
       return userRole === 'coordinator';
+
+    case 'job-image':
+      // Job images are public - anyone can view them
+      return true;
   }
 
   return false;
@@ -69,7 +73,7 @@ export function validateFilename(filename: string, expectedPrefix: string): bool
 
 export function getContentType(filename: string): string {
   const extension = filename.split('.').pop()?.toLowerCase();
-  
+
   switch (extension) {
     case 'pdf':
       return 'application/pdf';
@@ -87,7 +91,7 @@ export function getContentType(filename: string): string {
   }
 }
 
-export function getSecurityHeaders(fileType: 'cv' | 'photo' | 'fiscal-document') {
+export function getSecurityHeaders(fileType: 'cv' | 'photo' | 'fiscal-document' | 'job-image') {
   const baseHeaders = {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
@@ -107,6 +111,11 @@ export function getSecurityHeaders(fileType: 'cv' | 'photo' | 'fiscal-document')
       return {
         ...baseHeaders,
         'Cache-Control': 'private, max-age=3600',
+      };
+    case 'job-image':
+      return {
+        ...baseHeaders,
+        'Cache-Control': 'public, max-age=86400', // 24 hours cache for job images
       };
     default:
       return baseHeaders;

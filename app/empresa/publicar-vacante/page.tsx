@@ -19,6 +19,7 @@ import {
   Briefcase,
   AlertCircle,
   CalendarIcon,
+  Info,
 } from "lucide-react"
 import {
   Popover,
@@ -33,6 +34,12 @@ import { useFetch } from "@/hooks/useFetch"
 import { Careers, VacanteModalityEnum, VacanteTypeEnum } from "@/types/vacantes"
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { TempImageUpload } from "@/components/ui/temp-image-upload"
 
 export default function PostJob() {
   const { data: user } = useSession()
@@ -58,6 +65,7 @@ export default function PostJob() {
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const { data } = useFetch('/api/states')
 
   useEffect(() => {
@@ -94,7 +102,7 @@ export default function PostJob() {
   // Validation functions
   const validateBasicInfo = () => {
     const basicErrors: Record<string, string> = {}
-    
+
     if (!formData.title.trim()) {
       basicErrors.title = 'El título del puesto es requerido'
     }
@@ -113,20 +121,20 @@ export default function PostJob() {
     if (!formData.summary.trim()) {
       basicErrors.summary = 'El resumen del puesto es requerido'
     }
-    
+
     return basicErrors
   }
 
   const validateDetails = () => {
     const detailErrors: Record<string, string> = {}
-    
+
     if (!formData.description.trim()) {
       detailErrors.description = 'La descripción completa es requerida'
     }
     if (!formData.responsibilities.trim()) {
       detailErrors.responsibilities = 'Las responsabilidades principales son requeridas'
     }
-    
+
     return detailErrors
   }
 
@@ -134,7 +142,7 @@ export default function PostJob() {
     const basicErrors = validateBasicInfo()
     const detailErrors = validateDetails()
     const allErrors = { ...basicErrors, ...detailErrors }
-    
+
     setErrors(allErrors)
     return Object.keys(allErrors).length === 0
   }
@@ -150,7 +158,7 @@ export default function PostJob() {
     return Object.keys(detailErrors).length > 0
   }
 
-  const handleSubmit = (isMock?: boolean) => {
+  const handleSubmit = async (isMock?: boolean) => {
     // Validate form before submitting
     if (!validateForm()) {
       toast.error("Por favor completa todos los campos requeridos")
@@ -158,37 +166,73 @@ export default function PostJob() {
     }
 
     setLoading(true)
-    const payload = {
-      ...formData,
-      salaryMin: parseInt(formData.salaryMin) || null,
-      salaryMax: parseInt(formData.salaryMax) || null,
-      numberOfPositions: parseInt(formData.numberOfPositions) || null,
-      isMock: isMock || false,
-      deadline: date ? new Date(date) : null,
-    }
-    fetch('/api/vacantes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.status === 201 ? res.json() : Promise.reject(res.status))
-      .then(data => {
-        console.log("Vacante creada:", data)
+    try {
+      const payload = {
+        ...formData,
+        salaryMin: parseInt(formData.salaryMin) || null,
+        salaryMax: parseInt(formData.salaryMax) || null,
+        numberOfPositions: parseInt(formData.numberOfPositions) || null,
+        isMock: isMock || false,
+        deadline: date ? new Date(date) : null,
+      }
+
+      const response = await fetch('/api/vacantes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      if (response.status !== 201) {
+        throw new Error(`Error ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Vacante creada:", data)
+
+      // If there's an image, upload it after creating the job
+      if (selectedImage && data?.id) {
+        try {
+          console.log('Uploading image for job:', data.data.id)
+          const imageFormData = new FormData()
+          imageFormData.append('image', selectedImage)
+
+          const imageResponse = await fetch(`/api/empresa/vacantes/${data.data.id}/image`, {
+            method: 'POST',
+            body: imageFormData,
+          })
+
+          if (!imageResponse.ok) {
+            const errorData = await imageResponse.json().catch(() => ({}))
+            console.warn('Failed to upload image:', imageResponse.status, errorData)
+            toast.success("Vacante publicada correctamente (imagen no se pudo subir)")
+          } else {
+            const imageData = await imageResponse.json()
+            console.log('Image uploaded successfully:', imageData)
+            toast.success("Vacante e imagen publicadas correctamente")
+          }
+        } catch (imageError) {
+          console.error('Error uploading image:', imageError)
+          toast.success("Vacante publicada correctamente (imagen no se pudo subir)")
+        }
+      } else {
+        if (selectedImage) {
+          console.warn('Image selected but no job ID available')
+        }
         toast.success("Vacante publicada correctamente")
-        // Redirect to gestionar-vacantes after successful creation
-        setTimeout(() => {
-          router.push('/empresa/gestionar-vacante')
-        }, 1000) // Small delay to show the toast
-      })
-      .catch(err => {
-        const errorMsg = (err instanceof Error) ? err.message : String(err)
-        console.log(err)
-        toast.error("Ocurrió un error al publicar: " + errorMsg)
-        console.error(err)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      }
+
+      // Redirect to gestionar-vacantes after successful creation
+      setTimeout(() => {
+        router.push('/empresa/gestionar-vacante')
+      }, 1000) // Small delay to show the toast
+    } catch (err) {
+      const errorMsg = (err instanceof Error) ? err.message : String(err)
+      console.log(err)
+      toast.error("Ocurrió un error al publicar: " + errorMsg)
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -212,8 +256,8 @@ export default function PostJob() {
 
       <Tabs defaultValue="basic" className="w-full">
         <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 gap-2 h-auto p-2 bg-gray-50">
-          <TabsTrigger 
-            value="basic" 
+          <TabsTrigger
+            value="basic"
             className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
           >
             <FileText className="h-4 w-4" />
@@ -223,8 +267,8 @@ export default function PostJob() {
               <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
             )}
           </TabsTrigger>
-          <TabsTrigger 
-            value="details" 
+          <TabsTrigger
+            value="details"
             className="flex items-center justify-center gap-2 h-12 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
           >
             <Briefcase className="h-4 w-4" />
@@ -232,6 +276,9 @@ export default function PostJob() {
             <span className="sm:hidden">Detalles</span>
             {hasDetailErrors() && (
               <div className="w-2 h-2 bg-red-500 rounded-full ml-1" title="Campos requeridos faltantes" />
+            )}
+            {selectedImage && (
+              <div className="w-2 h-2 bg-green-500 rounded-full ml-1" title="Imagen seleccionada" />
             )}
           </TabsTrigger>
         </TabsList>
@@ -341,8 +388,8 @@ export default function PostJob() {
                     name="location"
                     id="location"
                     className={cn(errors.location && "border-red-500")}
-                    placeholder="Ej: Cancún, Quintana Roo" 
-                    value={formData.location} 
+                    placeholder="Ej: Cancún, Quintana Roo"
+                    value={formData.location}
                   />
                   {errors.location && (
                     <p className="text-xs text-red-500">{errors.location}</p>
@@ -355,7 +402,7 @@ export default function PostJob() {
                       <SelectValue className="w-full" placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.isArray(data) && data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
+                      {data?.data && Array.isArray(data.data) && data.data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   {errors.state && (
@@ -472,8 +519,14 @@ export default function PostJob() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <label htmlFor="deadline" className="text-sm font-medium">
+                <label htmlFor="deadline" className="text-sm font-medium flex items-center gap-2">
                   Fecha límite
+                  <Tooltip>
+                    <TooltipTrigger> <Info size={16} /></TooltipTrigger>
+                    <TooltipContent>
+                      <p>Fecha limite que se mostrara la vacante. Despues de la fecha seleccionada la vacante se borrara automaticamente</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </label>
 
                 <Popover>
@@ -500,6 +553,12 @@ export default function PostJob() {
                   </PopoverContent>
                 </Popover>
               </div>
+
+              <TempImageUpload
+                onImageSelected={setSelectedImage}
+                label="Imagen de la Vacante"
+                description="Sube una imagen para mejorar la presentación de tu vacante"
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -511,8 +570,12 @@ export default function PostJob() {
         </Button>
         <Button disabled={loading} onClick={() => handleSubmit()} className="w-full sm:w-auto">
           <Send className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Publicar Vacante</span>
-          <span className="sm:hidden">Publicar</span>
+          <span className="hidden sm:inline">
+            {loading ? 'Publicando...' : selectedImage ? 'Publicar Vacante e Imagen' : 'Publicar Vacante'}
+          </span>
+          <span className="sm:hidden">
+            {loading ? 'Publicando...' : 'Publicar'}
+          </span>
         </Button>
       </div>
     </div>

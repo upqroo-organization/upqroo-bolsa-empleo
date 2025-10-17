@@ -47,12 +47,12 @@ export async function GET(request: Request) {
             logoUrl: true,
           },
         },
-         state: {
+        state: {
           select: {
             name: true,
             id: true
           }
-         }
+        }
       },
       orderBy: {
         createdAt: 'desc',
@@ -131,7 +131,11 @@ export async function POST(req: Request) {
       },
     })
 
-    return NextResponse.json(newVacante, { status: 201 })
+    return NextResponse.json({
+      success: true,
+      data: newVacante,
+      message: 'Vacante creada correctamente'
+    }, { status: 201 })
   } catch (error) {
     console.error('Error creating vacante:', error)
     console.log(error)
