@@ -10,7 +10,6 @@ import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Bell,
   Search,
   FileText,
   Calendar,
