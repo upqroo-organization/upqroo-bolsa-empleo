@@ -139,8 +139,8 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
 
   const getFilteredCompanies = () => {
     return companies.filter(company =>
-      company.name.toLowerCase().includes(companyFilter.toLowerCase()) ||
-      company.email.toLowerCase().includes(companyFilter.toLowerCase()) ||
+      company.name?.toLowerCase().includes(companyFilter.toLowerCase()) ||
+      (company.email && company.email.toLowerCase().includes(companyFilter.toLowerCase())) ||
       (company.industry && company.industry.toLowerCase().includes(companyFilter.toLowerCase()))
     )
   }
