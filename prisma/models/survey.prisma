@@ -1,72 +1,61 @@
 model Survey {
-  id          String  @id @default(cuid())
-  title       String  @db.VarChar(200) // Max 200 characters for title
-  description String? @db.Text // Use TEXT for longer descriptions
-  isActive    Boolean @default(true)
-
-  // Survey timing configuration
-  daysAfterHiring Int @default(30) // Days after hiring when survey becomes available
-  surveyDuration  Int @default(30) // How many days the survey stays available
-
-  // Survey questions
-  questions SurveyQuestion[]
-  responses SurveyResponse[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String           @id @default(cuid())
+  title           String           @db.VarChar(200)
+  description     String?          @db.Text
+  isActive        Boolean          @default(true)
+  daysAfterHiring Int              @default(30)
+  surveyDuration  Int              @default(30)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  questions       SurveyQuestion[]
+  responses       SurveyResponse[]
 }
 
 model SurveyQuestion {
-  id         String  @id @default(cuid())
+  id         String         @id @default(cuid())
   surveyId   String
-  question   String  @db.Text // Use TEXT for longer questions
-  order      Int // Order of the question in the survey
-  isRequired Boolean @default(true)
-
-  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  answers SurveyAnswer[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  question   String         @db.Text
+  order      Int
+  isRequired Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  answers    SurveyAnswer[]
+  survey     Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 
   @@index([surveyId])
 }
 
 model SurveyResponse {
-  id          String  @id @default(cuid())
+  id          String         @id @default(cuid())
   surveyId    String
   companyId   String
-  studentId   String // The student being evaluated
-  isCompleted Boolean @default(false)
-  comments    String? @db.Text // Use TEXT for longer comments
+  studentId   String
+  isCompleted Boolean        @default(false)
+  comments    String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  answers     SurveyAnswer[]
+  company     company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  student     User           @relation("StudentSurveyResponses", fields: [studentId], references: [id], onDelete: Cascade)
+  survey      Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 
-  survey  Survey         @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  company company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  student User           @relation("StudentSurveyResponses", fields: [studentId], references: [id], onDelete: Cascade)
-  answers SurveyAnswer[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([surveyId, companyId, studentId]) // One response per company per student per survey
+  @@unique([surveyId, companyId, studentId])
   @@index([surveyId])
   @@index([companyId])
   @@index([studentId])
 }
 
 model SurveyAnswer {
-  id         String @id @default(cuid())
+  id         String         @id @default(cuid())
   responseId String
   questionId String
-  rating     Int // 0-5 rating (6=No aplica, 5=Muy Bien, 4=Bien, 3=Regular, 2=Mal, 1=Pésimo, 0=No aplica)
+  rating     Int
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  question   SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  response   SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
-  response SurveyResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
-  question SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([responseId, questionId]) // One answer per question per response
+  @@unique([responseId, questionId])
   @@index([responseId])
   @@index([questionId])
 }

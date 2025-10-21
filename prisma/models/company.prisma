@@ -1,45 +1,39 @@
 model company {
-  id          String  @id @default(cuid())
-  name        String
-  email       String  @unique
-  password    String // Optional: Only for company accounts that require a password
-  description String?
-  logoUrl     String?
-  websiteUrl  String?
-  rfc         String? @unique // RFC number or identifier for the company
-  role        role    @relation(fields: [roleId], references: [id])
-  roleId      String // Optional: If the company has a specific role in the system
-  // Optional: Add fields for address, contact info, etc.
-  city        String?
-  country     String?
-  address     String?
-  zipCode     String?
-  phone       String?
+  id                  String           @id @default(cuid())
+  name                String
+  email               String           @unique
+  password            String
+  description         String?
+  logoUrl             String?
+  websiteUrl          String?
+  rfc                 String?          @unique
+  roleId              String
+  city                String?
+  country             String?
+  address             String?
+  zipCode             String?
+  phone               String?
+  fundationDate       DateTime?
+  industry            String?
+  organizationCulture String?
+  size                String?
+  isApprove           Boolean          @default(false)
+  approvalStatus      String           @default("pending")
+  contactName         String?
+  contactEmail        String?
+  contactPhone        String?
+  contactPosition     String?
+  companyRole         String?
+  fiscalDocumentUrl   String?
+  stateId             Int?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  events              Event[]
+  surveyResponses     SurveyResponse[]
+  vacantes            Vacante[]
+  role                role             @relation(fields: [roleId], references: [id], onDelete: NoAction)
+  state               State?           @relation(fields: [stateId], references: [id])
 
-  fundationDate       DateTime? // Date when the company was founded
-  industry            String? // Industry sector the company operates
-  organizationCulture String? // Description of the company's culture
-  size                String? // Size of the company (e.g., small, medium, large
-  isApprove           Boolean   @default(false) // Indicates if the company is approved for job postings
-  approvalStatus      String    @default("pending") // pending, approved, rejected
-
-  contactName     String? // Name of the primary contact person
-  contactEmail    String? // Email of the primary contact person
-  contactPhone    String? // Phone number of the primary contact person
-  contactPosition String? // Position of the primary contact person
-  companyRole     String? // Role of the primary contact person in the company
-  companyType     String?
-
-  // Fiscal document (Constancia de situación fiscal)
-  fiscalDocumentUrl String? // URL to the uploaded fiscal document (PDF or image)
-
-  stateId Int?
-  state   State? @relation(fields: [stateId], references: [id])
-
-  vacantes        Vacante[] // Relation to Vacante model
-  surveyResponses SurveyResponse[] // Relation to survey responses
-  events          Event[] // Relation to Event model
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@index([roleId], map: "company_roleId_fkey")
+  @@index([stateId], map: "company_stateId_fkey")
 }

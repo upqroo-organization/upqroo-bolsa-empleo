@@ -1,7 +1,7 @@
 model State {
   id        Int       @id @default(autoincrement())
   name      String
-  companies company[]
-  vacante   Vacante[]
   events    Event[]
+  vacante   Vacante[]
+  companies company[]
 }

@@ -2,15 +2,14 @@ model Application {
   id        String    @id @default(cuid())
   userId    String
   vacanteId String
-  status    String    @default("pending") // pending, interview, rejected, hired
+  status    String    @default("pending")
   appliedAt DateTime  @default(now())
-  cvViewed  Boolean   @default(false) // Track if CV has been viewed by company
-  hiredAt   DateTime? // Date when student was hired
+  cvViewed  Boolean   @default(false)
+  hiredAt   DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vacante   Vacante   @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vacante Vacante @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, vacanteId]) // Prevent duplicate applications
+  @@unique([userId, vacanteId])
   @@index([userId])
   @@index([vacanteId])
 }

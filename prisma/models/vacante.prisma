@@ -1,34 +1,33 @@
 model Vacante {
-  id                String        @id @default(cuid())
-  title             String
-  summary           String        @db.Text
-  description       String        @db.Text
-  responsibilities  String        @db.Text
-  location          String?
-  salaryMin         Int?
-  salaryMax         Int?
-  career            String? // e. g., Ing Software, Lic Terapia fisicia
-  department        String? // e.g., Engineering, Marketing, Sales
-  type              String? // e.g., Full-time, Part-time, Internship
-  modality          String? // e.g., Remote, On-site, Hybrid
-  numberOfPositions Int? // Number of positions available
-  companyId         String
-  isMock            Boolean       @default(false) // Indicates if the job is a mock job for testing purposes
-  stateId           Int?
-  state             State?        @relation(fields: [stateId], references: [id])
-  company           company       @relation(fields: [companyId], references: [id])
-  aplicants         User[]        @relation("VacanteApplicants")
-  applications      Application[]
-
-  // Optional: Add fields for application process, deadline, etc.
-  applicationProcess String?   @db.Text
+  id                 String        @id @default(cuid())
+  title              String
+  summary            String        @db.Text
+  description        String        @db.Text
+  responsibilities   String        @db.Text
+  location           String?
+  salaryMin          Int?
+  salaryMax          Int?
+  career             String?
+  department         String?
+  type               String?
+  modality           String?
+  numberOfPositions  Int?
+  companyId          String
+  isMock             Boolean       @default(false)
+  stateId            Int?
+  applicationProcess String?       @db.Text
   deadline           DateTime?
-  originalDeadline   DateTime? // Store original deadline when paused
-  status             String    @default("active") // active, paused, expired
-  requirements       String?   @db.Text // Job requirements
-  benefits           String?   @db.Text // Job benefits
-  imageUrl           String? // URL to the job offer image
+  originalDeadline   DateTime?
+  status             String        @default("active")
+  requirements       String?       @db.Text
+  benefits           String?       @db.Text
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  applications       Application[]
+  company            company       @relation(fields: [companyId], references: [id], onDelete: NoAction)
+  state              State?        @relation(fields: [stateId], references: [id])
+  aplicants          User[]        @relation("VacanteApplicants")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@index([companyId], map: "Vacante_companyId_fkey")
+  @@index([stateId], map: "Vacante_stateId_fkey")
 }
