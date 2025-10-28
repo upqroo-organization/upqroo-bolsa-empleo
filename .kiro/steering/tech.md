@@ -18,7 +18,6 @@
 - **Date Handling**: date-fns and dayjs
 - **Form Validation**: Native validation
 - **Notifications**: Sonner
-- **API Documentation**: Swagger (swagger-jsdoc, swagger-ui-express)
 - **Password Hashing**: bcryptjs
 - **Email**: nodemailer
 
