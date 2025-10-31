@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +30,30 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script id="prevent-tab-reload" strategy="beforeInteractive">
+          {`
+            // Prevent NextAuth session refetch on tab visibility changes
+            if (typeof window !== 'undefined') {
+              let originalFetch = window.fetch;
+              window.fetch = function(...args) {
+                const url = args[0];
+                // Block session-related API calls when tab becomes visible
+                if (typeof url === 'string' && url.includes('/api/auth/session') && document.hidden === false) {
+                  const urlObj = new URL(url, window.location.origin);
+                  if (urlObj.searchParams.has('update')) {
+                    // Skip automatic session updates on tab focus
+                    return Promise.resolve(new Response('{}', { status: 200 }));
+                  }
+                }
+                return originalFetch.apply(this, args);
+              };
+            }
+          `}
+        </Script>
         <TooltipProvider>
-            {children}
+          {children}
         </TooltipProvider>
-      
+
         <Toaster position="top-center" richColors />
       </body>
     </html>

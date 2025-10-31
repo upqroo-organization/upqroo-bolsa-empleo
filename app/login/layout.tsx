@@ -1,6 +1,7 @@
 'use client';
 import { Spinner } from "@/components/Spinner";
 import { SessionProvider } from "next-auth/react";
+import { sessionConfig } from "@/lib/session-config";
 import { Suspense } from "react";
 
 export default function RootLayout({
@@ -9,8 +10,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
-      <Suspense fallback={<Spinner/>}>
+    <SessionProvider
+      refetchOnWindowFocus={sessionConfig.refetchOnWindowFocus}
+      refetchWhenOffline={sessionConfig.refetchWhenOffline}
+      refetchInterval={sessionConfig.refetchInterval}
+    >
+      <Suspense fallback={<Spinner />}>
         {children}
       </Suspense>
     </SessionProvider>

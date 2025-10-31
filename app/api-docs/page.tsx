@@ -76,7 +76,7 @@ export default function ApiDocsPage() {
               <div className="ml-3">
                 <p className="text-sm text-blue-700">
                   <strong>Authentication:</strong> Most endpoints require authentication via NextAuth.js session cookies.
-                  Make sure you're logged in to test protected endpoints.
+                  Make sure you&apos;re logged in to test protected endpoints.
                 </p>
               </div>
             </div>
