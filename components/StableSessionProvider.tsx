@@ -1,12 +1,20 @@
 'use client';
+
 import { SessionProvider } from "next-auth/react";
+import { ReactNode, memo } from "react";
 import { sessionConfig } from "@/lib/session-config";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+interface StableSessionProviderProps {
+  children: ReactNode;
+}
+
+/**
+ * A stable SessionProvider that prevents unnecessary re-renders
+ * when browser tab visibility changes
+ */
+const StableSessionProvider = memo(function StableSessionProvider({
+  children
+}: StableSessionProviderProps) {
   return (
     <SessionProvider
       refetchOnWindowFocus={sessionConfig.refetchOnWindowFocus}
@@ -16,4 +24,6 @@ export default function RootLayout({
       {children}
     </SessionProvider>
   );
-}
+});
+
+export default StableSessionProvider;

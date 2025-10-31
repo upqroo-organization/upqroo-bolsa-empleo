@@ -1,17 +1,18 @@
 'use client';
 import Navbar from "@/components/Navbar";
-import { SessionProvider } from "next-auth/react";
+import StableSessionProvider from "@/components/StableSessionProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
+    <StableSessionProvider>
       <main>
         <Navbar />
-        {children}   
-      </main>        
-    </SessionProvider>
+        {children}
+      </main>
+    </StableSessionProvider>
   );
 }

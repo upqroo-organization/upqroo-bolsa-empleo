@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
 
   // console.log(token);
 
-  if(pathname === "/login" && token) {
+  if (pathname === "/login" && token) {
     return NextResponse.redirect(new URL("/redirect", req.url));
   }
 
@@ -39,21 +39,26 @@ export async function middleware(req: NextRequest) {
     if (token?.role !== "company") {
       return NextResponse.redirect(new URL("/redirect", req.url));
     }
-    
+
     // Skip approval check for the waiting-approval page itself
     if (!pathname.includes("/waiting-approval")) {
       // For all other company pages, check if company is approved
-      const response = await fetch(`${req.nextUrl.origin}/api/company/me`, {
-        headers: {
-          cookie: req.headers.get('cookie') || '',
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && !data.data.isApprove) {
-          return NextResponse.redirect(new URL("/empresa/waiting-approval", req.url));
+      try {
+        const response = await fetch(`${req.nextUrl.origin}/api/company/me`, {
+          headers: {
+            cookie: req.headers.get('cookie') || '',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && !data.data.isApprove) {
+            return NextResponse.redirect(new URL("/empresa/waiting-approval", req.url));
+          }
         }
+      } catch (error) {
+        // If the API call fails, don't redirect to avoid infinite loops
+        console.warn('Middleware API call failed:', error);
       }
     }
   }

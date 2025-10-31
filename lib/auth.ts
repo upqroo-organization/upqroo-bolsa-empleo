@@ -63,6 +63,10 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+    // Increase session max age to reduce frequent token refreshes
+    maxAge: 24 * 60 * 60, // 24 hours
+    // Reduce update age to prevent unnecessary session updates
+    updateAge: 60 * 60, // 1 hour
   },
   pages: {
     signIn: '/login',
@@ -72,7 +76,7 @@ export const authOptions: NextAuthOptions = {
     async createUser(user) {
       // This is triggered only once for a new user
       let defaultRole;
-      if(user.user.email === process.env.COORDINATOR_MAIL) {
+      if (user.user.email === process.env.COORDINATOR_MAIL) {
         defaultRole = await prisma.role.findUnique({
           where: { name: 'coordinator' },
         })
