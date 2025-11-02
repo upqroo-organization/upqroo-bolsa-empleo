@@ -929,7 +929,7 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: CV filename (format: cv_userId_timestamp.pdf)
+ *         description: "CV filename format: cv_userId_timestamp.pdf"
  *     responses:
  *       200:
  *         description: CV file
