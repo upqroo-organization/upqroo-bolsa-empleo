@@ -1,7 +1,76 @@
 import { NextResponse } from 'next/server';
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile, stat } from 'fs/promises';
 import { join } from 'path';
 import { marked } from 'marked';
+
+interface DocFile {
+  name: string;
+  content: string;
+  slug: string;
+  path: string;
+  type: 'file';
+}
+
+interface DocFolder {
+  name: string;
+  type: 'folder';
+  path: string;
+  children: (DocFile | DocFolder)[];
+}
+
+type DocItem = DocFile | DocFolder;
+
+async function readDocsRecursively(dirPath: string, relativePath: string = ''): Promise<DocItem[]> {
+  const items: DocItem[] = [];
+  const entries = await readdir(dirPath);
+
+  for (const entry of entries) {
+    const fullPath = join(dirPath, entry);
+    const itemRelativePath = relativePath ? `${relativePath}/${entry}` : entry;
+    const stats = await stat(fullPath);
+
+    if (stats.isDirectory()) {
+      const children = await readDocsRecursively(fullPath, itemRelativePath);
+      if (children.length > 0) {
+        items.push({
+          name: entry,
+          type: 'folder',
+          path: itemRelativePath,
+          children
+        });
+      }
+    } else if (entry.endsWith('.md') || entry.endsWith('.mdx')) {
+      const content = await readFile(fullPath, 'utf8');
+
+      // Configure marked for better rendering
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+      });
+
+      const htmlContent = await marked(content);
+      const slug = itemRelativePath.replace(/\.(md|mdx)$/, '').toLowerCase().replace(/[^a-z0-9\/]/g, '-');
+
+      items.push({
+        name: entry,
+        content: htmlContent,
+        slug,
+        path: itemRelativePath,
+        type: 'file'
+      });
+    }
+  }
+
+  // Sort items: folders first, then files, both alphabetically
+  items.sort((a, b) => {
+    if (a.type !== b.type) {
+      return a.type === 'folder' ? -1 : 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+  return items;
+}
 
 export async function GET() {
   // Only allow in development environment
@@ -11,42 +80,14 @@ export async function GET() {
 
   try {
     const docsDirectory = join(process.cwd(), 'docs');
-    const filenames = await readdir(docsDirectory);
+    const structure = await readDocsRecursively(docsDirectory);
 
-    // Filter for markdown files only
-    const markdownFiles = filenames.filter(name => name.endsWith('.md'));
-
-    const files = await Promise.all(
-      markdownFiles.map(async (filename) => {
-        const filePath = join(docsDirectory, filename);
-        const content = await readFile(filePath, 'utf8');
-
-        // Configure marked for better rendering
-        marked.setOptions({
-          breaks: true,
-          gfm: true,
-        });
-
-        // Convert markdown to HTML
-        const htmlContent = marked(content);
-
-        return {
-          name: filename,
-          content: htmlContent,
-          slug: filename.replace('.md', '').toLowerCase().replace(/[^a-z0-9]/g, '-')
-        };
-      })
-    );
-
-    // Sort files alphabetically by name
-    files.sort((a, b) => a.name.localeCompare(b.name));
-
-    return NextResponse.json({ files });
+    return NextResponse.json({ structure });
   } catch (error) {
     console.error('Error reading docs:', error);
     return NextResponse.json({
       error: 'Failed to read documentation files',
-      files: []
+      structure: []
     }, { status: 500 });
   }
 }
