@@ -30,6 +30,7 @@ import {
   Filter,
   Grid3X3,
   List,
+  Download,
 } from "lucide-react"
 
 interface Student {
@@ -57,6 +58,7 @@ export default function EstudiantesActivos() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     fetchStudents()
@@ -127,6 +129,65 @@ export default function EstudiantesActivos() {
 
     return matchesSearch && matchesStatus
   })
+
+  const exportToCSV = async () => {
+    try {
+      setIsExporting(true)
+      
+      // Prepare CSV data
+      const csvData = filteredStudents.map(student => ({
+        'ID': student.id,
+        'Nombre': student.name,
+        'Email': student.email,
+        'Carrera': student.career,
+        'Semestre': student.semester,
+        'Estado': getStatusLabel(student.status),
+        'Teléfono': student.phone || 'No especificado',
+        'Ubicación': student.location || 'No especificado',
+        'Fecha de Registro': formatDate(student.registrationDate),
+        'Postulaciones': student.applicationsCount,
+        'Entrevistas': student.interviewsCount,
+        'Contrataciones': student.hiredCount,
+        'Tiene CV': student.cvUrl ? 'Sí' : 'No'
+      }))
+
+      // Convert to CSV format
+      const headers = Object.keys(csvData[0])
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row => 
+          headers.map(header => {
+            const value = row[header as keyof typeof row]
+            // Escape commas and quotes in CSV
+            return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
+              ? `"${value.replace(/"/g, '""')}"` 
+              : value
+          }).join(',')
+        )
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      
+      link.setAttribute('href', url)
+      link.setAttribute('download', `estudiantes_activos_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Show success message
+      console.log(`Exportados ${filteredStudents.length} estudiantes a CSV`)
+      
+    } catch (error) {
+      console.error('Error exporting CSV:', error)
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -267,6 +328,17 @@ export default function EstudiantesActivos() {
                 <SelectItem value="graduated">Graduados</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              onClick={exportToCSV}
+              disabled={isExporting || filteredStudents.length === 0}
+              className="flex items-center gap-2 h-12"
+              variant="outline"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isExporting ? "Exportando..." : "Exportar CSV"}
+              </span>
+            </Button>
             <div className="flex bg-muted rounded-lg p-1">
               <Button
                 variant={viewMode === "cards" ? "default" : "ghost"}
