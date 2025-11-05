@@ -29,11 +29,11 @@ npm run prisma:generate
 npm run prisma:seed
 ```
 
-# Google OAuth Auth & Email Credentials (Managed with Next Auth)
+## Google OAuth Auth & Email Credentials (Managed with Next Auth)
 
 This project is using the Google OAuth auth provided by Google Cloud Service for general users, and Email base login for comanies.
 
-# Commits & Contribution convention:
+## Commits & Contribution convention:
 
 The Main branch are locked to push changes from your local, so please create a new branch to upload changes and merge the changes from a Pull Request with 1 reviewer at least, a approval is required to merge the Pull Request.
 
@@ -44,7 +44,7 @@ Please, name the new branches according of the type of change you are working an
 - fix/
 - hotfix/
 
-# 📘 Prisma ORM & Database
+## 📘 Prisma ORM & Database
 
 This project uses [Prisma](https://www.prisma.io/) as the ORM for MySQL. Below are the most useful commands for managing the database schema, generating the client, and working with seed data.
 
@@ -52,13 +52,13 @@ This project uses [Prisma](https://www.prisma.io/) as the ORM for MySQL. Below a
 
 ---
 
-## ⚙️ Initialization & Setup (Needed to setup the project on your local machine)
+### ⚙️ Initialization & Setup (Needed to setup the project on your local machine)
 
 ```bash
 npx prisma generate
 ```
 
-## 🔄 Migrations & Schema Changes
+### 🔄 Migrations & Schema Changes
 
 For new change on prisma:
 
@@ -73,13 +73,13 @@ npx prisma db push
 npx prisma db pull
 ```
 
-## 🔍 Database Visualization
+### 🔍 Database Visualization
 
 ```bash
 npx prisma studio
 ```
 
-## 🌱 Seeding the Database (To add default data on the tables)
+### 🌱 Seeding the Database (To add default data on the tables)
 
 If run this command twice, the data on some tables may duplicate.
 
