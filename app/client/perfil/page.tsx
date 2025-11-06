@@ -624,26 +624,15 @@ export default function StudentProfile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Correo Electrónico</Label>
-                  <Input
-                    id="email"
-                    value={user.email || ''}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                  <p className="text-xs text-gray-500">El correo no se puede modificar</p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Rol</Label>
-                  <Input
-                    id="role"
-                    value={user.role?.name || 'Sin rol asignado'}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo Electrónico</Label>
+                <Input
+                  id="email"
+                  value={user.email || ''}
+                  disabled
+                  className="bg-gray-50"
+                />
+                <p className="text-xs text-gray-500">El correo no se puede modificar</p>
               </div>
 
               <div className="space-y-2">

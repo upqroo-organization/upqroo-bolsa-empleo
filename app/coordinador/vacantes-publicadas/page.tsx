@@ -290,6 +290,65 @@ export default function VacantesPublicadas() {
     }
   }
 
+  // Translation function for industry sectors
+  const getSectorLabel = (sector: string | null) => {
+    if (!sector) return 'No especificado'
+
+    switch (sector.toLowerCase()) {
+      case "technology":
+      case "tech":
+        return "Tecnología"
+      case "healthcare":
+      case "health":
+        return "Salud"
+      case "finance":
+      case "financial":
+        return "Finanzas"
+      case "education":
+        return "Educación"
+      case "manufacturing":
+        return "Manufactura"
+      case "retail":
+        return "Comercio"
+      case "construction":
+        return "Construcción"
+      case "automotive":
+        return "Automotriz"
+      case "telecommunications":
+      case "telecom":
+        return "Telecomunicaciones"
+      case "energy":
+        return "Energía"
+      case "agriculture":
+        return "Agricultura"
+      case "tourism":
+        return "Turismo"
+      case "logistics":
+        return "Logística"
+      case "consulting":
+        return "Consultoría"
+      case "marketing":
+        return "Marketing"
+      case "real estate":
+        return "Bienes Raíces"
+      case "food":
+      case "food & beverage":
+        return "Alimentos y Bebidas"
+      case "entertainment":
+        return "Entretenimiento"
+      case "government":
+        return "Gobierno"
+      case "non-profit":
+        return "Sin Fines de Lucro"
+      case "services":
+        return "Servicios"
+      case "other":
+        return "Otro"
+      default:
+        return sector
+    }
+  }
+
   const getRealStatus = (vacante: Vacante) => {
     if (vacante.deadline) {
       const now = new Date()
@@ -320,13 +379,13 @@ export default function VacantesPublicadas() {
   const exportToCSV = async () => {
     try {
       setIsExporting(true)
-      
+
       // Prepare CSV data
       const csvData = filteredVacantes.map(vacante => ({
         'ID': vacante.id,
         'Título': vacante.title,
         'Empresa': vacante.company.name,
-        'Sector': vacante.company.sector,
+        'Sector': getSectorLabel(vacante.company.sector),
         'Tipo': getTypeLabel(vacante.type),
         'Modalidad': getModalityLabel(vacante.modality),
         'Ubicación': vacante.location,
@@ -350,12 +409,12 @@ export default function VacantesPublicadas() {
       const headers = Object.keys(csvData[0])
       const csvContent = [
         headers.join(','),
-        ...csvData.map(row => 
+        ...csvData.map(row =>
           headers.map(header => {
             const value = row[header as keyof typeof row]
             // Escape commas and quotes in CSV
-            return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
-              ? `"${value.replace(/"/g, '""')}"` 
+            return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+              ? `"${value.replace(/"/g, '""')}"`
               : value
           }).join(',')
         )
@@ -365,18 +424,18 @@ export default function VacantesPublicadas() {
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
-      
+
       link.setAttribute('href', url)
       link.setAttribute('download', `vacantes_publicadas_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
-      
+
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       // Show success message
       console.log(`Exportadas ${filteredVacantes.length} vacantes a CSV`)
-      
+
     } catch (error) {
       console.error('Error exporting CSV:', error)
     } finally {
@@ -685,7 +744,7 @@ export default function VacantesPublicadas() {
                         <DialogTitle className="text-xl">{selectedVacante?.title}</DialogTitle>
                         <DialogDescription className="flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
-                          {selectedVacante?.company.name} • {selectedVacante?.company.sector}
+                          {selectedVacante?.company.name} • {getSectorLabel(selectedVacante?.company.sector)}
                         </DialogDescription>
                       </DialogHeader>
 
@@ -940,7 +999,7 @@ export default function VacantesPublicadas() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{vacante.company.name}</p>
-                          <p className="text-xs text-muted-foreground">{vacante.company.sector}</p>
+                          <p className="text-xs text-muted-foreground">{getSectorLabel(vacante.company.sector)}</p>
                         </div>
                       </TableCell>
                       <TableCell>

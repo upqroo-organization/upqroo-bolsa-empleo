@@ -275,7 +275,7 @@ export default function ColocacionesExitosas() {
       case undefined:
         return ""
       default:
-        return size
+        return size.charAt(0).toUpperCase() + size.slice(1).toLowerCase()
     }
   }
 
@@ -315,7 +315,7 @@ export default function ColocacionesExitosas() {
   const exportToCSV = async () => {
     try {
       setIsExporting(true)
-      
+
       // Prepare CSV data
       const csvData = filteredColocaciones.map(colocacion => ({
         'ID Colocación': colocacion.id,
@@ -342,12 +342,12 @@ export default function ColocacionesExitosas() {
       const headers = Object.keys(csvData[0])
       const csvContent = [
         headers.join(','),
-        ...csvData.map(row => 
+        ...csvData.map(row =>
           headers.map(header => {
             const value = row[header as keyof typeof row]
             // Escape commas and quotes in CSV
-            return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
-              ? `"${value.replace(/"/g, '""')}"` 
+            return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+              ? `"${value.replace(/"/g, '""')}"`
               : value
           }).join(',')
         )
@@ -357,18 +357,18 @@ export default function ColocacionesExitosas() {
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
-      
+
       link.setAttribute('href', url)
       link.setAttribute('download', `colocaciones_exitosas_${new Date().toISOString().split('T')[0]}.csv`)
       link.style.visibility = 'hidden'
-      
+
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      
+
       // Show success message
       console.log(`Exportadas ${filteredColocaciones.length} colocaciones a CSV`)
-      
+
     } catch (error) {
       console.error('Error exporting CSV:', error)
     } finally {
@@ -848,8 +848,8 @@ export default function ColocacionesExitosas() {
                                         <Star
                                           key={i}
                                           className={`h-4 w-4 ${i < getPerformanceStars(selectedColocacion.performance)
-                                              ? "text-yellow-500 fill-current"
-                                              : "text-gray-300"
+                                            ? "text-yellow-500 fill-current"
+                                            : "text-gray-300"
                                             }`}
                                         />
                                       ))}

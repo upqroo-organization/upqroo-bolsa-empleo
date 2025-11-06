@@ -164,6 +164,83 @@ export default function CoordinatorDashboard() {
     }
   }
 
+  // Translation function for industry sectors
+  const getSectorLabel = (sector: string | null) => {
+    if (!sector) return 'No especificado'
+
+    switch (sector.toLowerCase()) {
+      case "technology":
+      case "tech":
+        return "Tecnología"
+      case "healthcare":
+      case "health":
+        return "Salud"
+      case "finance":
+      case "financial":
+        return "Finanzas"
+      case "education":
+        return "Educación"
+      case "manufacturing":
+        return "Manufactura"
+      case "retail":
+        return "Comercio"
+      case "construction":
+        return "Construcción"
+      case "automotive":
+        return "Automotriz"
+      case "telecommunications":
+      case "telecom":
+        return "Telecomunicaciones"
+      case "energy":
+        return "Energía"
+      case "agriculture":
+        return "Agricultura"
+      case "tourism":
+        return "Turismo"
+      case "logistics":
+        return "Logística"
+      case "consulting":
+        return "Consultoría"
+      case "marketing":
+        return "Marketing"
+      case "real estate":
+        return "Bienes Raíces"
+      case "food":
+      case "food & beverage":
+        return "Alimentos y Bebidas"
+      case "entertainment":
+        return "Entretenimiento"
+      case "government":
+        return "Gobierno"
+      case "non-profit":
+        return "Sin Fines de Lucro"
+      case "services":
+        return "Servicios"
+      case "other":
+        return "Otro"
+      default:
+        return sector
+    }
+  }
+
+  // Translation function for company sizes
+  const getSizeLabel = (size: string | null) => {
+    if (!size) return 'No especificado'
+
+    switch (size.toLowerCase()) {
+      case "startup":
+        return "Startup"
+      case "small":
+        return "Pequeña"
+      case "medium":
+        return "Mediana"
+      case "large":
+        return "Grande"
+      default:
+        return size.charAt(0).toUpperCase() + size.slice(1).toLowerCase()
+    }
+  }
+
   // Handle email sending
   // const handleSendEmail = async () => {
   //   if (!emailData.to || !emailData.subject || !emailData.message) {
@@ -541,7 +618,7 @@ export default function CoordinatorDashboard() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {company.sector} • {company.size}
+                        {getSectorLabel(company.sector)} • {getSizeLabel(company.size)}
                       </p>
                       <p className="text-xs text-muted-foreground">{company.location}</p>
                       <p className="text-xs text-muted-foreground">
@@ -569,12 +646,12 @@ export default function CoordinatorDashboard() {
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                   <p><strong>Nombre:</strong> {selectedCompany?.name}</p>
-                                  <p><strong>Sector:</strong> {selectedCompany?.sector}</p>
+                                  <p><strong>Sector:</strong> {getSectorLabel(selectedCompany?.sector)}</p>
                                   <p><strong>Ubicación:</strong> {selectedCompany?.location}</p>
                                 </div>
                                 <div>
                                   <p><strong>Email:</strong> {selectedCompany?.email}</p>
-                                  <p><strong>Tamaño:</strong> {selectedCompany?.size}</p>
+                                  <p><strong>Tamaño:</strong> {getSizeLabel(selectedCompany?.size)}</p>
                                   <p><strong>Enviado:</strong> {selectedCompany?.submittedDate ? formatDate(selectedCompany.submittedDate) : 'N/A'}</p>
                                 </div>
                               </div>
