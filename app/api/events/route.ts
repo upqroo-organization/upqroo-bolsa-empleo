@@ -16,9 +16,20 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
-      company: {
-        isApprove: true // Only show events from approved companies
-      }
+      OR: [
+        {
+          // Company events (must be from approved companies)
+          company: {
+            isApprove: true
+          }
+        },
+        {
+          // Coordinator events (always shown if active)
+          coordinatorId: {
+            not: null
+          }
+        }
+      ]
     };
 
     if (eventType) {
@@ -44,6 +55,13 @@ export async function GET(request: NextRequest) {
               id: true,
               name: true,
               logoUrl: true
+            }
+          },
+          coordinator: {
+            select: {
+              id: true,
+              name: true,
+              image: true
             }
           },
           state: {

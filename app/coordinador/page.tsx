@@ -38,8 +38,11 @@ import {
   FileText,
   Download,
   Mail,
+  CalendarDays,
+  Plus,
 } from "lucide-react"
 import { EmailCampaignModal } from "@/components/coordinator/EmailCampaignModal"
+import Link from "next/link"
 
 interface DashboardData {
   statistics: {
@@ -498,7 +501,7 @@ export default function CoordinatorDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -545,6 +548,46 @@ export default function CoordinatorDashboard() {
                   <p className="text-sm">Las actividades aparecerán aquí cuando ocurran</p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Events Management Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CalendarDays className="h-5 w-5 mr-2" />
+                Eventos
+              </div>
+              <Link href="/coordinador/eventos">
+                <Button variant="outline" size="sm">
+                  Ver Todos
+                </Button>
+              </Link>
+            </CardTitle>
+            <CardDescription>Gestión de eventos institucionales</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center p-4">
+              <CalendarDays className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <h3 className="font-semibold mb-2">Eventos UPQROO</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Crea eventos institucionales para estudiantes y empresas
+              </p>
+              <div className="space-y-2">
+                <Link href="/coordinador/eventos/crear">
+                  <Button size="sm" className="w-full">
+                    <Plus className="mr-2 h-3 w-3" />
+                    Crear Evento
+                  </Button>
+                </Link>
+                <Link href="/coordinador/eventos">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Gestionar
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>

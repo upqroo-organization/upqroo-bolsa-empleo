@@ -12,9 +12,11 @@ model Event {
   registrationUrl String? // External registration URL
   isActive        Boolean   @default(true)
 
-  // Company relation
-  companyId String
-  company   company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  // Creator relations (either company or coordinator)
+  companyId     String?
+  company       company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  coordinatorId String?
+  coordinator   User?    @relation("CoordinatorEvents", fields: [coordinatorId], references: [id], onDelete: Cascade)
 
   // Location relation (optional)
   stateId Int?
@@ -24,6 +26,7 @@ model Event {
   updatedAt DateTime @updatedAt
 
   @@index([companyId])
+  @@index([coordinatorId])
   @@index([startDate])
   @@index([eventType])
 }

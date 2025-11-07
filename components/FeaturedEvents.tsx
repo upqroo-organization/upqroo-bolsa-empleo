@@ -4,10 +4,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
+import {
+  Calendar,
+  MapPin,
+  Users,
   ExternalLink,
   Building2,
   Clock,
@@ -21,9 +21,9 @@ import { es } from "date-fns/locale";
 import Link from "next/link";
 
 export default function FeaturedEvents() {
-  const { events, loading, error } = useEvents({ 
-    limit: 6, 
-    upcoming: true 
+  const { events, loading, error } = useEvents({
+    limit: 6,
+    upcoming: true
   });
 
   if (loading) {
@@ -80,7 +80,7 @@ export default function FeaturedEvents() {
               <CalendarDays className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
               <h3 className="text-2xl font-semibold mb-4">No hay eventos próximos</h3>
               <p className="text-muted-foreground mb-8">
-                Actualmente no hay eventos programados. Te invitamos a registrarte para recibir 
+                Actualmente no hay eventos programados. Te invitamos a registrarte para recibir
                 notificaciones cuando se publiquen nuevos eventos.
               </p>
             </div>
@@ -107,8 +107,8 @@ export default function FeaturedEvents() {
               <CardHeader className="pb-3">
                 {event.imageUrl && (
                   <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
-                    <img 
-                      src={event.imageUrl} 
+                    <img
+                      src={event.imageUrl}
                       alt={event.title}
                       className="w-full h-full object-cover"
                     />
@@ -121,7 +121,7 @@ export default function FeaturedEvents() {
                     </CardTitle>
                     <CardDescription className="flex items-center gap-1 mb-2">
                       <Building2 className="h-4 w-4" />
-                      {event.company.name}
+                      {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
                     </CardDescription>
                     <Badge variant="secondary" className="mb-2">
                       {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
@@ -129,7 +129,7 @@ export default function FeaturedEvents() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -141,14 +141,14 @@ export default function FeaturedEvents() {
                       )}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>
                       {format(new Date(event.startDate), "p", { locale: es })}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
                     <span>
@@ -164,15 +164,15 @@ export default function FeaturedEvents() {
                     </div>
                   )}
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {event.description}
                 </p>
-                
+
                 {event.registrationUrl ? (
-                  <a 
-                    href={event.registrationUrl} 
-                    target="_blank" 
+                  <a
+                    href={event.registrationUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-full"
                   >
@@ -198,8 +198,8 @@ export default function FeaturedEvents() {
                   <CardHeader className="pb-3">
                     {event.imageUrl && (
                       <div className="w-full h-32 rounded-lg overflow-hidden mb-3">
-                        <img 
-                          src={event.imageUrl} 
+                        <img
+                          src={event.imageUrl}
                           alt={event.title}
                           className="w-full h-full object-cover"
                         />
@@ -210,13 +210,13 @@ export default function FeaturedEvents() {
                     </CardTitle>
                     <CardDescription className="flex items-center gap-1 mb-2">
                       <Building2 className="h-4 w-4" />
-                      {event.company.name}
+                      {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
                     </CardDescription>
                     <Badge variant="secondary" className="mb-2">
                       {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
                     </Badge>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -225,7 +225,7 @@ export default function FeaturedEvents() {
                           {format(new Date(event.startDate), "PP", { locale: es })}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3" />
                         <span className="line-clamp-1">
@@ -233,15 +233,15 @@ export default function FeaturedEvents() {
                         </span>
                       </div>
                     </div>
-                    
+
                     <p className="text-xs text-muted-foreground line-clamp-2">
                       {event.description}
                     </p>
-                    
+
                     {event.registrationUrl ? (
-                      <a 
-                        href={event.registrationUrl} 
-                        target="_blank" 
+                      <a
+                        href={event.registrationUrl}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="w-full"
                       >
