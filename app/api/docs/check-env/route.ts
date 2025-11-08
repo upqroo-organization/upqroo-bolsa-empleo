@@ -1,9 +1,23 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function GET() {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  try {
+    const session = await getServerSession(authOptions);
 
-  return NextResponse.json({
-    isDevelopment
-  });
+    // Check if user is authenticated and has @upqroo.edu.mx email
+    const hasAccess = session?.user?.email?.endsWith('@upqroo.edu.mx') || false;
+
+    return NextResponse.json({
+      isDevelopment: hasAccess,
+      hasAccess
+    });
+  } catch (error) {
+    console.error('Error checking docs access:', error);
+    return NextResponse.json({
+      isDevelopment: false,
+      hasAccess: false
+    });
+  }
 }

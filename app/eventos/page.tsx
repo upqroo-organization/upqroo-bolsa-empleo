@@ -18,10 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
+import {
+  Calendar,
+  MapPin,
+  Users,
   ExternalLink,
   Building2,
   Clock,
@@ -55,7 +55,7 @@ export default function EventsPage() {
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.company.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (event.company?.name || event.coordinator?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handlePageChange = (page: number) => {
@@ -151,8 +151,8 @@ export default function EventsPage() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Filtro temporal</label>
-                  <Select 
-                    value={showUpcomingOnly ? 'upcoming' : 'all'} 
+                  <Select
+                    value={showUpcomingOnly ? 'upcoming' : 'all'}
                     onValueChange={(value) => setShowUpcomingOnly(value === 'upcoming')}
                   >
                     <SelectTrigger className='w-full'>
@@ -190,10 +190,10 @@ export default function EventsPage() {
                 <CalendarDays className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
                 <h3 className="text-2xl font-semibold mb-4">No se encontraron eventos</h3>
                 <p className="text-muted-foreground mb-8">
-                  No hay eventos que coincidan con tus criterios de búsqueda. 
+                  No hay eventos que coincidan con tus criterios de búsqueda.
                   Intenta ajustar los filtros.
                 </p>
-                <Button 
+                <Button
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedEventType('all');
@@ -214,8 +214,8 @@ export default function EventsPage() {
                     <CardHeader className="pb-3">
                       {event.imageUrl && (
                         <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
-                          <img 
-                            src={event.imageUrl} 
+                          <img
+                            src={event.imageUrl}
                             alt={event.title}
                             className="w-full h-full object-cover"
                           />
@@ -228,7 +228,7 @@ export default function EventsPage() {
                           </CardTitle>
                           <CardDescription className="flex items-center gap-1 mb-2">
                             <Building2 className="h-4 w-4" />
-                            {event.company.name}
+                            {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
                           </CardDescription>
                           <Badge variant="secondary" className="mb-2">
                             {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
@@ -236,7 +236,7 @@ export default function EventsPage() {
                         </div>
                       </div>
                     </CardHeader>
-                    
+
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -248,14 +248,14 @@ export default function EventsPage() {
                             )}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="h-4 w-4" />
                           <span>
                             {format(new Date(event.startDate), "p", { locale: es })}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
                           <span>
@@ -271,15 +271,15 @@ export default function EventsPage() {
                           </div>
                         )}
                       </div>
-                      
+
                       <p className="text-sm text-muted-foreground line-clamp-3">
                         {event.description}
                       </p>
-                      
+
                       {event.registrationUrl ? (
-                        <a 
-                          href={event.registrationUrl} 
-                          target="_blank" 
+                        <a
+                          href={event.registrationUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="w-full"
                         >
@@ -306,7 +306,7 @@ export default function EventsPage() {
                   >
                     Anterior
                   </Button>
-                  
+
                   <div className="flex gap-1">
                     {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
                       <Button
@@ -319,7 +319,7 @@ export default function EventsPage() {
                       </Button>
                     ))}
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     onClick={() => handlePageChange(currentPage + 1)}

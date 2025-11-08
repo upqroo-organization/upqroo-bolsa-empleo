@@ -219,7 +219,7 @@ export default function DocsPage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading documentation...</p>
+            <p className="text-muted-foreground">Cargando documentación...</p>
           </div>
         </div>
       </div>
@@ -233,18 +233,22 @@ export default function DocsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
-              <CardTitle>Documentation Not Available</CardTitle>
+              <CardTitle>Acceso Restringido</CardTitle>
             </div>
             <CardDescription>
-              This documentation page is only available in development environment.
+              Esta página de documentación solo está disponible para usuarios de UPQROO.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              To access the project documentation, please run the application in development mode:
+              Para acceder a la documentación del proyecto, debes iniciar sesión con una cuenta de correo institucional de UPQROO (@upqroo.edu.mx).
             </p>
             <div className="bg-muted p-3 rounded-md">
-              <code className="text-sm">npm run dev</code>
+              <p className="text-sm font-medium mb-2">Requisitos de acceso:</p>
+              <ul className="text-sm space-y-1 list-disc list-inside">
+                <li>Cuenta de correo institucional (@upqroo.edu.mx)</li>
+                <li>Sesión activa en la plataforma</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
@@ -273,7 +277,7 @@ export default function DocsPage() {
         <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
           <div className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold">Documentation</h2>
+            <h2 className="font-semibold">Documentación</h2>
             <Badge variant="secondary" className="text-xs">
               {allFiles.length} docs
             </Badge>
@@ -293,7 +297,7 @@ export default function DocsPage() {
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search documentation... (Ctrl+K)"
+            placeholder="Buscar documentación... (Ctrl+K)"
             className="w-full px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -307,7 +311,7 @@ export default function DocsPage() {
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {searchQuery ? 'No matching documents found' : 'No documentation found'}
+                  {searchQuery ? 'No se encontraron documentos' : 'No hay documentación disponible'}
                 </p>
               </div>
             ) : (
@@ -340,7 +344,7 @@ export default function DocsPage() {
           </Button>
           <div className="flex items-center gap-3">
             <BookOpen className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Project Documentation</h1>
+            <h1 className="text-2xl font-bold">Documentación del Proyecto</h1>
           </div>
         </div>
 
@@ -413,9 +417,9 @@ export default function DocsPage() {
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
                 <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Welcome to Documentation</h3>
+                <h3 className="text-xl font-semibold mb-2">Bienvenido a la Documentación</h3>
                 <p className="text-muted-foreground">
-                  Select a document from the sidebar to get started.
+                  Selecciona un documento de la barra lateral para comenzar.
                 </p>
               </div>
             </div>
