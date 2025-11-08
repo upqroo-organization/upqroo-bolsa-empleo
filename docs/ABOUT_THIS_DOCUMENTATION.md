@@ -12,7 +12,7 @@ http://localhost:3000/docs
 
 ## Features
 
-- **Environment Protection**: Only accessible in development mode
+- **Auth Protection**: This documentation is only available on development mode & for students users (@upqroo.edu.mx)
 - **Markdown Rendering**: All `.md` files are automatically converted to HTML
 - **Tabbed Interface**: Easy navigation between different documentation files
 - **Responsive Design**: Works on desktop and mobile devices
