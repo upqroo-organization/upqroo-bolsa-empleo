@@ -468,7 +468,9 @@ export default function StudentDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm line-clamp-1">{event.title}</p>
-                        <p className="text-xs text-muted-foreground">{event.company.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(event.startDate), "PPP 'a las' p", { locale: es })}
                         </p>

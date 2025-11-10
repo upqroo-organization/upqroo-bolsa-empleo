@@ -46,6 +46,7 @@ import {
   Clock,
   Star,
   FileText,
+  Download,
 } from "lucide-react"
 
 interface Colocacion {
@@ -93,6 +94,7 @@ export default function ColocacionesExitosas() {
 
   // Modal state
   const [selectedColocacion, setSelectedColocacion] = useState<Colocacion | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     fetchColocaciones()
@@ -273,7 +275,7 @@ export default function ColocacionesExitosas() {
       case undefined:
         return ""
       default:
-        return size
+        return size.charAt(0).toUpperCase() + size.slice(1).toLowerCase()
     }
   }
 
@@ -309,6 +311,70 @@ export default function ColocacionesExitosas() {
 
   const careers = [...new Set(colocaciones.map(c => c.student.career))]
   const sectors = [...new Set(colocaciones.map(c => c.company.sector))]
+
+  const exportToCSV = async () => {
+    try {
+      setIsExporting(true)
+
+      // Prepare CSV data
+      const csvData = filteredColocaciones.map(colocacion => ({
+        'ID Colocación': colocacion.id,
+        'Estudiante': colocacion.student.name,
+        'Email Estudiante': colocacion.student.email,
+        'Carrera': colocacion.student.career,
+        'Semestre': colocacion.student.semester,
+        'Empresa': colocacion.company.name,
+        'Sector Empresa': getSectorLabel(colocacion.company.sector) || colocacion.company.sector,
+        'Tamaño Empresa': getSizeLabel(colocacion.company.size) || colocacion.company.size,
+        'Título del Puesto': colocacion.vacante.title,
+        'Tipo de Empleo': getTypeLabel(colocacion.vacante.type),
+        'Modalidad': getModalityLabel(colocacion.vacante.modality),
+        'Ubicación': colocacion.vacante.location,
+        'Salario': formatSalary(colocacion.vacante.salaryMin, colocacion.vacante.salaryMax),
+        'Fecha de Contratación': formatDate(colocacion.hiredDate),
+        'Fecha de Inicio': colocacion.startDate ? formatDate(colocacion.startDate) : 'No especificada',
+        'Estado': getStatusLabel(colocacion.status),
+        'Rendimiento (%)': colocacion.performance || 'No evaluado',
+        'Notas': colocacion.notes || 'Sin notas'
+      }))
+
+      // Convert to CSV format
+      const headers = Object.keys(csvData[0])
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row =>
+          headers.map(header => {
+            const value = row[header as keyof typeof row]
+            // Escape commas and quotes in CSV
+            return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+              ? `"${value.replace(/"/g, '""')}"`
+              : value
+          }).join(',')
+        )
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `colocaciones_exitosas_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Show success message
+      console.log(`Exportadas ${filteredColocaciones.length} colocaciones a CSV`)
+
+    } catch (error) {
+      console.error('Error exporting CSV:', error)
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -478,6 +544,17 @@ export default function ColocacionesExitosas() {
                   <SelectItem value="terminated">Terminados</SelectItem>
                 </SelectContent>
               </Select>
+              <Button
+                onClick={exportToCSV}
+                disabled={isExporting || filteredColocaciones.length === 0}
+                className="flex items-center gap-2 h-12"
+                variant="outline"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {isExporting ? "Exportando..." : "Exportar CSV"}
+                </span>
+              </Button>
               <div className="flex bg-muted rounded-lg p-1">
                 <Button
                   variant={viewMode === "cards" ? "default" : "ghost"}
@@ -771,8 +848,8 @@ export default function ColocacionesExitosas() {
                                         <Star
                                           key={i}
                                           className={`h-4 w-4 ${i < getPerformanceStars(selectedColocacion.performance)
-                                              ? "text-yellow-500 fill-current"
-                                              : "text-gray-300"
+                                            ? "text-yellow-500 fill-current"
+                                            : "text-gray-300"
                                             }`}
                                         />
                                       ))}

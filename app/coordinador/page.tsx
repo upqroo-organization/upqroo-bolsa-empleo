@@ -38,8 +38,11 @@ import {
   FileText,
   Download,
   Mail,
+  CalendarDays,
+  Plus,
 } from "lucide-react"
 import { EmailCampaignModal } from "@/components/coordinator/EmailCampaignModal"
+import Link from "next/link"
 
 interface DashboardData {
   statistics: {
@@ -161,6 +164,83 @@ export default function CoordinatorDashboard() {
         return Building2
       default:
         return Briefcase
+    }
+  }
+
+  // Translation function for industry sectors
+  const getSectorLabel = (sector: string | null) => {
+    if (!sector) return 'No especificado'
+
+    switch (sector.toLowerCase()) {
+      case "technology":
+      case "tech":
+        return "Tecnología"
+      case "healthcare":
+      case "health":
+        return "Salud"
+      case "finance":
+      case "financial":
+        return "Finanzas"
+      case "education":
+        return "Educación"
+      case "manufacturing":
+        return "Manufactura"
+      case "retail":
+        return "Comercio"
+      case "construction":
+        return "Construcción"
+      case "automotive":
+        return "Automotriz"
+      case "telecommunications":
+      case "telecom":
+        return "Telecomunicaciones"
+      case "energy":
+        return "Energía"
+      case "agriculture":
+        return "Agricultura"
+      case "tourism":
+        return "Turismo"
+      case "logistics":
+        return "Logística"
+      case "consulting":
+        return "Consultoría"
+      case "marketing":
+        return "Marketing"
+      case "real estate":
+        return "Bienes Raíces"
+      case "food":
+      case "food & beverage":
+        return "Alimentos y Bebidas"
+      case "entertainment":
+        return "Entretenimiento"
+      case "government":
+        return "Gobierno"
+      case "non-profit":
+        return "Sin Fines de Lucro"
+      case "services":
+        return "Servicios"
+      case "other":
+        return "Otro"
+      default:
+        return sector
+    }
+  }
+
+  // Translation function for company sizes
+  const getSizeLabel = (size: string | null) => {
+    if (!size) return 'No especificado'
+
+    switch (size.toLowerCase()) {
+      case "startup":
+        return "Startup"
+      case "small":
+        return "Pequeña"
+      case "medium":
+        return "Mediana"
+      case "large":
+        return "Grande"
+      default:
+        return size.charAt(0).toUpperCase() + size.slice(1).toLowerCase()
     }
   }
 
@@ -421,7 +501,7 @@ export default function CoordinatorDashboard() {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -468,6 +548,46 @@ export default function CoordinatorDashboard() {
                   <p className="text-sm">Las actividades aparecerán aquí cuando ocurran</p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Events Management Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CalendarDays className="h-5 w-5 mr-2" />
+                Eventos
+              </div>
+              <Link href="/coordinador/eventos">
+                <Button variant="outline" size="sm">
+                  Ver Todos
+                </Button>
+              </Link>
+            </CardTitle>
+            <CardDescription>Gestión de eventos institucionales</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center p-4">
+              <CalendarDays className="h-8 w-8 mx-auto mb-3 text-primary" />
+              <h3 className="font-semibold mb-2">Eventos UPQROO</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Crea eventos institucionales para estudiantes y empresas
+              </p>
+              <div className="space-y-2">
+                <Link href="/coordinador/eventos/crear">
+                  <Button size="sm" className="w-full">
+                    <Plus className="mr-2 h-3 w-3" />
+                    Crear Evento
+                  </Button>
+                </Link>
+                <Link href="/coordinador/eventos">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Gestionar
+                  </Button>
+                </Link>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -541,7 +661,7 @@ export default function CoordinatorDashboard() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {company.sector} • {company.size}
+                        {getSectorLabel(company.sector)} • {getSizeLabel(company.size)}
                       </p>
                       <p className="text-xs text-muted-foreground">{company.location}</p>
                       <p className="text-xs text-muted-foreground">
@@ -569,12 +689,12 @@ export default function CoordinatorDashboard() {
                               <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                   <p><strong>Nombre:</strong> {selectedCompany?.name}</p>
-                                  <p><strong>Sector:</strong> {selectedCompany?.sector}</p>
+                                  <p><strong>Sector:</strong> {getSectorLabel(selectedCompany?.sector)}</p>
                                   <p><strong>Ubicación:</strong> {selectedCompany?.location}</p>
                                 </div>
                                 <div>
                                   <p><strong>Email:</strong> {selectedCompany?.email}</p>
-                                  <p><strong>Tamaño:</strong> {selectedCompany?.size}</p>
+                                  <p><strong>Tamaño:</strong> {getSizeLabel(selectedCompany?.size)}</p>
                                   <p><strong>Enviado:</strong> {selectedCompany?.submittedDate ? formatDate(selectedCompany.submittedDate) : 'N/A'}</p>
                                 </div>
                               </div>

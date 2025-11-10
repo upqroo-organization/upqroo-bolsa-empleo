@@ -190,4 +190,473 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}/* Prose st
+yles for markdown content */
+.prose {
+  color: var(--foreground);
+  max-width: none;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: var(--foreground);
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 2.25rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--foreground);
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--foreground);
+}
+
+.prose h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.prose p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+
+.prose ul, .prose ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+  font-style: italic;
+  border-left: 4px solid var(--border);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--muted-foreground);
+}
+
+.prose code {
+  background-color: var(--muted);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.prose pre {
+  background-color: var(--muted);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.prose th, .prose td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+
+.prose th {
+  background-color: var(--muted);
+  font-weight: 600;
+}
+
+.prose a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* Dark mode prose styles */
+.dark .prose {
+  color: var(--foreground);
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  color: var(--foreground);
+}
+
+.dark .prose blockquote {
+  color: var(--muted-foreground);
+}
+
+.dark .prose a {
+  color: var(--primary);
+}/* 
+Prose styles for markdown documentation */
+.prose {
+  color: hsl(var(--foreground));
+  max-width: none;
+  line-height: 1.7;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+  color: hsl(var(--foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.5rem;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 2.25rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
+}
+
+.prose h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.prose p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+
+.prose ul, .prose ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose blockquote {
+  font-style: italic;
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: hsl(var(--muted-foreground));
+  background-color: hsl(var(--muted) / 0.3);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.prose code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  color: hsl(var(--foreground));
+}
+
+.prose pre {
+  background-color: hsl(var(--muted));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.prose th, .prose td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.prose th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.prose td {
+  background-color: hsl(var(--card));
+}
+
+.prose a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  color: hsl(var(--primary));
+  opacity: 0.8;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+}
+
+.prose hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 2rem 0;
+}
+
+.prose strong {
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.prose em {
+  font-style: italic;
+}
+
+/* Dark mode adjustments */
+.dark .prose {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4 {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose blockquote {
+  color: hsl(var(--muted-foreground));
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+.dark .prose a {
+  color: hsl(var(--primary));
+}
+
+.dark .prose code {
+  color: hsl(var(--foreground));
+}
+
+.dark .prose strong {
+  color: hsl(var(--foreground));
+}/* Docum
+entation specific styles */
+.docs-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)) transparent;
+}
+
+.docs-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.docs-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* Improve prose styling for documentation */
+.docs-content {
+  line-height: 1.7;
+}
+
+.docs-content h1,
+.docs-content h2,
+.docs-content h3,
+.docs-content h4,
+.docs-content h5,
+.docs-content h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.docs-content h1 {
+  font-size: 2rem;
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.5rem;
+}
+
+.docs-content h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.25rem;
+}
+
+.docs-content h3 {
+  font-size: 1.25rem;
+}
+
+.docs-content code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.docs-content pre {
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.docs-content pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.docs-content blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.docs-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.docs-content th,
+.docs-content td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.docs-content th {
+  background-color: hsl(var(--muted));
+  font-weight: 600;
+}/* En
+hanced scrolling for documentation content */
+.docs-content-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)) transparent;
+}
+
+.docs-content-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.docs-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.docs-content-scroll::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+.docs-content-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* Smooth scrolling behavior */
+.docs-content-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Ensure content doesn't get cut off */
+.docs-content-wrapper {
+  min-height: 100%;
+  padding-bottom: 2rem;
 }

@@ -92,17 +92,6 @@ export default function StateSelect({
             {isLoading ? 'Cargando estados...' : 'No se encontraron estados.'}
           </CommandEmpty>
           <CommandGroup className='max-h-[350px] overflow-auto'>
-            <CommandItem
-                onSelect={() => handleSelect({id: 0, name: "Todos"})}
-              >
-              <Check
-                className={cn(
-                  'mr-2 h-4 w-4',
-                  selectedState?.id === 0 ? 'opacity-100' : 'opacity-0'
-                )}
-              />
-              Todos
-              </CommandItem>
             {Array.isArray(states) && states.map((state) => (
               <CommandItem
                 key={state.id}

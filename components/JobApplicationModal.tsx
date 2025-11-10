@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { FileText, Building2, MapPin, DollarSign, Calendar, AlertCircle, CheckCircle } from "lucide-react"
-import { VacanteInterface } from "@/types/vacantes"
+import { VacanteInterface, VacanteTypeEnum, VacanteModalityEnum, Careers } from "@/types/vacantes"
 import { User } from "@/types/users"
 import { toast } from "sonner"
+import { getEnumLabelSafe } from "@/utils"
 
 interface JobApplicationModalProps {
   vacante: VacanteInterface | null
@@ -18,12 +19,14 @@ interface JobApplicationModalProps {
   onApplicationSuccess: () => void
 }
 
-export default function JobApplicationModal({ 
-  vacante, 
-  user, 
-  isOpen, 
-  onClose, 
-  onApplicationSuccess 
+
+
+export default function JobApplicationModal({
+  vacante,
+  user,
+  isOpen,
+  onClose,
+  onApplicationSuccess
 }: JobApplicationModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -122,14 +125,14 @@ export default function JobApplicationModal({
           color: '#16a34a'
         }
       })
-      
+
       onApplicationSuccess()
       onClose()
     } catch (error) {
       console.error('Error applying to job:', error)
       // Dismiss loading toast
       toast.dismiss(loadingToast)
-      
+
       toast.error("Error de conexión", {
         description: "No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente.",
         duration: 5000,
@@ -167,16 +170,16 @@ export default function JobApplicationModal({
 
             <div className="flex flex-wrap gap-2">
               {vacante.type && (
-                <Badge variant="secondary">{vacante.type}</Badge>
+                <Badge variant="secondary">{getEnumLabelSafe(VacanteTypeEnum, vacante.type)}</Badge>
               )}
               {vacante.modality && (
                 <Badge variant="outline" className="text-blue-600 border-blue-600">
-                  {vacante.modality}
+                  {getEnumLabelSafe(VacanteModalityEnum, vacante.modality)}
                 </Badge>
               )}
               {vacante.career && (
                 <Badge variant="outline" className="text-purple-600 border-purple-600">
-                  {vacante.career}
+                  {getEnumLabelSafe(Careers, vacante.career)}
                 </Badge>
               )}
             </div>
@@ -188,14 +191,14 @@ export default function JobApplicationModal({
                   <span>{vacante.location}</span>
                 </div>
               )}
-              
+
               {(vacante.salaryMin || vacante.salaryMax) && (
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-gray-500" />
                   <span className="text-green-600 font-medium">
-                    {vacante.salaryMin && vacante.salaryMax 
+                    {vacante.salaryMin && vacante.salaryMax
                       ? `$${vacante.salaryMin.toLocaleString()} - $${vacante.salaryMax.toLocaleString()}`
-                      : vacante.salaryMin 
+                      : vacante.salaryMin
                         ? `Desde $${vacante.salaryMin.toLocaleString()}`
                         : `Hasta $${vacante.salaryMax?.toLocaleString()}`
                     }
@@ -217,7 +220,7 @@ export default function JobApplicationModal({
           {/* CV Section */}
           <div className="space-y-4">
             <h3 className="font-semibold">Tu CV</h3>
-            
+
             {user?.cvUrl ? (
               <div className="border rounded-lg p-4 bg-green-50 border-green-200">
                 <div className="flex items-center gap-3">

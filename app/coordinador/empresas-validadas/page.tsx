@@ -40,6 +40,7 @@ import {
   FileText,
   Grid3X3,
   List,
+  Download,
 } from "lucide-react"
 
 interface Company {
@@ -74,6 +75,7 @@ export default function EmpresasValidadas() {
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards")
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   useEffect(() => {
     fetchCompanies()
@@ -135,7 +137,7 @@ export default function EmpresasValidadas() {
       case "large":
         return "Grande"
       default:
-        return size === "No especificado" ? "" : size
+        return size === "No especificado" ? "" : size.charAt(0).toUpperCase() + size.slice(1).toLowerCase()
     }
   }
 
@@ -181,6 +183,70 @@ export default function EmpresasValidadas() {
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedCompany(null)
+  }
+
+  const exportToCSV = async () => {
+    try {
+      setIsExporting(true)
+
+      // Prepare CSV data
+      const csvData = filteredCompanies.map(company => ({
+        'ID': company.id,
+        'Nombre': company.name,
+        'Email': company.email,
+        'Sector': getSectorLabel(company.sector) || company.sector,
+        'Tamaño': getSizeLabel(company.size) || company.size,
+        'Ubicación': company.location,
+        'Teléfono': company.phone || 'No especificado',
+        'Sitio Web': company.website || 'No especificado',
+        'Descripción': company.description || 'No especificado',
+        'Fecha de Aprobación': formatDate(company.approvedDate),
+        'Estado': 'Validada',
+        'Vacantes Publicadas': company.vacantesCount,
+        'Postulaciones Recibidas': company.applicationsCount,
+        'Contrataciones': company.hiresCount,
+        'Tiene Constancia Fiscal': company.fiscalDocumentUrl ? 'Sí' : 'No',
+        'Contacto Principal': company.contactName || 'No especificado',
+        'Email de Contacto': company.contactEmail || 'No especificado',
+        'Teléfono de Contacto': company.contactPhone || 'No especificado'
+      }))
+
+      // Convert to CSV format
+      const headers = Object.keys(csvData[0])
+      const csvContent = [
+        headers.join(','),
+        ...csvData.map(row =>
+          headers.map(header => {
+            const value = row[header as keyof typeof row]
+            // Escape commas and quotes in CSV
+            return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+              ? `"${value.replace(/"/g, '""')}"`
+              : value
+          }).join(',')
+        )
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `empresas_validadas_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Show success message
+      console.log(`Exportadas ${filteredCompanies.length} empresas a CSV`)
+
+    } catch (error) {
+      console.error('Error exporting CSV:', error)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   if (loading) {
@@ -337,6 +403,17 @@ export default function EmpresasValidadas() {
                 ))}
               </SelectContent>
             </Select>
+            <Button
+              onClick={exportToCSV}
+              disabled={isExporting || filteredCompanies.length === 0}
+              className="flex items-center gap-2 h-12"
+              variant="outline"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">
+                {isExporting ? "Exportando..." : "Exportar CSV"}
+              </span>
+            </Button>
             <div className="flex bg-muted rounded-lg p-1">
               <Button
                 variant={viewMode === "cards" ? "default" : "ghost"}
@@ -467,9 +544,9 @@ export default function EmpresasValidadas() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="flex-1"
                     onClick={() => handleViewDetails(company)}
                   >
@@ -709,9 +786,9 @@ export default function EmpresasValidadas() {
                         {selectedCompany.website && (
                           <div className="flex items-center gap-3">
                             <Globe className="h-4 w-4 text-muted-foreground" />
-                            <a 
-                              href={selectedCompany.website} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.website}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-blue-600 hover:underline"
                             >
@@ -771,7 +848,7 @@ export default function EmpresasValidadas() {
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t">
                 {selectedCompany.fiscalDocumentUrl && (
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => {
                       const filename = selectedCompany.fiscalDocumentUrl?.split('/').pop()

@@ -11,11 +11,17 @@ export interface Event {
   maxAttendees?: number;
   registrationUrl?: string;
   isActive: boolean;
-  companyId: string;
-  company: {
+  companyId?: string;
+  company?: {
     id: string;
     name: string;
     logoUrl?: string;
+  };
+  coordinatorId?: string;
+  coordinator?: {
+    id: string;
+    name: string;
+    image?: string;
   };
   stateId?: number;
   state?: {

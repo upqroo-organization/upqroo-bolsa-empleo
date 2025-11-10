@@ -8,24 +8,25 @@ generator client {
 }
 
 model User {
-  id              String              @id @default(cuid())
-  name            String?
-  username        String?             @unique
-  email           String?             @unique
-  emailVerified   DateTime?
-  image           String?
-  cvUrl           String? // URL to the user's CV PDF file
-  accounts        Account[]
-  sessions        Session[]
-  career          String?
-  period          Int?
-  role            role?               @relation(fields: [roleId], references: [id])
-  vacantes        Vacante[]           @relation("VacanteApplicants")
-  applications    Application[]
-  surveyResponses SurveyResponse[]    @relation("StudentSurveyResponses")
-  jobExperience   UserJobExperience[] @relation("UserJobExperience")
+  id                String              @id @default(cuid())
+  name              String?
+  username          String?             @unique
+  email             String?             @unique
+  emailVerified     DateTime?
+  image             String?
+  cvUrl             String? // URL to the user's CV PDF file
+  accounts          Account[]
+  sessions          Session[]
+  career            String?
+  period            Int?
+  role              role?               @relation(fields: [roleId], references: [id])
+  vacantes          Vacante[]           @relation("VacanteApplicants")
+  applications      Application[]
+  surveyResponses   SurveyResponse[]    @relation("StudentSurveyResponses")
+  jobExperience     UserJobExperience[] @relation("UserJobExperience")
+  coordinatorEvents Event[]             @relation("CoordinatorEvents")
   // Optional for WebAuthn support
-  Authenticator   Authenticator[]
+  Authenticator     Authenticator[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
