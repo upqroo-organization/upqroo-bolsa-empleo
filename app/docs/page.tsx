@@ -146,6 +146,7 @@ export default function DocsPage() {
     };
 
     checkEnvironmentAndLoadDocs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keyboard shortcut for search

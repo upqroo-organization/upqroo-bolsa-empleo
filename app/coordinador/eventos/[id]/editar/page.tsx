@@ -23,9 +23,9 @@ import { toast } from "sonner";
 import StateSelectClient from "@/components/StateSelectClient";
 
 interface EditCoordinatorEventPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function EditCoordinatorEventPage({ params }: EditCoordinatorEventPageProps) {
@@ -37,15 +37,20 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [formData, setFormData] = useState<UpdateEventData>({});
+  const [eventId, setEventId] = useState<string>('');
 
   useEffect(() => {
-    fetchEvent();
-  }, [params.id]);
+    params.then(({ id }) => {
+      setEventId(id);
+      fetchEvent(id);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const fetchEvent = async () => {
+  const fetchEvent = async (id: string) => {
     try {
       setFetchLoading(true);
-      const response = await fetch(`/api/coordinador/events/${params.id}`);
+      const response = await fetch(`/api/coordinador/events/${id}`);
       const data = await response.json();
 
       if (data.success) {
@@ -143,7 +148,7 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
     formDataUpload.append('image', imageFile);
 
     try {
-      const response = await fetch(`/api/coordinador/events/${params.id}/upload-image`, {
+      const response = await fetch(`/api/coordinador/events/${eventId}/upload-image`, {
         method: 'POST',
         body: formDataUpload,
       });
@@ -175,7 +180,7 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/coordinador/events/${params.id}`, {
+      const response = await fetch(`/api/coordinador/events/${eventId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -284,8 +289,8 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
             ) : (
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${dragActive
-                    ? 'border-primary bg-primary/5'
-                    : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/25 hover:border-muted-foreground/50'
                   }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}

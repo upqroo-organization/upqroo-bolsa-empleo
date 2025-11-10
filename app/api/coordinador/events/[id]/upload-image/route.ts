@@ -7,9 +7,10 @@ import path from 'path';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || session.user.role !== 'coordinator') {
@@ -33,7 +34,7 @@ export async function POST(
     // Check if event exists and belongs to coordinator
     const existingEvent = await prisma.event.findFirst({
       where: {
-        id: params.id,
+        id,
         coordinatorId: coordinator.id
       }
     });
@@ -79,7 +80,7 @@ export async function POST(
     // Create unique filename
     const timestamp = Date.now();
     const extension = path.extname(file.name);
-    const filename = `event_${params.id}_${timestamp}${extension}`;
+    const filename = `event_${id}_${timestamp}${extension}`;
 
     // Ensure upload directory exists
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'events');
@@ -92,7 +93,7 @@ export async function POST(
     // Update event with image URL
     const imageUrl = `/uploads/events/${filename}`;
     await prisma.event.update({
-      where: { id: params.id },
+      where: { id },
       data: { imageUrl }
     });
 

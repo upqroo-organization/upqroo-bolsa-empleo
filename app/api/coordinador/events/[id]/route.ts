@@ -6,9 +6,10 @@ import { UpdateEventData } from '@/types/events';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || session.user.role !== 'coordinator') {
@@ -32,7 +33,7 @@ export async function GET(
     // Check if event exists and belongs to coordinator
     const event = await prisma.event.findFirst({
       where: {
-        id: params.id,
+        id,
         coordinatorId: coordinator.id
       },
       include: {
@@ -75,9 +76,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || session.user.role !== 'coordinator') {
@@ -101,7 +103,7 @@ export async function PUT(
     // Check if event exists and belongs to coordinator
     const existingEvent = await prisma.event.findFirst({
       where: {
-        id: params.id,
+        id,
         coordinatorId: coordinator.id
       }
     });
@@ -138,7 +140,7 @@ export async function PUT(
     }
 
     const updatedEvent = await prisma.event.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.title && { title: body.title }),
         ...(body.description && { description: body.description }),
@@ -186,9 +188,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || session.user.role !== 'coordinator') {
@@ -212,7 +215,7 @@ export async function DELETE(
     // Check if event exists and belongs to coordinator
     const existingEvent = await prisma.event.findFirst({
       where: {
-        id: params.id,
+        id,
         coordinatorId: coordinator.id
       }
     });
@@ -225,7 +228,7 @@ export async function DELETE(
     }
 
     await prisma.event.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({
