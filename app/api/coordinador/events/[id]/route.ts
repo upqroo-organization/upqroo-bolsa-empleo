@@ -117,18 +117,8 @@ export async function PUT(
 
     const body: UpdateEventData = await request.json();
 
-    // Validate dates if provided
-    if (body.startDate) {
-      const startDate = new Date(body.startDate);
-      if (startDate < new Date()) {
-        return NextResponse.json(
-          { success: false, message: 'La fecha de inicio debe ser futura' },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (body.endDate && body.startDate) {
+    // Validate dates if both are provided
+    if (body.startDate && body.endDate) {
       const startDate = new Date(body.startDate);
       const endDate = new Date(body.endDate);
       if (endDate <= startDate) {

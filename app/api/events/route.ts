@@ -16,18 +16,22 @@ export async function GET(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       isActive: true,
-      OR: [
+      AND: [
         {
-          // Company events (must be from approved companies)
-          company: {
-            isApprove: true
-          }
-        },
-        {
-          // Coordinator events (always shown if active)
-          coordinatorId: {
-            not: null
-          }
+          OR: [
+            {
+              // Company events (must be from approved companies)
+              company: {
+                isApprove: true
+              }
+            },
+            {
+              // Coordinator events (always shown if active)
+              coordinatorId: {
+                not: null
+              }
+            }
+          ]
         }
       ]
     };
@@ -41,9 +45,20 @@ export async function GET(request: NextRequest) {
     }
 
     if (upcoming) {
-      where.startDate = {
-        gte: new Date()
-      };
+      where.AND.push({
+        OR: [
+          {
+            // Future events
+            startDate: {
+              gte: new Date()
+            }
+          },
+          {
+            // Events without date
+            startDate: null
+          }
+        ]
+      });
     }
 
     const [events, total] = await Promise.all([
@@ -71,7 +86,10 @@ export async function GET(request: NextRequest) {
             }
           }
         },
-        orderBy: { startDate: 'asc' },
+        orderBy: [
+          { startDate: 'asc' },
+          { createdAt: 'desc' }
+        ],
         skip,
         take: limit
       }),

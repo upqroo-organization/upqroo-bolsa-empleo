@@ -31,8 +31,8 @@ export default function CreateCoordinatorEventPage() {
   const [formData, setFormData] = useState<CreateEventData>({
     title: '',
     description: '',
-    eventType: EventType.OTHER,
-    startDate: new Date(),
+    eventType: EventType.ANNOUNCEMENT,
+    startDate: undefined,
     endDate: undefined,
     location: '',
     isOnline: false,
@@ -123,13 +123,12 @@ export default function CreateCoordinatorEventPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.description || !formData.eventType) {
-      toast.error('Por favor completa todos los campos requeridos');
-      return;
-    }
+    // Validation: Either image is uploaded OR all required fields are filled
+    const hasImage = !!imageFile;
+    const hasRequiredFields = formData.title && formData.description && formData.eventType && (formData.isOnline || formData.location);
 
-    if (!formData.isOnline && !formData.location) {
-      toast.error('Por favor especifica la ubicación del evento o marca como evento en línea');
+    if (!hasImage && !hasRequiredFields) {
+      toast.error('Por favor sube una imagen o completa todos los campos requeridos (título, descripción, tipo de evento y ubicación)');
       return;
     }
 
@@ -195,10 +194,10 @@ export default function CreateCoordinatorEventPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
-            Imagen del Evento (Opcional)
+            Imagen del Evento
           </CardTitle>
           <CardDescription>
-            Sube una imagen representativa para tu evento (máximo 5MB)
+            Sube una imagen representativa para tu evento (máximo 5MB). Si subes una imagen, los demás campos son opcionales.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -283,18 +282,17 @@ export default function CreateCoordinatorEventPage() {
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Título del Evento *</Label>
+                <Label htmlFor="title">Título del Evento</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   placeholder="Ej: Feria de Empleo UPQROO 2024"
-                  required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="eventType">Tipo de Evento *</Label>
+                <Label htmlFor="eventType">Tipo de Evento</Label>
                 <Select
                   value={formData.eventType}
                   onValueChange={(value) => handleInputChange('eventType', value as EventType)}
@@ -314,27 +312,25 @@ export default function CreateCoordinatorEventPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descripción *</Label>
+              <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="Describe el evento, objetivos, agenda, etc."
                 rows={4}
-                required
               />
             </div>
 
             {/* Date and Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Fecha de Inicio *</Label>
+                <Label htmlFor="startDate">Fecha de Inicio (Opcional)</Label>
                 <Input
                   id="startDate"
                   type="datetime-local"
-                  value={formData.startDate.toISOString().slice(0, 16)}
-                  onChange={(e) => handleInputChange('startDate', new Date(e.target.value))}
-                  required
+                  value={formData.startDate ? formData.startDate.toISOString().slice(0, 16) : ''}
+                  onChange={(e) => handleInputChange('startDate', e.target.value ? new Date(e.target.value) : undefined)}
                 />
               </div>
 
@@ -363,18 +359,17 @@ export default function CreateCoordinatorEventPage() {
               {!formData.isOnline && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="location">Ubicación *</Label>
+                    <Label htmlFor="location">Ubicación</Label>
                     <Input
                       id="location"
                       value={formData.location || ''}
                       onChange={(e) => handleInputChange('location', e.target.value)}
                       placeholder="Ej: Auditorio UPQROO, Campus Principal..."
-                      required={!formData.isOnline}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="state">Estado</Label>
+                    <Label htmlFor="state">Estado (Opcional)</Label>
                     <StateSelectClient
                       name="state"
                       value={formData.stateId?.toString() || 'none'}
