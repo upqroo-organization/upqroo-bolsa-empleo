@@ -44,7 +44,6 @@ export default async function LandingPage() {
       label: "Colocaciones Exitosas",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
-      // subtitle: jobsStats.placementRate > 0 ? `${jobsStats.placementRate}% tasa de éxito` : "0% tasa de éxito"
     },
   ] as Array<{
     icon: React.ComponentType<{ className?: string }>;
@@ -54,7 +53,7 @@ export default async function LandingPage() {
     bgColor: string;
     subtitle?: string;
   }>
-  
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -78,7 +77,7 @@ export default async function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
                 <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8 cursor-pointer">
-                  <LogIn/>
+                  <LogIn />
                   Iniciar Sesión
                 </Button>
               </Link>
@@ -96,12 +95,12 @@ export default async function LandingPage() {
                 <div className="md:flex-1 w-full space-y-2">
                   <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 wmercad-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input name="vacante" type="text" placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
                   </div>
                 </div>
                 <div className="w-full md:flex-1 space-y-2">
-                  <StateSelectServerSide name="estado"/>
+                  <StateSelectServerSide name="estado" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 px-8">
                   <Search className="mr-2 h-4 w-4" />
@@ -120,7 +119,7 @@ export default async function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Vacantes Destacadas</h2>
             <p className="text-xl text-muted-foreground">Oportunidades perfectas para tu perfil profesional</p>
           </div>
-          
+
           <FeaturedJobsCarousel jobs={featuredJobs} />
 
           <div className="text-center mt-12">
@@ -215,15 +214,9 @@ export default async function LandingPage() {
               © 2025 Universidad Politécnica de Quintana Roo. Todos los derechos reservados.
             </p>
             <div className="flex justify-center space-x-6 text-sm text-muted-foreground">
-              {/* <a href="#" className="hover:text-primary transition-colors">
-                Términos de Uso
-              </a> */}
               <a href="/terms" className="hover:text-primary transition-colors">
                 Aviso de Privacidad
               </a>
-              {/* <a href="#" className="hover:text-primary transition-colors">
-                Contacto
-              </a> */}
               <a href="/autores" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Autores</a>
             </div>
           </div>
