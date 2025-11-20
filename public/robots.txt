@@ -1,0 +1,87 @@
+# Robots.txt optimizado para Red Talento UPQROO
+# Bolsa de Trabajo Universitaria - Universidad Politécnica de Quintana Roo
+
+User-agent: *
+Allow: /
+
+# Páginas públicas importantes para SEO
+Allow: /vacantes
+Allow: /vacantes/*
+Allow: /eventos
+Allow: /eventos/*
+Allow: /empresas-landing
+Allow: /login
+Allow: /signup
+Allow: /terms
+Allow: /autores
+
+# Permitir páginas de categorías y filtros para SEO
+Allow: /vacantes?categoria=*
+Allow: /vacantes?ubicacion=*
+Allow: /vacantes?tipo=*
+
+# Bloquear páginas privadas y administrativas
+Disallow: /admin/
+Disallow: /coordinador/
+Disallow: /empresa/
+Disallow: /client/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /redirect/
+Disallow: /_next/
+Disallow: /uploads/cvs/
+
+# Permitir archivos estáticos importantes
+Allow: /favicon.ico
+Allow: /logo_upqroo.svg
+Allow: /upqroo_logo_outlined.svg
+Allow: /manifest.json
+Allow: /*.css
+Allow: /*.js
+Allow: /api/og/*
+
+# Configuración específica para bots de empleo y redes sociales
+User-agent: JobBot
+Allow: /vacantes
+Allow: /vacantes/*
+Allow: /api/vacantes/public
+Crawl-delay: 2
+
+User-agent: LinkedInBot
+Allow: /vacantes
+Allow: /vacantes/*
+Allow: /eventos
+Allow: /eventos/*
+Allow: /empresas-landing
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /vacantes
+Allow: /vacantes/*
+Allow: /eventos
+Allow: /eventos/*
+
+User-agent: Twitterbot
+Allow: /vacantes
+Allow: /vacantes/*
+Allow: /eventos
+Allow: /eventos/*
+
+User-agent: WhatsApp
+Allow: /vacantes
+Allow: /vacantes/*
+
+# Bots de Google específicos
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /api/og/*
+
+# Sitemap
+Sitemap: https://redtalento.upqroo.edu.mx/sitemap.xml
+
+# Crawl-delay general para evitar sobrecarga del servidor
+Crawl-delay: 1

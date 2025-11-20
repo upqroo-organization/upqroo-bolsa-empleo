@@ -5,9 +5,20 @@ import { Search, Users, Building2, GraduationCap, TrendingUp, LogIn } from "luci
 import Link from "next/link"
 import StateSelectServerSide from "@/components/StateSelectorServerSide"
 import { getFeaturedJobs, getJobsStats } from "@/lib/featured-jobs"
+import { generateMetadata } from "@/components/SEOHead"
+import StructuredData from "@/components/StructuredData"
+import { pageMetadata } from "@/lib/seo"
 import Image from "next/image"
 import FeaturedEvents from "@/components/FeaturedEvents"
 import FeaturedJobsCarousel from "@/components/FeaturedJobsCarousel"
+
+// Metadatos específicos para la página principal
+export const metadata = generateMetadata({
+  title: pageMetadata.home.title,
+  description: pageMetadata.home.description,
+  keywords: pageMetadata.home.keywords.split(', '),
+  canonical: "https://redtalento.upqroo.edu.mx"
+})
 
 export default async function LandingPage() {
   // Fetch real data - Get 10 featured jobs for carousel
@@ -57,6 +68,10 @@ export default async function LandingPage() {
   
   return (
     <div className="min-h-screen">
+      {/* Datos estructurados para la página principal */}
+      <StructuredData type="organization" />
+      <StructuredData type="website" />
+      
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground py-24">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:60px_60px]" />
