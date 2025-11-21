@@ -30,6 +30,13 @@ export async function GET() {
         career: true,
         department: true,
         numberOfPositions: true,
+        description: true,
+        requirements: true,
+        benefits: true,
+        isExternal: true,
+        externalCompanyName: true,
+        externalCompanyEmail: true,
+        externalCompanyPhone: true,
         state: {
           select: {
             name: true
@@ -57,10 +64,17 @@ export async function GET() {
     const vacantesWithStats = vacantes.map(vacante => ({
       id: vacante.id,
       title: vacante.title,
-      company: {
+      description: vacante.description,
+      requirements: vacante.requirements,
+      benefits: vacante.benefits,
+      company: vacante.company ? {
         name: vacante.company.name,
         sector: vacante.company.industry || 'No especificado',
-      },
+      } : null,
+      isExternal: vacante.isExternal,
+      externalCompanyName: vacante.externalCompanyName,
+      externalCompanyEmail: vacante.externalCompanyEmail,
+      externalCompanyPhone: vacante.externalCompanyPhone,
       type: vacante.type || 'No especificado',
       modality: vacante.modality || 'No especificado',
       location: vacante.location || 'No especificada',

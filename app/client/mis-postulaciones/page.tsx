@@ -34,9 +34,10 @@ export default function MyApplications() {
   // Filter and sort applications
   const filteredApplications = applications
     .filter(app => {
+      const companyName = app.vacante.company?.name || app.vacante.externalCompanyName || '';
       const matchesSearch = searchTerm === "" ||
         app.vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.vacante.company.name.toLowerCase().includes(searchTerm.toLowerCase())
+        companyName.toLowerCase().includes(searchTerm.toLowerCase())
 
       const matchesStatus = statusFilter === "all" || app.status === statusFilter
 
@@ -49,7 +50,9 @@ export default function MyApplications() {
         case 'oldest':
           return new Date(a.appliedAt).getTime() - new Date(b.appliedAt).getTime()
         case 'company':
-          return a.vacante.company.name.localeCompare(b.vacante.company.name)
+          const companyA = a.vacante.company?.name || a.vacante.externalCompanyName || '';
+          const companyB = b.vacante.company?.name || b.vacante.externalCompanyName || '';
+          return companyA.localeCompare(companyB)
         default:
           return 0
       }
@@ -308,7 +311,7 @@ export default function MyApplications() {
                     <div className="flex-1">
                       <CardTitle className="text-lg">{application.vacante.title}</CardTitle>
                       <CardDescription>
-                        {application.vacante.company.name} • {application.vacante.location}
+                        {application.vacante.company?.name || application.vacante.externalCompanyName || 'Empresa Externa'} • {application.vacante.location}
                       </CardDescription>
                     </div>
                     <Badge className="bg-green-100 text-green-800">Aceptada</Badge>
@@ -364,7 +367,7 @@ export default function MyApplications() {
                     <div className="flex-1">
                       <CardTitle className="text-lg">{application.vacante.title}</CardTitle>
                       <CardDescription>
-                        {application.vacante.company.name} • {application.vacante.location}
+                        {application.vacante.company?.name || application.vacante.externalCompanyName || 'Empresa Externa'} • {application.vacante.location}
                       </CardDescription>
                     </div>
                     <Badge className="bg-red-100 text-red-800">Rechazada</Badge>
