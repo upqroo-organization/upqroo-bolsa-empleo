@@ -61,10 +61,10 @@ interface Vacante {
   description?: string
   requirements?: string
   benefits?: string
-  company: {
+  company?: {
     name: string
     sector: string
-  }
+  } | null
   type: string
   modality: string
   location: string
@@ -80,6 +80,10 @@ interface Vacante {
   department?: string
   numberOfPositions?: number
   state?: string
+  isExternal?: boolean
+  externalCompanyName?: string
+  externalCompanyEmail?: string
+  externalCompanyPhone?: string
 }
 
 interface Postulante {
@@ -361,8 +365,9 @@ export default function VacantesPublicadas() {
   }
 
   const filteredVacantes = vacantes.filter(vacante => {
+    const companyName = vacante.company?.name || vacante.externalCompanyName || '';
     const matchesSearch = vacante.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      vacante.company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vacante.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (vacante.career && vacante.career.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -384,8 +389,8 @@ export default function VacantesPublicadas() {
       const csvData = filteredVacantes.map(vacante => ({
         'ID': vacante.id,
         'Título': vacante.title,
-        'Empresa': vacante.company.name,
-        'Sector': getSectorLabel(vacante.company.sector),
+        'Empresa': vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa',
+        'Sector': vacante.company?.sector ? getSectorLabel(vacante.company.sector) : 'N/A',
         'Tipo': getTypeLabel(vacante.type),
         'Modalidad': getModalityLabel(vacante.modality),
         'Ubicación': vacante.location,
@@ -502,6 +507,13 @@ export default function VacantesPublicadas() {
             Lista completa de vacantes en la plataforma ({filteredVacantes.length} vacantes)
           </p>
         </div>
+        <Button
+          onClick={() => router.push('/coordinador/vacantes-publicadas/crear-externa')}
+          className="w-full md:w-auto"
+        >
+          <Briefcase className="h-4 w-4 mr-2" />
+          Crear Vacante Externa
+        </Button>
       </div>
 
       {/* Stats Summary */}
@@ -665,7 +677,7 @@ export default function VacantesPublicadas() {
                     <CardTitle className="text-lg line-clamp-2">{vacante.title}</CardTitle>
                     <CardDescription className="text-sm flex items-center gap-1 mt-1">
                       <Building2 className="h-3 w-3" />
-                      {vacante.company.name}
+                      {vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa'}
                     </CardDescription>
                   </div>
                   <Badge className={getStatusColor(getRealStatus(vacante))}>
@@ -744,7 +756,8 @@ export default function VacantesPublicadas() {
                         <DialogTitle className="text-xl">{selectedVacante?.title}</DialogTitle>
                         <DialogDescription className="flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
-                          {selectedVacante?.company.name} • {getSectorLabel(selectedVacante?.company.sector)}
+                          {selectedVacante?.company?.name || selectedVacante?.externalCompanyName || 'Empresa Externa'}
+                          {selectedVacante?.company?.sector && ` • ${getSectorLabel(selectedVacante.company.sector)}`}
                         </DialogDescription>
                       </DialogHeader>
 
@@ -998,8 +1011,8 @@ export default function VacantesPublicadas() {
                       </TableCell>
                       <TableCell>
                         <div>
-                          <p className="font-medium">{vacante.company.name}</p>
-                          <p className="text-xs text-muted-foreground">{getSectorLabel(vacante.company.sector)}</p>
+                          <p className="font-medium">{vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa'}</p>
+                          <p className="text-xs text-muted-foreground">{vacante.company?.sector ? getSectorLabel(vacante.company.sector) : 'N/A'}</p>
                         </div>
                       </TableCell>
                       <TableCell>

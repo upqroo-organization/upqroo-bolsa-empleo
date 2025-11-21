@@ -443,6 +443,12 @@ export default function CoordinatorDashboard() {
           <p className="text-muted-foreground">Supervisión y gestión de la bolsa de trabajo universitaria</p>
         </div>
         <div className="flex items-center space-x-2">
+          <Link href="/coordinador/vacantes-publicadas/crear-externa">
+            <Button size="sm">
+              <Briefcase className="h-4 w-4 mr-2" />
+              Crear Vacante Externa
+            </Button>
+          </Link>
           <Button
             variant="outline"
             size="sm"

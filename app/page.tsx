@@ -65,7 +65,7 @@ export default async function LandingPage() {
     bgColor: string;
     subtitle?: string;
   }>
-  
+
   return (
     <div className="min-h-screen">
       {/* Datos estructurados para la página principal */}
@@ -93,7 +93,7 @@ export default async function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
                 <Button size="lg" className="bg-white text-primary hover:bg-gray-100 h-12 px-8 cursor-pointer">
-                  <LogIn/>
+                  <LogIn />
                   Iniciar Sesión
                 </Button>
               </Link>
@@ -116,7 +116,7 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <div className="w-full md:flex-1 space-y-2">
-                  <StateSelectServerSide name="estado"/>
+                  <StateSelectServerSide name="estado" />
                 </div>
                 <Button type="submit" size="lg" className="h-12 px-8">
                   <Search className="mr-2 h-4 w-4" />
@@ -135,7 +135,7 @@ export default async function LandingPage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Vacantes Destacadas</h2>
             <p className="text-xl text-muted-foreground">Oportunidades perfectas para tu perfil profesional</p>
           </div>
-          
+
           <FeaturedJobsCarousel jobs={featuredJobs} />
 
           <div className="text-center mt-12">

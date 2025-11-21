@@ -12,13 +12,22 @@ model Vacante {
   type              String? // e.g., Full-time, Part-time, Internship
   modality          String? // e.g., Remote, On-site, Hybrid
   numberOfPositions Int? // Number of positions available
-  companyId         String
+  companyId         String?
   isMock            Boolean       @default(false) // Indicates if the job is a mock job for testing purposes
   stateId           Int?
   state             State?        @relation(fields: [stateId], references: [id])
-  company           company       @relation(fields: [companyId], references: [id])
+  company           company?      @relation(fields: [companyId], references: [id])
   aplicants         User[]        @relation("VacanteApplicants")
   applications      Application[]
+
+  // Coordinator-created external vacantes
+  isExternal             Boolean @default(false) // Indicates if vacante is for external (non-registered) company
+  isImageOnly            Boolean @default(false) // Indicates if vacante is image-only (no detailed fields)
+  externalCompanyName    String? // Name of external company (when isExternal = true)
+  externalCompanyEmail   String? // Contact email for external company
+  externalCompanyPhone   String? // Contact phone for external company
+  createdByCoordinatorId String? // ID of coordinator who created this vacante
+  createdByCoordinator   User?   @relation("CoordinatorCreatedVacantes", fields: [createdByCoordinatorId], references: [id])
 
   // Optional: Add fields for application process, deadline, etc.
   applicationProcess String?   @db.Text

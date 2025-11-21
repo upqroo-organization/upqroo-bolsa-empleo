@@ -12,7 +12,7 @@ export interface VacanteInterface {
   type: string | null // e.g., Full-time, Part-time, Internship
   modality: string | null // e.g., Remote, On-site, Hybrid
   numberOfPositions: number | null // Number of positions available
-  companyId: string
+  companyId: string | null
   isMock: boolean
   applicationProcess: string | null
   deadline: string | null // o Date si la parseas
@@ -23,10 +23,15 @@ export interface VacanteInterface {
     id: string | number,
     name: string | null
   } | null,
-  company: {
+  company?: {
     name: string
     logoUrl: string | null
-  }
+  } | null
+  // External company fields
+  isExternal?: boolean
+  externalCompanyName?: string
+  externalCompanyEmail?: string
+  externalCompanyPhone?: string
 }
 
 export enum VacanteTypeEnum {

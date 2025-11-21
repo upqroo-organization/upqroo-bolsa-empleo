@@ -23,34 +23,34 @@ import { useUserApplications } from "@/hooks/useUserApplications"
 import { toast } from "sonner"
 
 export default function JobSearch() {
-  const { 
-    vacantes, 
-    total, 
-    titleSearch, 
-    currentPage, 
-    totalPages, 
+  const {
+    vacantes,
+    total,
+    titleSearch,
+    currentPage,
+    totalPages,
     itemsPerPage,
-    handleFilters, 
-    handleCheckboxChange, 
+    handleFilters,
+    handleCheckboxChange,
     handlePageChange,
-    resetFilters, 
-    filters, 
-    isLoading 
+    resetFilters,
+    filters,
+    isLoading
   } = useVacantes();
   const [selectedVacante, setSelectedVacante] = useState<VacanteInterface | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [applicationVacante, setApplicationVacante] = useState<VacanteInterface | null>(null);
-  
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { user, isAuthenticated } = useCurrentUser();
   const { hasAppliedToJob, addAppliedJob } = useUserApplications();
-  
+
   // Get shared job ID from URL
   const sharedJobId = searchParams.get('job');
-  
+
   // Fetch shared job data
   const { vacante: sharedVacante, isLoading: isLoadingSharedJob, error: sharedJobError } = useVacante(sharedJobId);
 
@@ -111,7 +111,7 @@ export default function JobSearch() {
     if (applicationVacante) {
       addAppliedJob(applicationVacante.id);
     }
-    
+
     toast.success("¡Aplicación procesada!", {
       description: "Tu aplicación ha sido enviada correctamente",
       duration: 4000,
@@ -127,11 +127,12 @@ export default function JobSearch() {
     const params = new URLSearchParams(searchParams);
     params.set('job', vacante.id);
     const shareUrl = `${window.location.origin}/vacantes?${params.toString()}`;
-    
+    const companyName = vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa';
+
     if (navigator.share) {
       navigator.share({
-        title: `${vacante.title} - ${vacante.company.name}`,
-        text: `Mira esta oportunidad laboral: ${vacante.title} en ${vacante.company.name}`,
+        title: `${vacante.title} - ${companyName}`,
+        text: `Mira esta oportunidad laboral: ${vacante.title} en ${companyName}`,
         url: shareUrl,
       }).catch(console.error);
     } else {
@@ -290,7 +291,7 @@ export default function JobSearch() {
             </div>
           ) : vacantes.length > 0 ? (
             vacantes.map((item) => (
-              <VacanteCard 
+              <VacanteCard
                 key={item.id} // Use unique ID instead of index
                 vacante={item}
                 hasApplied={hasAppliedToJob(item.id)}
