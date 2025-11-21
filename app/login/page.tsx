@@ -30,10 +30,10 @@ export default function LoginPage() {
   useEffect(() => {
     const error = searchParams.get('error')
     const message = searchParams.get('message')
-    
+
     if (error) {
       let errorMessage = 'Error al iniciar sesión'
-      
+
       if (error.includes('Correo no encontrado')) {
         errorMessage = 'Correo o contraseña incorrectos'
       } else if (error.includes('Contraseña incorrecta')) {
@@ -41,9 +41,9 @@ export default function LoginPage() {
       } else if (error === 'CredentialsSignin') {
         errorMessage = 'Credenciales incorrectas'
       }
-      
+
       toast.error(errorMessage)
-      
+
       // Clean the URL without the error parameter
       const newUrl = new URL(window.location.href)
       newUrl.searchParams.delete('error')
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
     if (message === 'password-reset-success') {
       toast.success('Contraseña actualizada exitosamente. Ya puedes iniciar sesión.')
-      
+
       // Clean the URL without the message parameter
       const newUrl = new URL(window.location.href)
       newUrl.searchParams.delete('message')
@@ -81,14 +81,14 @@ export default function LoginPage() {
 
   const handleCompanySignIn = async (e: FormEvent) => {
     e.preventDefault()
-    
+
     if (!companyData.email || !companyData.password) {
       toast.error('Por favor, completa todos los campos')
       return
     }
 
     setLoading(true)
-    
+
     try {
       const result = await signIn('credentials', {
         email: companyData.email,
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
       if (result?.error) {
         let errorMessage = 'Error al iniciar sesión'
-        
+
         if (result.error.includes('Correo no encontrado')) {
           errorMessage = 'Correo o contraseña incorrectos'
         } else if (result.error.includes('Contraseña incorrecta')) {
@@ -106,7 +106,7 @@ export default function LoginPage() {
         } else if (result.error === 'CredentialsSignin') {
           errorMessage = 'Credenciales incorrectas'
         }
-        
+
         toast.error(errorMessage)
       } else if (result?.ok) {
         toast.success('Inicio de sesión exitoso')
@@ -123,7 +123,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <Image src="logo_upqroo.svg" width={480} height={280} alt="Logo UPQROO" className="rounded-lg" />
+          <Image src="/logo_upqroo.svg" width={480} height={280} alt="Logo UPQROO" className="rounded-lg" />
           <h2 className="text-gray-600 mt-2 text-lg text-bold">Bolsa de Trabajo Universitaria</h2>
           <h3 className="text-gray-600 mt-2">Atracción Talento</h3>
         </div>
@@ -141,9 +141,9 @@ export default function LoginPage() {
               </TabsList>
 
               <TabsContent value="student" className="space-y-4">
-                <Button 
-                  onClick={handleGoogleSignIn} 
-                  className="w-full cursor-pointer" 
+                <Button
+                  onClick={handleGoogleSignIn}
+                  className="w-full cursor-pointer"
                   variant="outline"
                   disabled={loading}
                 >
@@ -185,8 +185,8 @@ export default function LoginPage() {
                   </Button>
                 </form>
                 <div className="text-center">
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="text-sm"
                     onClick={() => setShowForgotPassword(true)}
                     type="button"
@@ -214,7 +214,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <ForgotPasswordModal 
+      <ForgotPasswordModal
         isOpen={showForgotPassword}
         onClose={() => setShowForgotPassword(false)}
       />
