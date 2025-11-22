@@ -29,28 +29,28 @@ function formatSalary(min: number | null, max: number | null): string {
 // Helper function to get job tags
 function getJobTags(job: FeaturedJob): string[] {
   const tags: string[] = []
-  
+
   if (job.career) {
     const careerLabel = getEnumLabelSafe(Careers, job.career)
     if (careerLabel !== job.career) {
       tags.push(careerLabel)
     }
   }
-  
+
   if (job.type) {
     const typeLabel = getEnumLabelSafe(VacanteTypeEnum, job.type)
     if (typeLabel !== job.type) {
       tags.push(typeLabel)
     }
   }
-  
+
   if (job.modality) {
     const modalityLabel = getEnumLabelSafe(VacanteModalityEnum, job.modality)
     if (modalityLabel !== job.modality) {
       tags.push(modalityLabel)
     }
   }
-  
+
   return tags.slice(0, 3) // Limit to 3 tags
 }
 
@@ -96,14 +96,14 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
 
   const nextSlide = useCallback(() => {
     const totalSlides = getTotalSlides()
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex >= totalSlides - 1 ? 0 : prevIndex + 1
     )
   }, [getTotalSlides])
 
   const prevSlide = useCallback(() => {
     const totalSlides = getTotalSlides()
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex <= 0 ? totalSlides - 1 : prevIndex - 1
     )
   }, [getTotalSlides])
@@ -128,7 +128,7 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
           <Briefcase className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
           <h3 className="text-2xl font-semibold mb-4">No hay vacantes disponibles</h3>
           <p className="text-muted-foreground mb-8">
-            Actualmente no hay vacantes publicadas. Te invitamos a registrarte para recibir notificaciones 
+            Actualmente no hay vacantes publicadas. Te invitamos a registrarte para recibir notificaciones
             cuando se publiquen nuevas oportunidades.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -184,25 +184,24 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
       </div>
 
       {/* Carousel Container */}
-      <div 
+      <div
         className="relative overflow-hidden rounded-lg"
         onMouseEnter={() => setIsAutoPlaying(false)}
         onMouseLeave={() => setIsAutoPlaying(true)}
       >
         {/* Responsive Carousel */}
-        <div 
+        <div
           className="flex transition-transform duration-500 ease-in-out"
-          style={{ 
-            transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)` 
+          style={{
+            transform: `translateX(-${currentIndex * (100 / cardsPerView)}%)`
           }}
         >
           {jobs.map((job) => (
-            <div 
-              key={job.id} 
-              className={`flex-shrink-0 px-3 ${
-                cardsPerView === 1 ? 'w-full' : 
-                cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
-              }`}
+            <div
+              key={job.id}
+              className={`flex-shrink-0 px-3 ${cardsPerView === 1 ? 'w-full' :
+                  cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
+                }`}
             >
               <JobCard job={job} />
             </div>
@@ -240,11 +239,10 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
           {Array.from({ length: totalSlides }).map((_, index) => (
             <button
               key={index}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentIndex 
-                  ? 'bg-primary scale-110' 
+              className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentIndex
+                  ? 'bg-primary scale-110'
                   : 'bg-gray-300 hover:bg-gray-400'
-              }`}
+                }`}
               onClick={() => goToSlide(index)}
               aria-label={`Ir a la diapositiva ${index + 1}`}
             />
@@ -256,10 +254,10 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
       {showNavigation && isAutoPlaying && (
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-1">
-            <div 
+            <div
               className="bg-primary h-1 rounded-full transition-all duration-100 ease-linear"
-              style={{ 
-                width: `${((currentIndex + 1) / totalSlides) * 100}%` 
+              style={{
+                width: `${((currentIndex + 1) / totalSlides) * 100}%`
               }}
             />
           </div>
@@ -271,7 +269,7 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
         <p className="text-sm text-muted-foreground">
           {showNavigation ? (
             <>
-              Diapositiva {currentIndex + 1} de {totalSlides} • 
+              Diapositiva {currentIndex + 1} de {totalSlides} •
               {jobs.length} vacante{jobs.length !== 1 ? 's' : ''} disponible{jobs.length !== 1 ? 's' : ''}
             </>
           ) : (
@@ -298,7 +296,7 @@ function JobCard({ job }: { job: FeaturedJob }) {
         <CardTitle className="text-lg line-clamp-2">{job.title}</CardTitle>
         <CardDescription className="flex items-center gap-1">
           <Building2 className="h-4 w-4" />
-          {job.company.name}
+          {job.company?.name || job.externalCompanyName || 'Empresa Externa'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -318,13 +316,13 @@ function JobCard({ job }: { job: FeaturedJob }) {
             {formatSalary(job.salaryMin, job.salaryMax)}
           </div>
         </div>
-        
+
         {job.summary && (
           <p className="text-sm text-muted-foreground line-clamp-2">
             {job.summary}
           </p>
         )}
-        
+
         <div className="flex flex-wrap gap-2">
           {getJobTags(job).map((tag, tagIndex) => (
             <Badge key={tagIndex} variant="secondary" className="text-xs">
@@ -332,7 +330,7 @@ function JobCard({ job }: { job: FeaturedJob }) {
             </Badge>
           ))}
         </div>
-        
+
         <Link href={`/vacantes?job=${job.id}`}>
           <Button className="w-full">Ver Detalles</Button>
         </Link>

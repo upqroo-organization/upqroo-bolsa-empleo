@@ -117,7 +117,17 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
-          {isAuthenticated && hasApplied ? (
+          {vacante.isExternal ? (
+            <Button
+              className="flex-1 text-sm"
+              variant="outline"
+              disabled
+              size="sm"
+              title="Esta vacante es de una empresa externa. Contacta directamente con la empresa."
+            >
+              Vacante Externa
+            </Button>
+          ) : isAuthenticated && hasApplied ? (
             <Button
               className="flex-1 text-sm"
               variant="outline"

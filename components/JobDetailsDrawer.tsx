@@ -39,11 +39,9 @@ export default function JobDetailsDrawer({
       <SheetContent className="w-full !sm:w-[540px] !max-w-[70vw] overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-xl">{vacante.title}</SheetTitle>
-          <SheetDescription>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Building2 className="h-4 w-4" />
-              {vacante.company.name}
-            </div>
+          <SheetDescription className="flex items-center gap-2 text-sm text-gray-600">
+            <Building2 className="h-4 w-4" />
+            {vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa'}
           </SheetDescription>
         </SheetHeader>
 
@@ -126,7 +124,7 @@ export default function JobDetailsDrawer({
               <div className="lg:col-span-1">
                 <div className="sticky top-4">
                   <ExpandableImage
-                    src={`/${vacante.imageUrl}`}
+                    src={vacante.imageUrl.startsWith('/') ? vacante.imageUrl : `/${vacante.imageUrl}`}
                     alt={`Imagen de ${vacante.title}`}
                     containerClassName="relative w-full h-48 lg:h-64 rounded-lg overflow-hidden bg-gray-100 border"
                     objectFit="contain"
@@ -167,7 +165,16 @@ export default function JobDetailsDrawer({
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t">
-            {isAuthenticated && hasApplied ? (
+            {vacante.isExternal ? (
+              <Button
+                className="flex-1"
+                variant="outline"
+                disabled
+                title="Esta vacante es de una empresa externa. Contacta directamente con la empresa."
+              >
+                Vacante Externa
+              </Button>
+            ) : isAuthenticated && hasApplied ? (
               <Button
                 className="flex-1"
                 variant="outline"
