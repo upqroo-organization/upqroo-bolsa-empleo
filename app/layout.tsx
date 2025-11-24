@@ -16,8 +16,55 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Upqroo - Atracción Talento - Bolsa de empleo",
-  description: "Atracció de talento y Bolsa de empleo creado por la Universidad Politécnica de Quintana Roo. Bolsa de trabajo enfocado en la comunidad universitaria de la Universidad Politécnica de Quintana Roo.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://redtalento.upqroo.edu.mx"),
+  title: {
+    default: "Upqroo - Atracción Talento - Bolsa de empleo",
+    template: "%s | Upqroo Bolsa de Empleo",
+  },
+  description: "Plataforma oficial de vinculación laboral de la Universidad Politécnica de Quintana Roo. Conectamos estudiantes y egresados con las mejores oportunidades laborales.",
+  keywords: ["Bolsa de trabajo", "UPQROO", "Empleo", "Quintana Roo", "Universitarios", "Prácticas profesionales", "Vacantes"],
+  authors: [{ name: "Universidad Politécnica de Quintana Roo", url: "https://upqroo.edu.mx" }],
+  creator: "UPQROO",
+  publisher: "UPQROO",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "es_MX",
+    url: "https://redtalento.upqroo.edu.mx",
+    title: "Upqroo - Atracción Talento - Bolsa de empleo",
+    description: "Plataforma oficial de vinculación laboral de la Universidad Politécnica de Quintana Roo.",
+    siteName: "UPQROO Bolsa de Empleo",
+    images: [
+      {
+        url: "/og-image.jpg", // We might need to ensure this image exists or use a default
+        width: 1200,
+        height: 630,
+        alt: "UPQROO Bolsa de Empleo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Upqroo - Atracción Talento - Bolsa de empleo",
+    description: "Plataforma oficial de vinculación laboral de la Universidad Politécnica de Quintana Roo.",
+    images: ["/og-image.jpg"],
+    creator: "@UPQROO", // Assuming handle, can be updated later
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

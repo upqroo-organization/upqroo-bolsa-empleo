@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -17,6 +18,14 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { getJobsStats } from "@/lib/featured-jobs"
+
+export const metadata: Metadata = {
+  title: "Empresas | Upqroo Bolsa de Empleo",
+  description: "Registra tu empresa y encuentra el mejor talento joven. Conecta con estudiantes y egresados de la UPQROO.",
+  alternates: {
+    canonical: "/empresas-landing",
+  },
+}
 
 export default async function EmpresasLanding() {
   // Fetch real statistics from database
@@ -68,8 +77,27 @@ export default async function EmpresasLanding() {
 
 
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "serviceType": "Recruitment Service",
+    "provider": {
+      "@type": "EducationalOrganization",
+      "name": "Universidad Politécnica de Quintana Roo"
+    },
+    "areaServed": {
+      "@type": "State",
+      "name": "Quintana Roo"
+    },
+    "description": "Servicio de vinculación laboral para empresas que buscan talento universitario."
+  }
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Navigation */}
       <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
