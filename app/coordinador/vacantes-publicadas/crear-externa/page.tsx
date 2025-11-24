@@ -46,7 +46,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 export default function CrearVacanteExterna() {
   const router = useRouter()
-  const [date, setDate] = useState<Date | undefined>(undefined)
+  // Set default deadline to 3 weeks from today
+  const getDefaultDeadline = () => {
+    const today = new Date()
+    today.setDate(today.getDate() + 21) // 3 weeks = 21 days
+    return today
+  }
+  const [date, setDate] = useState<Date | undefined>(getDefaultDeadline())
   const [isImageOnly, setIsImageOnly] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -59,7 +65,7 @@ export default function CrearVacanteExterna() {
     department: '',
     type: '',
     modality: 'hybrid',
-    numberOfPositions: '1',
+    numberOfPositions: '',
     career: '',
     state: undefined,
     externalCompanyName: '',
@@ -192,7 +198,7 @@ export default function CrearVacanteExterna() {
         salaryMax: parseInt(formData.salaryMax) || null,
         type: formData.type,
         modality: formData.modality,
-        numberOfPositions: parseInt(formData.numberOfPositions) || null,
+        numberOfPositions: formData.numberOfPositions && formData.numberOfPositions !== 'none' ? parseInt(formData.numberOfPositions) : null,
         career: formData.career || null,
         deadline: date ? new Date(date) : null,
         stateId: formData.state,
@@ -474,11 +480,12 @@ export default function CrearVacanteExterna() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="positions">Número de Vacantes</Label>
-                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1" value={formData.numberOfPositions}>
+                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} value={formData.numberOfPositions || "none"}>
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue placeholder="Selecciona el número de vacantes" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No especificado</SelectItem>
                       <SelectItem value="1">1 vacante</SelectItem>
                       <SelectItem value="2">2 vacantes</SelectItem>
                       <SelectItem value="3">3 vacantes</SelectItem>

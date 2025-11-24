@@ -200,7 +200,7 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
             <div
               key={job.id}
               className={`flex-shrink-0 px-3 ${cardsPerView === 1 ? 'w-full' :
-                  cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
+                cardsPerView === 2 ? 'w-1/2' : 'w-1/3'
                 }`}
             >
               <JobCard job={job} />
@@ -240,8 +240,8 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
             <button
               key={index}
               className={`w-3 h-3 rounded-full transition-all duration-200 ${index === currentIndex
-                  ? 'bg-primary scale-110'
-                  : 'bg-gray-300 hover:bg-gray-400'
+                ? 'bg-primary scale-110'
+                : 'bg-gray-300 hover:bg-gray-400'
                 }`}
               onClick={() => goToSlide(index)}
               aria-label={`Ir a la diapositiva ${index + 1}`}
@@ -311,10 +311,12 @@ function JobCard({ job }: { job: FeaturedJob }) {
               {getEnumLabelSafe(VacanteTypeEnum, job.type)}
             </div>
           )}
-          <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
-            <DollarSign className="h-4 w-4" />
-            {formatSalary(job.salaryMin, job.salaryMax)}
-          </div>
+          {job.type !== 'intership' && (
+            <div className="flex items-center gap-2 text-sm font-semibold text-green-600">
+              <DollarSign className="h-4 w-4" />
+              {formatSalary(job.salaryMin, job.salaryMax)}
+            </div>
+          )}
         </div>
 
         {job.summary && (
