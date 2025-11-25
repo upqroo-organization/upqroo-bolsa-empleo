@@ -1,4 +1,5 @@
 'use client'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -20,14 +21,15 @@ import {
   AlertCircle,
   CalendarIcon,
   Info,
+  Building2,
+  ArrowLeft,
 } from "lucide-react"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useFetch } from "@/hooks/useFetch"
@@ -40,11 +42,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { TempImageUpload } from "@/components/ui/temp-image-upload"
+import { Checkbox } from "@/components/ui/checkbox"
 
-export default function PostJob() {
-  const { data: user } = useSession()
+export default function CrearVacanteExterna() {
   const router = useRouter()
-  const [date, setDate] = useState<Date | undefined>(undefined)
+  // Set default deadline to 3 weeks from today
+  const getDefaultDeadline = () => {
+    const today = new Date()
+    today.setDate(today.getDate() + 21) // 3 weeks = 21 days
+    return today
+  }
+  const [date, setDate] = useState<Date | undefined>(getDefaultDeadline())
+  const [isImageOnly, setIsImageOnly] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     summary: '',
@@ -56,26 +65,17 @@ export default function PostJob() {
     department: '',
     type: '',
     modality: 'hybrid',
-    numberOfPositions: '1',
+    numberOfPositions: '',
     career: '',
-    companyId: '',
-    isMock: false,
-    applicationProcess: 'open',
-    state: undefined
+    state: undefined,
+    externalCompanyName: '',
+    externalCompanyEmail: '',
+    externalCompanyPhone: '',
   })
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
-  const { data } = useFetch('/api/states')
-
-  useEffect(() => {
-    if (user?.user?.id) {
-      setFormData(prev => ({
-        ...prev,
-        companyId: user.user.id ?? ''
-      }))
-    }
-  }, [user])
+  const { data: statesData } = useFetch('/api/states')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
@@ -85,7 +85,6 @@ export default function PostJob() {
         ? (e.target as HTMLInputElement).checked
         : value
     }))
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -93,18 +92,19 @@ export default function PostJob() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }))
-    // Clear error when user starts typing/selecting
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
   }
 
-  // Validation functions
   const validateBasicInfo = () => {
     const basicErrors: Record<string, string> = {}
 
     if (!formData.title.trim()) {
       basicErrors.title = 'El título del puesto es requerido'
+    }
+    if (!formData.externalCompanyName.trim()) {
+      basicErrors.externalCompanyName = 'El nombre de la empresa es requerido'
     }
     if (!formData.type) {
       basicErrors.type = 'El tipo de empleo es requerido'
@@ -118,7 +118,7 @@ export default function PostJob() {
     if (!formData.state) {
       basicErrors.state = 'El estado es requerido'
     }
-    if (!formData.summary.trim()) {
+    if (!isImageOnly && !formData.summary.trim()) {
       basicErrors.summary = 'El resumen del puesto es requerido'
     }
 
@@ -128,11 +128,17 @@ export default function PostJob() {
   const validateDetails = () => {
     const detailErrors: Record<string, string> = {}
 
-    if (!formData.description.trim()) {
-      detailErrors.description = 'La descripción completa es requerida'
+    if (isImageOnly && !selectedImage) {
+      detailErrors.image = 'La imagen es requerida para vacantes de solo imagen'
     }
-    if (!formData.responsibilities.trim()) {
-      detailErrors.responsibilities = 'Las responsabilidades principales son requeridas'
+
+    if (!isImageOnly) {
+      if (!formData.description.trim()) {
+        detailErrors.description = 'La descripción completa es requerida'
+      }
+      if (!formData.responsibilities.trim()) {
+        detailErrors.responsibilities = 'Las responsabilidades principales son requeridas'
+      }
     }
 
     return detailErrors
@@ -147,7 +153,6 @@ export default function PostJob() {
     return Object.keys(allErrors).length === 0
   }
 
-  // Check if sections have errors
   const hasBasicErrors = () => {
     const basicErrors = validateBasicInfo()
     return Object.keys(basicErrors).length > 0
@@ -158,8 +163,7 @@ export default function PostJob() {
     return Object.keys(detailErrors).length > 0
   }
 
-  const handleSubmit = async (isMock?: boolean) => {
-    // Validate form before submitting
+  const handleSubmit = async () => {
     if (!validateForm()) {
       toast.error("Por favor completa todos los campos requeridos")
       return
@@ -167,67 +171,63 @@ export default function PostJob() {
 
     setLoading(true)
     try {
-      const payload = {
-        ...formData,
-        salaryMin: parseInt(formData.salaryMin) || null,
-        salaryMax: parseInt(formData.salaryMax) || null,
-        numberOfPositions: parseInt(formData.numberOfPositions) || null,
-        isMock: isMock || false,
-        deadline: date ? new Date(date) : null,
+      // First, upload the image if it exists
+      let imageUrl = null
+      if (selectedImage) {
+        const imageFormData = new FormData()
+        imageFormData.append('image', selectedImage)
+
+        const imageResponse = await fetch('/api/uploads/job-images', {
+          method: 'POST',
+          body: imageFormData,
+        })
+
+        if (imageResponse.ok) {
+          const imageData = await imageResponse.json()
+          imageUrl = imageData.url
+        }
       }
 
-      const response = await fetch('/api/vacantes', {
+      const payload = {
+        title: formData.title,
+        summary: isImageOnly ? 'Ver imagen para más detalles' : formData.summary,
+        description: isImageOnly ? 'Ver imagen para más detalles' : formData.description,
+        responsibilities: isImageOnly ? 'Ver imagen para más detalles' : formData.responsibilities,
+        location: formData.location,
+        salaryMin: parseInt(formData.salaryMin) || null,
+        salaryMax: parseInt(formData.salaryMax) || null,
+        type: formData.type,
+        modality: formData.modality,
+        numberOfPositions: formData.numberOfPositions && formData.numberOfPositions !== 'none' ? parseInt(formData.numberOfPositions) : null,
+        career: formData.career || null,
+        deadline: date ? new Date(date) : null,
+        stateId: formData.state,
+        externalCompanyName: formData.externalCompanyName,
+        externalCompanyEmail: formData.externalCompanyEmail || null,
+        externalCompanyPhone: formData.externalCompanyPhone || null,
+        imageUrl,
+        isImageOnly,
+      }
+
+      const response = await fetch('/api/coordinador/vacantes/external', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
 
-      if (response.status !== 201) {
-        throw new Error(`Error ${response.status}`)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `Error ${response.status}`)
       }
 
-      const data = await response.json()
-      console.log("Vacante creada:", data)
+      await response.json()
+      toast.success("Vacante externa creada correctamente")
 
-      // If there's an image, upload it after creating the job
-      if (selectedImage && data?.id) {
-        try {
-          console.log('Uploading image for job:', data.data.id)
-          const imageFormData = new FormData()
-          imageFormData.append('image', selectedImage)
-
-          const imageResponse = await fetch(`/api/empresa/vacantes/${data.data.id}/image`, {
-            method: 'POST',
-            body: imageFormData,
-          })
-
-          if (!imageResponse.ok) {
-            const errorData = await imageResponse.json().catch(() => ({}))
-            console.warn('Failed to upload image:', imageResponse.status, errorData)
-            toast.success("Vacante publicada correctamente (imagen no se pudo subir)")
-          } else {
-            const imageData = await imageResponse.json()
-            console.log('Image uploaded successfully:', imageData)
-            toast.success("Vacante e imagen publicadas correctamente")
-          }
-        } catch (imageError) {
-          console.error('Error uploading image:', imageError)
-          toast.success("Vacante publicada correctamente (imagen no se pudo subir)")
-        }
-      } else {
-        if (selectedImage) {
-          console.warn('Image selected but no job ID available')
-        }
-        toast.success("Vacante publicada correctamente")
-      }
-
-      // Redirect to gestionar-vacantes after successful creation
       setTimeout(() => {
-        router.push('/empresa/gestionar-vacante')
-      }, 1000) // Small delay to show the toast
+        router.push('/coordinador/vacantes-publicadas')
+      }, 1000)
     } catch (err) {
       const errorMsg = (err instanceof Error) ? err.message : String(err)
-      console.log(err)
       toast.error("Ocurrió un error al publicar: " + errorMsg)
       console.error(err)
     } finally {
@@ -239,18 +239,29 @@ export default function PostJob() {
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6 md:space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Publicar Nueva Vacante</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Crea una nueva oportunidad laboral para estudiantes de UPQROO</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Crear Vacante Externa</h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Publica una vacante para una empresa no registrada
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Progress Alert */}
+      {/* Info Alert */}
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Tip:</strong> Las vacantes completas y detalladas reciben 3x más postulaciones. Completa todos los
-          campos para mejores resultados.
+          <strong>Vacantes Externas:</strong> Estas vacantes son para empresas que no están registradas en la plataforma.
+          Puedes crear vacantes con imagen únicamente (flyers/carteles) o con información detallada.
         </AlertDescription>
       </Alert>
 
@@ -288,12 +299,74 @@ export default function PostJob() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Información de la Empresa Externa
+              </CardTitle>
+              <CardDescription>Datos de la empresa no registrada</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="externalCompanyName">Nombre de la Empresa *</Label>
+                <Input
+                  id="externalCompanyName"
+                  placeholder="Ej: Tech Solutions SA de CV"
+                  className={cn(errors.externalCompanyName && "border-red-500")}
+                  onChange={handleChange}
+                  value={formData.externalCompanyName}
+                  name="externalCompanyName"
+                />
+                {errors.externalCompanyName && (
+                  <p className="text-xs text-red-500">{errors.externalCompanyName}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="externalCompanyEmail">Email de Contacto</Label>
+                  <Input
+                    id="externalCompanyEmail"
+                    type="email"
+                    placeholder="rh@empresa.com"
+                    onChange={handleChange}
+                    value={formData.externalCompanyEmail}
+                    name="externalCompanyEmail"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="externalCompanyPhone">Teléfono de Contacto</Label>
+                  <Input
+                    id="externalCompanyPhone"
+                    type="tel"
+                    placeholder="+52 998 123 4567"
+                    onChange={handleChange}
+                    value={formData.externalCompanyPhone}
+                    name="externalCompanyPhone"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
                 Información Básica de la Vacante
               </CardTitle>
               <CardDescription>Datos principales que verán los candidatos</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isImageOnly"
+                  checked={isImageOnly}
+                  onCheckedChange={(checked) => setIsImageOnly(checked as boolean)}
+                />
+                <Label htmlFor="isImageOnly" className="text-sm font-normal cursor-pointer">
+                  Vacante de solo imagen (flyer/cartel)
+                </Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="jobTitle">Título del Puesto *</Label>
                 <Input
@@ -307,9 +380,6 @@ export default function PostJob() {
                 {errors.title && (
                   <p className="text-xs text-red-500">{errors.title}</p>
                 )}
-                <p className="text-xs text-muted-foreground">
-                  Usa un título claro y específico. Incluye el nivel (Jr, Sr) si aplica.
-                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -330,7 +400,7 @@ export default function PostJob() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="jobType">Tipo de Empleo *</Label>
-                  <Select onValueChange={(val) => handleSelectChange("type", val)} defaultValue="full-time" value={formData.type}>
+                  <Select onValueChange={(val) => handleSelectChange("type", val)} value={formData.type}>
                     <SelectTrigger className={cn(errors.type && "border-red-500")}>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
@@ -352,7 +422,7 @@ export default function PostJob() {
                 <Label>Modalidad de Trabajo *</Label>
                 <RadioGroup
                   onValueChange={(val) => handleSelectChange("modality", val)}
-                  defaultValue="Hybrid"
+                  defaultValue="hybrid"
                   className="flex flex-col space-y-2"
                   value={formData.modality}
                 >
@@ -375,9 +445,6 @@ export default function PostJob() {
                     );
                   })}
                 </RadioGroup>
-                {errors.modality && (
-                  <p className="text-xs text-red-500">{errors.modality}</p>
-                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -396,13 +463,15 @@ export default function PostJob() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="positions">Estado *</Label>
+                  <Label htmlFor="state">Estado *</Label>
                   <Select onValueChange={(val) => handleSelectChange("state", val)} value={formData.state}>
                     <SelectTrigger className={cn("w-full", errors.state && "border-red-500")}>
-                      <SelectValue className="w-full" placeholder="Selecciona el estado" />
+                      <SelectValue placeholder="Selecciona el estado" />
                     </SelectTrigger>
                     <SelectContent>
-                      {data?.data && Array.isArray(data.data) && data.data.map(state => (<SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>))}
+                      {statesData?.data && Array.isArray(statesData.data) && statesData.data.map((state: { id: string; name: string }) => (
+                        <SelectItem key={state.id} value={state.id}>{state.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   {errors.state && (
@@ -411,11 +480,12 @@ export default function PostJob() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="positions">Número de Vacantes</Label>
-                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} defaultValue="1" value={formData.numberOfPositions}>
+                  <Select onValueChange={(val) => handleSelectChange("numberOfPositions", val)} value={formData.numberOfPositions || "none"}>
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue placeholder="Selecciona el número de vacantes" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No especificado</SelectItem>
                       <SelectItem value="1">1 vacante</SelectItem>
                       <SelectItem value="2">2 vacantes</SelectItem>
                       <SelectItem value="3">3 vacantes</SelectItem>
@@ -426,22 +496,23 @@ export default function PostJob() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="summary">Resumen del Puesto *</Label>
-                <Textarea
-                  id="summary"
-                  rows={3}
-                  name="summary"
-                  onChange={handleChange}
-                  className={cn(errors.summary && "border-red-500")}
-                  placeholder="Breve descripción del puesto y lo que buscas en un candidato..."
-                  value={formData.summary}
-                />
-                {errors.summary && (
-                  <p className="text-xs text-red-500">{errors.summary}</p>
-                )}
-                <p className="text-xs text-muted-foreground">Este resumen aparecerá en los resultados de búsqueda.</p>
-              </div>
+              {!isImageOnly && (
+                <div className="space-y-2">
+                  <Label htmlFor="summary">Resumen del Puesto *</Label>
+                  <Textarea
+                    id="summary"
+                    rows={3}
+                    name="summary"
+                    onChange={handleChange}
+                    className={cn(errors.summary && "border-red-500")}
+                    placeholder="Breve descripción del puesto y lo que buscas en un candidato..."
+                    value={formData.summary}
+                  />
+                  {errors.summary && (
+                    <p className="text-xs text-red-500">{errors.summary}</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -454,77 +525,96 @@ export default function PostJob() {
                 <Briefcase className="h-5 w-5" />
                 Detalles del Puesto
               </CardTitle>
-              <CardDescription>Descripción completa y responsabilidades</CardDescription>
+              <CardDescription>
+                {isImageOnly ? 'Sube una imagen con la información de la vacante' : 'Descripción completa y responsabilidades'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="description">Descripción Completa del Puesto *</Label>
-                <Textarea
-                  id="description"
-                  onChange={handleChange}
-                  rows={6}
-                  name="description"
-                  className={cn(errors.description && "border-red-500")}
-                  placeholder="Describe detalladamente el puesto, las responsabilidades principales, el ambiente de trabajo, oportunidades de crecimiento..."
-                  value={formData.description}
-                />
-                {errors.description && (
-                  <p className="text-xs text-red-500">{errors.description}</p>
-                )}
-              </div>
+              <TempImageUpload
+                onImageSelected={setSelectedImage}
+                label={isImageOnly ? "Imagen de la Vacante *" : "Imagen de la Vacante (Opcional)"}
+                description={isImageOnly ? "Sube un flyer o cartel con la información de la vacante" : "Sube una imagen para mejorar la presentación de tu vacante"}
+              />
+              {errors.image && (
+                <p className="text-xs text-red-500">{errors.image}</p>
+              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="responsibilities">Responsabilidades Principales *</Label>
-                <Textarea
-                  id="responsibilities"
-                  rows={5}
-                  name="responsibilities"
-                  onChange={handleChange}
-                  className={cn(errors.responsibilities && "border-red-500")}
-                  placeholder="• Desarrollar interfaces web responsivas&#10;• Colaborar con el equipo de diseño&#10;• Mantener código limpio y documentado&#10;• Participar en revisiones de código"
-                  value={formData.responsibilities}
-                />
-                {errors.responsibilities && (
-                  <p className="text-xs text-red-500">{errors.responsibilities}</p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Usa viñetas (•) para listar las responsabilidades principales.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Información Salarial
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!isImageOnly && (
+                <>
                   <div className="space-y-2">
-                    <Label htmlFor="salaryMin">Salario Mínimo (MXN)</Label>
-                    <Input onChange={handleChange}
-                      name="salaryMin"
-                      id="salaryMin"
-                      type="number"
-                      placeholder="15000" value={formData.salaryMin} />
-
-
+                    <Label htmlFor="description">Descripción Completa del Puesto *</Label>
+                    <Textarea
+                      id="description"
+                      onChange={handleChange}
+                      rows={6}
+                      name="description"
+                      className={cn(errors.description && "border-red-500")}
+                      placeholder="Describe detalladamente el puesto, las responsabilidades principales, el ambiente de trabajo, oportunidades de crecimiento..."
+                      value={formData.description}
+                    />
+                    {errors.description && (
+                      <p className="text-xs text-red-500">{errors.description}</p>
+                    )}
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="salaryMax">Salario Máximo (MXN)</Label>
-                    <Input onChange={handleChange}
-                      name="salaryMax"
-                      id="salaryMax"
-                      type="number"
-                      placeholder="25000" value={formData.salaryMax} />
+                    <Label htmlFor="responsibilities">Responsabilidades Principales *</Label>
+                    <Textarea
+                      id="responsibilities"
+                      rows={5}
+                      name="responsibilities"
+                      onChange={handleChange}
+                      className={cn(errors.responsibilities && "border-red-500")}
+                      placeholder="• Desarrollar interfaces web responsivas&#10;• Colaborar con el equipo de diseño&#10;• Mantener código limpio y documentado&#10;• Participar en revisiones de código"
+                      value={formData.responsibilities}
+                    />
+                    {errors.responsibilities && (
+                      <p className="text-xs text-red-500">{errors.responsibilities}</p>
+                    )}
                   </div>
-                </div>
-              </div>
+
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Información Salarial
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="salaryMin">Salario Mínimo (MXN)</Label>
+                        <Input
+                          onChange={handleChange}
+                          name="salaryMin"
+                          id="salaryMin"
+                          type="number"
+                          placeholder="15000"
+                          value={formData.salaryMin}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="salaryMax">Salario Máximo (MXN)</Label>
+                        <Input
+                          onChange={handleChange}
+                          name="salaryMax"
+                          id="salaryMax"
+                          type="number"
+                          placeholder="25000"
+                          value={formData.salaryMax}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div className="flex flex-col gap-2">
                 <label htmlFor="deadline" className="text-sm font-medium flex items-center gap-2">
                   Fecha límite
                   <Tooltip>
-                    <TooltipTrigger> <Info size={16} /></TooltipTrigger>
+                    <TooltipTrigger>
+                      <Info size={16} />
+                    </TooltipTrigger>
                     <TooltipContent>
-                      <p>Fecha limite que se mostrara la vacante. Despues de la fecha seleccionada la vacante se borrara automaticamente</p>
+                      <p>Fecha límite que se mostrará la vacante. Después de la fecha seleccionada la vacante se borrará automáticamente</p>
                     </TooltipContent>
                   </Tooltip>
                 </label>
@@ -548,30 +638,23 @@ export default function PostJob() {
                       mode="single"
                       selected={date}
                       onSelect={setDate}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-
-              <TempImageUpload
-                onImageSelected={setSelectedImage}
-                label="Imagen de la Vacante (Opcional)"
-                description="Sube una imagen para mejorar la presentación de tu vacante"
-              />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
       <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6">
-        <Button variant="outline" className="w-full sm:w-auto">
+        <Button variant="outline" className="w-full sm:w-auto" onClick={() => router.back()}>
           Cancelar
         </Button>
-        <Button disabled={loading} onClick={() => handleSubmit()} className="w-full sm:w-auto">
+        <Button disabled={loading} onClick={handleSubmit} className="w-full sm:w-auto">
           <Send className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">
-            {loading ? 'Publicando...' : selectedImage ? 'Publicar Vacante e Imagen' : 'Publicar Vacante'}
+            {loading ? 'Publicando...' : 'Publicar Vacante Externa'}
           </span>
           <span className="sm:hidden">
             {loading ? 'Publicando...' : 'Publicar'}

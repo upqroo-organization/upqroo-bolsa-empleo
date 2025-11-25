@@ -1,4 +1,3 @@
-import { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,14 +8,6 @@ import { getFeaturedJobs, getJobsStats } from "@/lib/featured-jobs"
 import Image from "next/image"
 import FeaturedEvents from "@/components/FeaturedEvents"
 import FeaturedJobsCarousel from "@/components/FeaturedJobsCarousel"
-
-export const metadata: Metadata = {
-  title: "Inicio | Upqroo Bolsa de Empleo",
-  description: "Encuentra las mejores vacantes y oportunidades laborales en Quintana Roo. Conectamos talento universitario con empresas líderes.",
-  alternates: {
-    canonical: "/",
-  },
-}
 
 export default async function LandingPage() {
   // Fetch real data - Get 10 featured jobs for carousel
@@ -53,7 +44,6 @@ export default async function LandingPage() {
       label: "Colocaciones Exitosas",
       color: "text-orange-600",
       bgColor: "bg-orange-100",
-      // subtitle: jobsStats.placementRate > 0 ? `${jobsStats.placementRate}% tasa de éxito` : "0% tasa de éxito"
     },
   ] as Array<{
     icon: React.ComponentType<{ className?: string }>;
@@ -64,29 +54,8 @@ export default async function LandingPage() {
     subtitle?: string;
   }>
 
-
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Upqroo Bolsa de Empleo",
-    "url": "https://redtalento.upqroo.edu.mx",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://redtalento.upqroo.edu.mx/vacantes?vacante={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
-  }
-
   return (
     <div className="min-h-screen">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground py-24">
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:60px_60px]" />
@@ -126,7 +95,7 @@ export default async function LandingPage() {
                 <div className="md:flex-1 w-full space-y-2">
                   <label className="text-sm font-medium">¿Qué trabajo buscas?</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 wmercad-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input name="vacante" type="text" placeholder="Buscar empleos, empresas o carreras..." className="pl-10 h-12" />
                   </div>
                 </div>
@@ -245,15 +214,9 @@ export default async function LandingPage() {
               © 2025 Universidad Politécnica de Quintana Roo. Todos los derechos reservados.
             </p>
             <div className="flex justify-center space-x-6 text-sm text-muted-foreground">
-              {/* <a href="#" className="hover:text-primary transition-colors">
-                Términos de Uso
-              </a> */}
               <a href="/terms" className="hover:text-primary transition-colors">
                 Aviso de Privacidad
               </a>
-              {/* <a href="#" className="hover:text-primary transition-colors">
-                Contacto
-              </a> */}
               <a href="/autores" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Autores</a>
             </div>
           </div>

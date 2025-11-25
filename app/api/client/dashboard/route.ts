@@ -82,7 +82,7 @@ export async function GET() {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 5 // Limit recommendations
+      take: 3 // Limit recommendations
     })
 
     // Calculate profile completion
@@ -123,8 +123,8 @@ export async function GET() {
         recentApplications: recentApplications.map(app => ({
           id: app.id,
           title: app.vacante.title,
-          company: app.vacante.company.name,
-          companyLogo: app.vacante.company.logoUrl,
+          company: app.vacante.company?.name || app.vacante.externalCompanyName || "Empresa Confidencial",
+          companyLogo: app.vacante.company?.logoUrl,
           status: app.status,
           appliedAt: app.appliedAt,
           location: app.vacante.location,
@@ -133,8 +133,8 @@ export async function GET() {
         recommendedJobs: recommendedJobs.map(job => ({
           id: job.id,
           title: job.title,
-          company: job.company.name,
-          companyLogo: job.company.logoUrl,
+          company: job.company?.name || job.externalCompanyName || "Empresa Confidencial",
+          companyLogo: job.company?.logoUrl,
           location: job.location,
           salaryMin: job.salaryMin,
           salaryMax: job.salaryMax,

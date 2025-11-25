@@ -52,6 +52,12 @@ export async function GET(request: Request) {
             name: true,
             id: true
           }
+        },
+        createdByCoordinator: {
+          select: {
+            name: true,
+            email: true
+          }
         }
       },
       orderBy: {

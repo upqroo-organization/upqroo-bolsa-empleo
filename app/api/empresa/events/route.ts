@@ -7,7 +7,7 @@ import { CreateEventData } from '@/types/events';
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'company') {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
@@ -64,7 +64,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'company') {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
@@ -93,30 +93,17 @@ export async function POST(request: NextRequest) {
 
     const body: CreateEventData = await request.json();
 
-    // Validate required fields
-    if (!body.title || !body.description || !body.eventType || !body.startDate) {
-      return NextResponse.json(
-        { success: false, message: 'Faltan campos requeridos' },
-        { status: 400 }
-      );
-    }
+    // Validate dates if both are provided
+    if (body.startDate && body.endDate) {
+      const startDate = new Date(body.startDate);
+      const endDate = new Date(body.endDate);
 
-    // Validate dates
-    const startDate = new Date(body.startDate);
-    const endDate = body.endDate ? new Date(body.endDate) : null;
-
-    if (startDate < new Date()) {
-      return NextResponse.json(
-        { success: false, message: 'La fecha de inicio debe ser futura' },
-        { status: 400 }
-      );
-    }
-
-    if (endDate && endDate <= startDate) {
-      return NextResponse.json(
-        { success: false, message: 'La fecha de fin debe ser posterior a la fecha de inicio' },
-        { status: 400 }
-      );
+      if (endDate <= startDate) {
+        return NextResponse.json(
+          { success: false, message: 'La fecha de fin debe ser posterior a la fecha de inicio' },
+          { status: 400 }
+        );
+      }
     }
 
     const event = await prisma.event.create({
@@ -124,8 +111,8 @@ export async function POST(request: NextRequest) {
         title: body.title,
         description: body.description,
         eventType: body.eventType,
-        startDate,
-        endDate,
+        startDate: body.startDate ? new Date(body.startDate) : undefined,
+        endDate: body.endDate ? new Date(body.endDate) : undefined,
         location: body.location,
         isOnline: body.isOnline,
         maxAttendees: body.maxAttendees,

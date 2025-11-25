@@ -1,10 +1,10 @@
 model Event {
   id              String    @id @default(cuid())
-  title           String
-  description     String    @db.Text
+  title           String?
+  description     String?   @db.Text
   imageUrl        String? // URL to the event image
-  eventType       String // bootcamp, job_fair, course, workshop, etc.
-  startDate       DateTime
+  eventType       String? // bootcamp, job_fair, course, workshop, announcement, etc.
+  startDate       DateTime?
   endDate         DateTime?
   location        String? // Physical location or "Online"
   isOnline        Boolean   @default(false)

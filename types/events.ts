@@ -1,10 +1,10 @@
 export interface Event {
   id: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   imageUrl?: string;
-  eventType: EventType;
-  startDate: Date;
+  eventType?: EventType;
+  startDate?: Date;
   endDate?: Date;
   location?: string;
   isOnline: boolean;
@@ -40,6 +40,7 @@ export enum EventType {
   CONFERENCE = 'conference',
   NETWORKING = 'networking',
   WEBINAR = 'webinar',
+  ANNOUNCEMENT = 'announcement',
   OTHER = 'other'
 }
 
@@ -51,14 +52,15 @@ export const EventTypeLabels: Record<EventType, string> = {
   [EventType.CONFERENCE]: 'Conferencia',
   [EventType.NETWORKING]: 'Networking',
   [EventType.WEBINAR]: 'Webinar',
+  [EventType.ANNOUNCEMENT]: 'Anuncio',
   [EventType.OTHER]: 'Otro'
 };
 
 export interface CreateEventData {
-  title: string;
-  description: string;
-  eventType: EventType;
-  startDate: Date;
+  title?: string;
+  description?: string;
+  eventType?: EventType;
+  startDate?: Date;
   endDate?: Date;
   location?: string;
   isOnline: boolean;

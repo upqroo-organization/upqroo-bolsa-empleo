@@ -1,7 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import EventImage from "@/components/EventImage";
 
 interface State {
   id: number;
@@ -24,7 +29,6 @@ import {
   Users,
   ExternalLink,
   Building2,
-  Clock,
   Loader2,
   CalendarDays,
   Search,
@@ -53,8 +57,8 @@ export default function EventsPage() {
 
   // Filter events by search term (client-side)
   const filteredEvents = events.filter(event =>
-    event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (event.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (event.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (event.company?.name || event.coordinator?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -91,7 +95,7 @@ export default function EventsPage() {
             Eventos y Oportunidades
           </h1>
           <p className="text-xl text-primary-foreground/90 max-w-2xl mx-auto">
-            Descubre talleres, conferencias, ferias de empleo y oportunidades de networking
+            Descubre talleres, conferencias, ferias de empleo, anuncios y oportunidades de networking
           </p>
         </div>
       </section>
@@ -159,7 +163,7 @@ export default function EventsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="upcoming">Solo próximos</SelectItem>
+                      <SelectItem value="upcoming">Próximos y sin fecha</SelectItem>
                       <SelectItem value="all">Todos los eventos</SelectItem>
                     </SelectContent>
                   </Select>
@@ -210,86 +214,103 @@ export default function EventsPage() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEvents.map((event) => (
-                  <Card key={event.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                    <CardHeader className="pb-3">
+                  <Card key={event.id} className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 flex flex-col">
+                    <CardHeader className="pb-2 space-y-2">
                       {event.imageUrl && (
-                        <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
-                          <img
-                            src={event.imageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className={`w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity ${!event.title && !event.description ? 'h-96' : 'h-40'
+                              }`}>
+                              <EventImage
+                                src={event.imageUrl}
+                                alt={event.title || 'Imagen del evento'}
+                                className="w-full h-full object-contain bg-muted"
+                                containerClassName="w-full h-full"
+                              />
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl w-full p-0">
+                            <div className="relative w-full max-h-[90vh] overflow-auto">
+                              <EventImage
+                                src={event.imageUrl}
+                                alt={event.title || 'Imagen del evento'}
+                                className="w-full h-auto"
+                                containerClassName="w-full min-h-[200px]"
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                      {(event.title || event.description || event.eventType) && (
+                        <div className="space-y-1">
+                          {event.title && (
+                            <CardTitle className="text-base line-clamp-2">
+                              {event.title}
+                            </CardTitle>
+                          )}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <CardDescription className="flex items-center gap-1 text-xs">
+                              <Building2 className="h-3 w-3" />
+                              {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
+                            </CardDescription>
+                            {event.eventType && (
+                              <Badge variant="secondary" className="text-xs py-0 h-5">
+                                {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       )}
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-2 mb-2">
-                            {event.title}
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-1 mb-2">
-                            <Building2 className="h-4 w-4" />
-                            {event.company?.name || (event.coordinator ? 'UPQROO' : 'Organizador')}
-                          </CardDescription>
-                          <Badge variant="secondary" className="mb-2">
-                            {EventTypeLabels[event.eventType as keyof typeof EventTypeLabels]}
-                          </Badge>
-                        </div>
-                      </div>
                     </CardHeader>
 
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          <span>
-                            {format(new Date(event.startDate), "PPP", { locale: es })}
-                            {event.endDate && isAfter(new Date(event.endDate), new Date(event.startDate)) && (
-                              <> - {format(new Date(event.endDate), "PPP", { locale: es })}</>
-                            )}
-                          </span>
-                        </div>
+                    <CardContent className="space-y-2 pt-2 flex-1">
+                      <div className="space-y-1.5 text-xs">
+                        {event.startDate && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Calendar className="h-3 w-3 flex-shrink-0" />
+                            <span className="line-clamp-1">
+                              {format(new Date(event.startDate), "PP", { locale: es })}
+                              {event.endDate && isAfter(new Date(event.endDate), new Date(event.startDate)) && (
+                                <> - {format(new Date(event.endDate), "PP", { locale: es })}</>
+                              )}
+                            </span>
+                          </div>
+                        )}
 
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>
-                            {format(new Date(event.startDate), "p", { locale: es })}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span>
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                          <span className="line-clamp-1">
                             {event.isOnline ? "En línea" : event.location || "Por definir"}
                             {event.state && !event.isOnline && ` - ${event.state.name}`}
                           </span>
                         </div>
 
                         {event.maxAttendees && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Users className="h-4 w-4" />
-                            <span>Máximo {event.maxAttendees} asistentes</span>
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Users className="h-3 w-3 flex-shrink-0" />
+                            <span>Máx. {event.maxAttendees}</span>
                           </div>
                         )}
                       </div>
 
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {event.description}
-                      </p>
+                      {event.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
 
-                      {event.registrationUrl ? (
+                      {event.registrationUrl && (
                         <a
                           href={event.registrationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full"
+                          className="w-full mt-auto"
                         >
-                          <Button className="w-full">
-                            <ExternalLink className="mr-2 h-4 w-4" />
+                          <Button size="sm" className="w-full">
+                            <ExternalLink className="mr-1.5 h-3 w-3" />
                             Registrarse
                           </Button>
                         </a>
-                      ) : (
-                        <></>
                       )}
                     </CardContent>
                   </Card>

@@ -22,7 +22,8 @@ export interface ApplicationWithVacante {
     company: {
       name: string
       logoUrl: string | null
-    }
+    } | null
+    externalCompanyName: string | null
     state: {
       id: number
       name: string

@@ -11,7 +11,7 @@ export async function GET(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'company') {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
@@ -32,9 +32,9 @@ export async function GET(
     }
 
     const event = await prisma.event.findFirst({
-      where: { 
+      where: {
         id,
-        companyId: company.id 
+        companyId: company.id
       },
       include: {
         company: {
@@ -81,7 +81,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'company') {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
@@ -103,9 +103,9 @@ export async function PUT(
 
     // Check if event exists and belongs to company
     const existingEvent = await prisma.event.findFirst({
-      where: { 
+      where: {
         id,
-        companyId: company.id 
+        companyId: company.id
       }
     });
 
@@ -118,18 +118,8 @@ export async function PUT(
 
     const body: UpdateEventData = await request.json();
 
-    // Validate dates if provided
-    if (body.startDate) {
-      const startDate = new Date(body.startDate);
-      if (startDate < new Date()) {
-        return NextResponse.json(
-          { success: false, message: 'La fecha de inicio debe ser futura' },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (body.endDate && body.startDate) {
+    // Validate dates if both are provided
+    if (body.startDate && body.endDate) {
       const startDate = new Date(body.startDate);
       const endDate = new Date(body.endDate);
       if (endDate <= startDate) {
@@ -142,7 +132,7 @@ export async function PUT(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
-    
+
     if (body.title !== undefined) updateData.title = body.title;
     if (body.description !== undefined) updateData.description = body.description;
     if (body.eventType !== undefined) updateData.eventType = body.eventType;
@@ -197,7 +187,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user || session.user.role !== 'company') {
       return NextResponse.json(
         { success: false, message: 'No autorizado' },
@@ -219,9 +209,9 @@ export async function DELETE(
 
     // Check if event exists and belongs to company
     const existingEvent = await prisma.event.findFirst({
-      where: { 
+      where: {
         id,
-        companyId: company.id 
+        companyId: company.id
       }
     });
 
