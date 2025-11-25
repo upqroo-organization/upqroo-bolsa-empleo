@@ -133,24 +133,7 @@ export default function FeaturedEventsCarousel({ events }: FeaturedEventsCarouse
         </div>
         {showNavigation && (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleAutoPlay}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {isAutoPlaying ? (
-                <>
-                  <Pause className="h-4 w-4 mr-1" />
-                  Pausar
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-1" />
-                  Reproducir
-                </>
-              )}
-            </Button>
+            {/* Play/Pause button removed */}
           </div>
         )}
       </div>
@@ -222,40 +205,9 @@ export default function FeaturedEventsCarousel({ events }: FeaturedEventsCarouse
         </div>
       )}
 
-      {/* Progress Bar */}
-      {showNavigation && isAutoPlaying && (
-        <div className="mt-4">
-          <div className="w-full bg-gray-200 rounded-full h-1">
-            <div
-              className="bg-primary h-1 rounded-full transition-all duration-100 ease-linear"
-              style={{
-                width: `${((currentIndex + 1) / totalSlides) * 100}%`
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Progress Bar removed */}
 
-      {/* Event Counter and Navigation Info */}
-      <div className="text-center mt-6 space-y-2">
-        <p className="text-sm text-muted-foreground">
-          {showNavigation ? (
-            <>
-              Diapositiva {currentIndex + 1} de {totalSlides} •
-              {events.length} evento{events.length !== 1 ? 's' : ''} disponible{events.length !== 1 ? 's' : ''}
-            </>
-          ) : (
-            <>
-              {events.length} evento{events.length !== 1 ? 's' : ''} próximo{events.length !== 1 ? 's' : ''}
-            </>
-          )}
-        </p>
-        {showNavigation && (
-          <p className="text-xs text-muted-foreground">
-            {isAutoPlaying ? 'Reproducción automática activada' : 'Reproducción automática pausada'}
-          </p>
-        )}
-      </div>
+      {/* Event Counter and Navigation Info removed */}
     </div>
   )
 }
