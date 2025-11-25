@@ -18,9 +18,7 @@ import {
   Users,
   ExternalLink,
   Building2,
-  CalendarDays,
-  Play,
-  Pause
+  CalendarDays
 } from "lucide-react"
 import { Event, EventTypeLabels } from "@/types/events"
 import { format, isAfter } from "date-fns"
@@ -88,9 +86,7 @@ export default function FeaturedEventsCarousel({ events }: FeaturedEventsCarouse
     setCurrentIndex(index)
   }, [])
 
-  const toggleAutoPlay = () => {
-    setIsAutoPlaying(!isAutoPlaying)
-  }
+
 
   // Reset to first slide when screen size changes
   useEffect(() => {

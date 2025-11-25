@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Building2, MapPin, Clock, DollarSign, Briefcase, Play, Pause } from "lucide-react"
+import { ChevronLeft, ChevronRight, Building2, MapPin, Clock, DollarSign, Briefcase } from "lucide-react"
 import Link from "next/link"
 import { FeaturedJob } from "@/lib/featured-jobs"
 import { Careers, VacanteTypeEnum, VacanteModalityEnum } from "@/types/vacantes"
@@ -112,9 +112,7 @@ export default function FeaturedJobsCarousel({ jobs }: FeaturedJobsCarouselProps
     setCurrentIndex(index)
   }, [])
 
-  const toggleAutoPlay = () => {
-    setIsAutoPlaying(!isAutoPlaying)
-  }
+
 
   // Reset to first slide when screen size changes
   useEffect(() => {
