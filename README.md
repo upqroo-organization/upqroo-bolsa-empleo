@@ -73,7 +73,7 @@ npx prisma db push
 npx prisma db pull
 ```
 
-### 🔍 Database Visualization
+### Database Visualization
 
 ```bash
 npx prisma studio
