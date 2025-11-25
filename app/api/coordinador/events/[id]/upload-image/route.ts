@@ -83,7 +83,7 @@ export async function POST(
     const filename = `event_${id}_${timestamp}${extension}`;
 
     // Ensure upload directory exists
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'events');
+    const uploadDir = path.join(process.cwd(), 'uploads', 'events');
     await mkdir(uploadDir, { recursive: true });
 
     // Write file

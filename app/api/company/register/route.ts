@@ -121,7 +121,7 @@ export async function POST(req: Request) {
         }
 
         // Create upload directory if it doesn't exist
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'fiscal-documents');
+        const uploadDir = path.join(process.cwd(), 'uploads', 'fiscal-documents');
         await mkdir(uploadDir, { recursive: true });
 
         // Generate unique filename

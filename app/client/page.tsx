@@ -27,6 +27,8 @@ import { useEvents } from "@/hooks/useEvents"
 import { EventTypeLabels } from "@/types/events"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
+import { getEnumLabelSafe } from "@/utils/index"
+import { VacanteTypeEnum } from "@/types/vacantes"
 
 interface DashboardData {
   user: {
@@ -407,7 +409,7 @@ export default function StudentDashboard() {
               <CardDescription>Basado en tu perfil y carrera</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 {dashboardData.recommendedJobs.length > 0 ? (
                   dashboardData.recommendedJobs.map((job) => (
                     <Link key={job.id} href={`/vacantes?job=${job.id}`}>
@@ -425,8 +427,8 @@ export default function StudentDashboard() {
                           {formatSalary(job.salaryMin, job.salaryMax)}
                         </div>
                         {job.type && (
-                          <Badge variant="secondary" className="text-xs">
-                            {job.type}
+                          <Badge variant="secondary" className="text-xs capitalize">
+                            {getEnumLabelSafe(VacanteTypeEnum, job.type)}
                           </Badge>
                         )}
                       </div>
