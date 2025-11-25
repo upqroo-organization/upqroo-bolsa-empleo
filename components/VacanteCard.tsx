@@ -42,7 +42,7 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Building2 className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                <span className="truncate">{vacante.company.name}</span>
+                <span className="truncate">{vacante.company?.name || vacante.externalCompanyName || 'Empresa Externa'}</span>
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
@@ -106,7 +106,7 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
           {vacante.imageUrl && (
             <div className="lg:col-span-1">
               <ExpandableImage
-                src={`/${vacante.imageUrl}`}
+                src={vacante.imageUrl.startsWith('/') ? vacante.imageUrl : `/${vacante.imageUrl}`}
                 alt={`Imagen de ${vacante.title}`}
                 containerClassName="relative w-full h-24 sm:h-32 lg:h-36 rounded-lg overflow-hidden bg-gray-100 border"
                 objectFit="contain"
@@ -117,7 +117,17 @@ export default function VacanteCard({ vacante, hasApplied = false, isAuthenticat
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t">
-          {isAuthenticated && hasApplied ? (
+          {vacante.isExternal ? (
+            <Button
+              className="flex-1 text-sm"
+              variant="outline"
+              disabled
+              size="sm"
+              title="Esta vacante es de una empresa externa. Contacta directamente con la empresa."
+            >
+              Vacante Externa
+            </Button>
+          ) : isAuthenticated && hasApplied ? (
             <Button
               className="flex-1 text-sm"
               variant="outline"

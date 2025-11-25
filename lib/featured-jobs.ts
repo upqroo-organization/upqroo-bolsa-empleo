@@ -14,10 +14,12 @@ export interface FeaturedJob {
   company: {
     name: string
     logoUrl: string | null
-  }
+  } | null
   state: {
     name: string
   } | null
+  isExternal?: boolean
+  externalCompanyName?: string | null
 }
 
 export async function getFeaturedJobs(limit: number = 6): Promise<FeaturedJob[]> {
@@ -37,6 +39,8 @@ export async function getFeaturedJobs(limit: number = 6): Promise<FeaturedJob[]>
         modality: true,
         career: true,
         createdAt: true,
+        isExternal: true,
+        externalCompanyName: true,
         company: {
           select: {
             name: true,
