@@ -497,7 +497,7 @@ export default function EditJobPage() {
                   onImageDeleted={() => handleInputChange('imageUrl', null)}
                   uploadEndpoint={`/api/empresa/vacantes/${params.id}/image`}
                   deleteEndpoint={`/api/empresa/vacantes/${params.id}/image`}
-                  label="Imagen de la Vacante"
+                  label="Imagen de la Vacante (Opcional)"
                   description="Sube una imagen para mejorar la presentación de tu vacante"
                 />
               </CardContent>

@@ -556,7 +556,7 @@ export default function PostJob() {
 
               <TempImageUpload
                 onImageSelected={setSelectedImage}
-                label="Imagen de la Vacante"
+                label="Imagen de la Vacante (Opcional)"
                 description="Sube una imagen para mejorar la presentación de tu vacante"
               />
             </CardContent>
