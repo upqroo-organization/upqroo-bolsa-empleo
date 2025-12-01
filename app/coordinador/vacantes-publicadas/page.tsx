@@ -513,7 +513,7 @@ export default function VacantesPublicadas() {
             className="w-full sm:w-auto"
           >
             <Briefcase className="h-4 w-4 mr-2" />
-            Crear Vacante Externa
+            Crear Vacante
           </Button>
         </div>
       </div>

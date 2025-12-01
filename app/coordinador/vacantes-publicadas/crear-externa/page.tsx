@@ -248,7 +248,7 @@ export default function CrearVacanteExterna() {
             Volver
           </Button>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Crear Vacante Externa</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Crear Vacante</h1>
             <p className="text-sm md:text-base text-muted-foreground">
               Publica una vacante para una empresa no registrada
             </p>
@@ -654,7 +654,7 @@ export default function CrearVacanteExterna() {
         <Button disabled={loading} onClick={handleSubmit} className="w-full sm:w-auto">
           <Send className="mr-2 h-4 w-4" />
           <span className="hidden sm:inline">
-            {loading ? 'Publicando...' : 'Publicar Vacante Externa'}
+            {loading ? 'Publicando...' : 'Publicar Vacante'}
           </span>
           <span className="sm:hidden">
             {loading ? 'Publicando...' : 'Publicar'}

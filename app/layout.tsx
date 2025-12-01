@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   authors: [{ name: "Universidad Politécnica de Quintana Roo", url: "https://upqroo.edu.mx" }],
   creator: "UPQROO",
   publisher: "UPQROO",
+  verification: {
+    google: "eGkNpxRfLf9SjuJFJfUZM0PMO3PN9HNAi50DAHvZWwA",
+  },
   robots: {
     index: true,
     follow: true,

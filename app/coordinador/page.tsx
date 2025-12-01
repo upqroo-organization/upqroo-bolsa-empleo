@@ -446,7 +446,7 @@ export default function CoordinatorDashboard() {
           <Link href="/coordinador/vacantes-publicadas/crear-externa">
             <Button size="sm">
               <Briefcase className="h-4 w-4 mr-2" />
-              Crear Vacante Externa
+              Crear Vacante
             </Button>
           </Link>
           <Button
