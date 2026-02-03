@@ -23,3 +23,33 @@ Steps:
 6. Generate the build files with `npm run build`
 7. Restart the pm2 process of the project `bolsa-upqroo` (If you can't see the process on the pm2 process list with command `pm2 list`, please contact with the server administrator to restart the pm2 or asks to update your credential rights)
 8. Verify that the page was deployed correctly on the webpage `redtalento.upqroo.edu.mx`
+
+Deployment from scratch
+
+1. Verify if VirtualHost file was created on `/etc/apache2/sites-available/redtalento.conf` else create it as follows:
+
+```
+<VirtualHost *:80>
+    ServerName redtalento.upqroo.edu.mx
+
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:7500/
+    ProxyPassReverse / http://127.0.0.1:7500/
+
+    ErrorLog ${APACHE_LOG_DIR}/mydomain_error.log
+    CustomLog ${APACHE_LOG_DIR}/mydomain_access.log combined
+</VirtualHost>
+```
+
+2. Download prohject on `/var/www/` folder
+
+```bash
+npm run build
+
+# Start project on port 7500
+pm2 start npm --name "redtalento" -- start -- --port 7500
+
+# Save process list
+pm2 save
+pm2 startup
+```
