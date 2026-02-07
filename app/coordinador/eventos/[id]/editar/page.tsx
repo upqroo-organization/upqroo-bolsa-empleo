@@ -395,8 +395,17 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
                 <Input
                   id="startDate"
                   type="datetime-local"
-                  value={formData.startDate?.toISOString().slice(0, 16) || ''}
-                  onChange={(e) => handleInputChange('startDate', new Date(e.target.value))}
+                  value={formData.startDate instanceof Date && !isNaN(formData.startDate.getTime()) ? formData.startDate.toISOString().slice(0, 16) : ''}
+                  onChange={(e) => {
+                    if (!e.target.value) {
+                      handleInputChange('startDate', undefined);
+                      return;
+                    }
+                    const date = new Date(e.target.value);
+                    if (!isNaN(date.getTime())) {
+                      handleInputChange('startDate', date);
+                    }
+                  }}
                 />
               </div>
 
@@ -405,8 +414,17 @@ export default function EditCoordinatorEventPage({ params }: EditCoordinatorEven
                 <Input
                   id="endDate"
                   type="datetime-local"
-                  value={formData.endDate?.toISOString().slice(0, 16) || ''}
-                  onChange={(e) => handleInputChange('endDate', e.target.value ? new Date(e.target.value) : undefined)}
+                  value={formData.endDate instanceof Date && !isNaN(formData.endDate.getTime()) ? formData.endDate.toISOString().slice(0, 16) : ''}
+                  onChange={(e) => {
+                    if (!e.target.value) {
+                      handleInputChange('endDate', undefined);
+                      return;
+                    }
+                    const date = new Date(e.target.value);
+                    if (!isNaN(date.getTime())) {
+                      handleInputChange('endDate', date);
+                    }
+                  }}
                 />
               </div>
             </div>
