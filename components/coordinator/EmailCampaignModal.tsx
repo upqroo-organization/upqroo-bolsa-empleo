@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -38,7 +39,11 @@ import {
   Loader2,
   Plus,
   X,
-  UserPlus
+  UserPlus,
+  FileText,
+  PenLine,
+  Eye,
+  List
 } from "lucide-react"
 
 interface Company {
@@ -61,6 +66,7 @@ interface EmailCampaignModalProps {
 export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalProps) {
   const [activeTab, setActiveTab] = useState("compose")
   const [loading, setLoading] = useState(false)
+  const [emailType, setEmailType] = useState<'template' | 'custom'>('template')
   const [sending, setSending] = useState(false)
 
   // Companies data
@@ -74,12 +80,18 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
   const [customEmails, setCustomEmails] = useState<Array<{ email: string; name: string }>>([])
   const [newEmail, setNewEmail] = useState("")
   const [newName, setNewName] = useState("")
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkEmails, setBulkEmails] = useState("")
 
   // Email composition - simplified for single template
   const [emailData, setEmailData] = useState({
     companyName: "",
     contactName: ""
   })
+
+  // Custom email fields
+  const [customSubject, setCustomSubject] = useState("")
+  const [customBody, setCustomBody] = useState("")
 
   const [sendResults, setSendResults] = useState<{
     totalCompanies: number
@@ -146,8 +158,8 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
   }
 
   const addCustomEmail = () => {
-    if (!newEmail || !newName) {
-      toast.error("Complete el email y nombre")
+    if (!newEmail) {
+      toast.error("Ingrese un email")
       return
     }
 
@@ -164,10 +176,51 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
       return
     }
 
-    setCustomEmails(prev => [...prev, { email: newEmail, name: newName }])
+    setCustomEmails(prev => [...prev, { email: newEmail, name: newName || '' }])
     setNewEmail("")
     setNewName("")
     toast.success("Email agregado correctamente")
+  }
+
+  const addBulkEmails = () => {
+    if (!bulkEmails.trim()) {
+      toast.error("Pegue al menos un email")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    // Split by commas, semicolons, newlines or spaces
+    const emails = bulkEmails
+      .split(/[,;\n\s]+/)
+      .map(e => e.trim())
+      .filter(Boolean)
+
+    let added = 0
+    let skipped = 0
+    const newEmails = [...customEmails]
+
+    for (const email of emails) {
+      if (!emailRegex.test(email)) {
+        skipped++
+        continue
+      }
+      if (newEmails.some(e => e.email === email)) {
+        skipped++
+        continue
+      }
+      newEmails.push({ email, name: '' })
+      added++
+    }
+
+    setCustomEmails(newEmails)
+    setBulkEmails("")
+    setBulkMode(false)
+
+    if (added > 0) {
+      toast.success(`${added} email(s) agregado(s)${skipped > 0 ? `, ${skipped} omitido(s)` : ''}`)
+    } else {
+      toast.error("No se encontraron emails válidos nuevos")
+    }
   }
 
   const removeCustomEmail = (emailToRemove: string) => {
@@ -182,6 +235,11 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
       return
     }
 
+    if (emailType === 'custom' && (!customSubject.trim() || !customBody.trim())) {
+      toast.error("Complete el asunto y el cuerpo del correo personalizado")
+      return
+    }
+
     try {
       setSending(true)
       const response = await fetch("/api/coordinador/email-campaigns", {
@@ -192,7 +250,10 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
         body: JSON.stringify({
           companyIds: selectedCompanies,
           customEmails: customEmails,
-          templateData: emailData
+          templateData: emailData,
+          emailType,
+          customSubject: customSubject.trim(),
+          customBody: customBody.trim()
         })
       })
 
@@ -224,6 +285,11 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
     setNewName("")
     setInternalCount(0)
     setExternalCount(0)
+    setEmailType('template')
+    setCustomSubject("")
+    setCustomBody("")
+    setBulkMode(false)
+    setBulkEmails("")
   }
 
   const handleClose = () => {
@@ -249,81 +315,187 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <TabsList className="grid w-full grid-cols-2">
-            {/* <TabsTrigger value="compose">Configurar</TabsTrigger> */}
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="compose">Configurar</TabsTrigger>
             <TabsTrigger value="recipients">Destinatarios</TabsTrigger>
             <TabsTrigger value="results" disabled={!sendResults}>Resultados</TabsTrigger>
           </TabsList>
 
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
             <TabsContent value="compose" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Configuración del Email</CardTitle>
-                  <CardDescription>
-                    Se enviará la plantilla de invitación a registro con los datos personalizados
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="companyName">Nombre de la empresa (opcional)</Label>
-                      <Input
-                        id="companyName"
-                        value={emailData.companyName}
-                        onChange={(e) => setEmailData(prev => ({ ...prev, companyName: e.target.value }))}
-                        placeholder="Ej: Empresa ABC (se usará el nombre registrado si se deja vacío)"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Si se deja vacío, se usará el nombre de cada empresa registrada
+              {/* Email Type Toggle */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEmailType('template')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${emailType === 'template'
+                    ? 'border-[#622120] bg-[#622120]/5 shadow-sm'
+                    : 'border-border hover:border-muted-foreground/30'
+                    }`}
+                >
+                  <FileText className={`h-5 w-5 ${emailType === 'template' ? 'text-[#622120]' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-medium text-sm ${emailType === 'template' ? 'text-[#622120]' : ''}`}>Plantilla Predeterminada</p>
+                    <p className="text-xs text-muted-foreground">Invitación a registro</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEmailType('custom')}
+                  className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all ${emailType === 'custom'
+                    ? 'border-[#622120] bg-[#622120]/5 shadow-sm'
+                    : 'border-border hover:border-muted-foreground/30'
+                    }`}
+                >
+                  <PenLine className={`h-5 w-5 ${emailType === 'custom' ? 'text-[#622120]' : 'text-muted-foreground'}`} />
+                  <div className="text-left">
+                    <p className={`font-medium text-sm ${emailType === 'custom' ? 'text-[#622120]' : ''}`}>Correo Personalizado</p>
+                    <p className="text-xs text-muted-foreground">Redacta tu propio correo</p>
+                  </div>
+                </button>
+              </div>
+
+              {emailType === 'template' ? (
+                /* Template Mode */
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Plantilla de Invitación</CardTitle>
+                    <CardDescription>
+                      Se enviará automáticamente a cada destinatario con su nombre personalizado
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-1">📧 Asunto del correo:</h4>
+                      <p className="text-sm text-blue-800">
+                        &quot;Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO&quot;
                       </p>
                     </div>
 
-                    <div>
-                      <Label htmlFor="contactName">Nombre del contacto (opcional)</Label>
-                      <Input
-                        id="contactName"
-                        value={emailData.contactName}
-                        onChange={(e) => setEmailData(prev => ({ ...prev, contactName: e.target.value }))}
-                        placeholder="Ej: Sr./Sra. García (se usará el contacto registrado si se deja vacío)"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Si se deja vacío, se usará el contacto de cada empresa o &quot;Estimado/a&quot;
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Plantilla que se enviará:</h4>
-                    <p className="text-sm text-blue-800">
-                      &quot;Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO&quot;
-                    </p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      La plantilla incluye información sobre los beneficios de registrarse,
-                      enlace de registro y datos de contacto de la universidad.
-                    </p>
-                  </div>
-
-                  {(internalCount > 0 || externalCount > 0) && (
-                    <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Empresas disponibles:</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-gray-600 rounded-full"></div>
-                          <span>{internalCount} empresas registradas</span>
+                    {/* Preview */}
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-muted border-b">
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">Vista previa de la plantilla</span>
+                      </div>
+                      <div>
+                        {/* Header Preview */}
+                        <div className="flex items-center justify-between px-4 py-3" style={{ backgroundColor: '#622120' }}>
+                          <span className="text-white font-bold text-sm">Bolsa de Trabajo</span>
+                          <span className="text-white/70 text-xs">UPQROO</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                          <span>{externalCount} empresas externas</span>
+                        {/* Body Preview */}
+                        <div className="p-4 text-sm text-foreground leading-relaxed space-y-2">
+                          <p>Estimado(a) <strong>[nombre del destinatario]</strong>,</p>
+                          <p>La <strong>Universidad Politécnica de Quintana Roo</strong> te invita cordialmente a registrar tu empresa en la <strong>Bolsa de Trabajo Universitaria</strong>.</p>
+                          <p className="text-muted-foreground text-xs mt-1">• Publicar ofertas de empleo y prácticas profesionales sin costo</p>
+                          <p className="text-muted-foreground text-xs">• Acceder a perfiles de estudiantes y egresados</p>
+                          <p className="text-muted-foreground text-xs">• Fortalecer la vinculación con la universidad</p>
+                          <div className="text-center my-3">
+                            <span className="inline-block px-4 py-2 text-xs text-white rounded-md" style={{ backgroundColor: '#622120' }}>
+                              Registrarse gratuitamente
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Contacto: gestionempresarial@upqroo.edu.mx</p>
+                        </div>
+                        {/* Footer Preview */}
+                        <div className="px-4 py-3 bg-muted/50 text-center">
+                          <p className="text-xs text-muted-foreground">
+                            Universidad Politécnica de Quintana Roo — Cancún, Quintana Roo
+                          </p>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-600 mt-2">
-                        Las empresas externas provienen de la base de datos de empresas que ya trabajan con la universidad.
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                /* Custom Email Mode */
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Redactar Correo Personalizado</CardTitle>
+                    <CardDescription>
+                      El correo se enviará con el header y footer oficiales de UPQROO
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="customSubject">Asunto del correo *</Label>
+                      <Input
+                        id="customSubject"
+                        value={customSubject}
+                        onChange={(e) => setCustomSubject(e.target.value)}
+                        placeholder="Ej: Invitación a Feria de Empleo UPQROO 2026"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="customBody">Cuerpo del correo *</Label>
+                      <Textarea
+                        id="customBody"
+                        value={customBody}
+                        onChange={(e) => setCustomBody(e.target.value)}
+                        placeholder="Escriba aquí el contenido de su correo...&#10;&#10;Use doble salto de línea para separar párrafos."
+                        rows={8}
+                        className="resize-y"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        El saludo &quot;Estimado(a) [nombre]&quot; se agregará automáticamente al inicio.
+                        Use doble salto de línea para separar párrafos.
                       </p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+
+                    {/* Preview */}
+                    <div className="mt-4 border rounded-lg overflow-hidden">
+                      <div className="flex items-center gap-2 px-4 py-2 bg-muted border-b">
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">Vista previa</span>
+                      </div>
+                      <div>
+                        {/* Header Preview */}
+                        <div className="flex items-center justify-between px-4 py-3" style={{ backgroundColor: '#622120' }}>
+                          <span className="text-white font-bold text-sm">Bolsa de Trabajo</span>
+                          <span className="text-white/70 text-xs">UPQROO</span>
+                        </div>
+                        {/* Body Preview */}
+                        <div className="p-4 text-sm text-foreground leading-relaxed space-y-2">
+                          <p><strong>Asunto:</strong> {customSubject || <span className="text-muted-foreground italic">Sin asunto</span>}</p>
+                          <hr className="my-2" />
+                          <p>Estimado(a) <strong>[nombre del destinatario]</strong>,</p>
+                          {customBody ? (
+                            customBody.split('\n\n').filter(Boolean).map((p, i) => (
+                              <p key={i}>{p}</p>
+                            ))
+                          ) : (
+                            <p className="text-muted-foreground italic">El cuerpo del correo aparecerá aquí...</p>
+                          )}
+                        </div>
+                        {/* Footer Preview */}
+                        <div className="px-4 py-3 bg-muted/50 text-center">
+                          <p className="text-xs text-muted-foreground">
+                            Universidad Politécnica de Quintana Roo — Cancún, Quintana Roo
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {(internalCount > 0 || externalCount > 0) && (
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">Empresas disponibles:</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-gray-600 rounded-full"></div>
+                      <span>{internalCount} empresas registradas</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                      <span>{externalCount} empresas externas</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="recipients" className="space-y-4">
@@ -402,55 +574,98 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
                 {/* Custom Emails Section */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <UserPlus className="h-5 w-5" />
-                      Emails Personalizados
-                    </CardTitle>
-                    <CardDescription>
-                      {customEmails.length} emails personalizados agregados
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Add new email form */}
-                    <div className="space-y-3 p-3 border rounded-lg bg-muted/50">
-                      <div className="grid grid-cols-1 gap-2">
-                        <Input
-                          placeholder="Nombre del contacto"
-                          value={newName}
-                          onChange={(e) => setNewName(e.target.value)}
-                        />
-                        <Input
-                          placeholder="email@ejemplo.com"
-                          type="email"
-                          value={newEmail}
-                          onChange={(e) => setNewEmail(e.target.value)}
-                        />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <UserPlus className="h-5 w-5" />
+                          Emails Adicionales
+                        </CardTitle>
+                        <CardDescription className="mt-1">
+                          {customEmails.length} email(s) agregado(s)
+                        </CardDescription>
                       </div>
                       <Button
-                        onClick={addCustomEmail}
+                        variant={bulkMode ? 'default' : 'outline'}
                         size="sm"
-                        className="w-full"
-                        disabled={!newEmail || !newName}
+                        onClick={() => setBulkMode(!bulkMode)}
                       >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Agregar Email
+                        <List className="h-4 w-4 mr-1" />
+                        {bulkMode ? 'Individual' : 'Agregar varios'}
                       </Button>
                     </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {bulkMode ? (
+                      /* Bulk paste mode */
+                      <div className="space-y-3 p-3 border rounded-lg bg-muted/50">
+                        <Textarea
+                          placeholder={"Pegue los correos aquí, separados por comas, punto y coma, espacios o saltos de línea.\n\nEjemplo:\nemail1@ejemplo.com, email2@empresa.com\nemail3@gmail.com"}
+                          value={bulkEmails}
+                          onChange={(e) => setBulkEmails(e.target.value)}
+                          rows={5}
+                          className="resize-y"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Se usará &quot;Estimado/a&quot; como saludo para estos contactos
+                        </p>
+                        <Button
+                          onClick={addBulkEmails}
+                          size="sm"
+                          className="w-full"
+                          disabled={!bulkEmails.trim()}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar todos los emails
+                        </Button>
+                      </div>
+                    ) : (
+                      /* Individual add mode */
+                      <div className="space-y-3 p-3 border rounded-lg bg-muted/50">
+                        <div className="grid grid-cols-1 gap-2">
+                          <Input
+                            placeholder="email@ejemplo.com *"
+                            type="email"
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Nombre del contacto (opcional)"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          onClick={addCustomEmail}
+                          size="sm"
+                          className="w-full"
+                          disabled={!newEmail}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar Email
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Custom emails list */}
                     <div className="space-y-2 max-h-80 overflow-y-auto">
                       {customEmails.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
                           <Mail className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No hay emails personalizados agregados</p>
+                          <p className="text-sm">No hay emails adicionales agregados</p>
                         </div>
                       ) : (
                         customEmails.map((customEmail, index) => (
                           <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg">
                             <Mail className="h-4 w-4 text-muted-foreground" />
                             <div className="flex-1">
-                              <p className="font-medium">{customEmail.name}</p>
-                              <p className="text-sm text-muted-foreground">{customEmail.email}</p>
+                              {customEmail.name ? (
+                                <>
+                                  <p className="font-medium">{customEmail.name}</p>
+                                  <p className="text-sm text-muted-foreground">{customEmail.email}</p>
+                                </>
+                              ) : (
+                                <p className="font-medium">{customEmail.email}</p>
+                              )}
                             </div>
                             <Button
                               variant="ghost"
@@ -553,8 +768,8 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
                 </div>
               )}
             </TabsContent>
-          </div>
-        </Tabs>
+          </div >
+        </Tabs >
 
         <DialogFooter className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -578,7 +793,10 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
             </Button>
 
             {(activeTab === "compose" || activeTab === "recipients") && (
-              <Button onClick={handleSendEmails} disabled={sending || totalRecipients === 0}>
+              <Button
+                onClick={handleSendEmails}
+                disabled={sending || totalRecipients === 0 || (emailType === 'custom' && (!customSubject.trim() || !customBody.trim()))}
+              >
                 {sending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
@@ -589,7 +807,7 @@ export function EmailCampaignModal({ open, onOpenChange }: EmailCampaignModalPro
             )}
           </div>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </DialogContent >
+    </Dialog >
   )
 }
