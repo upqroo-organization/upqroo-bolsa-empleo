@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendEmailDirect } from '@/lib/emailService';
-import { COMPANY_REGISTER_INVITATION, EmpresasApiResponse } from './email-template';
+import { COMPANY_REGISTER_INVITATION, CUSTOM_EMAIL_WRAPPER, EmpresasApiResponse } from './email-template';
 
 export async function GET() {
   try {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { companyIds, customEmails, templateData } = await request.json();
+    const { companyIds, customEmails, templateData, emailType, customSubject, customBody } = await request.json();
 
     // Separate internal and external company IDs
     const internalCompanyIds = (companyIds || []).filter((id: string) => !id.startsWith('external_'));
@@ -170,27 +170,50 @@ export async function POST(request: NextRequest) {
       errors: [] as string[]
     };
 
+    const isCustomEmail = emailType === 'custom';
+
+    // Convert plain-text body to HTML paragraphs
+    const convertToHtml = (text: string) => {
+      return text
+        .split('\n\n')
+        .map(paragraph => paragraph.trim())
+        .filter(Boolean)
+        .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+        .join('\n');
+    };
+
     // Prepare the template with replacements
     const prepareTemplate = (companyName: string, contactName: string) => {
+      if (isCustomEmail) {
+        const finalContactName = contactName || companyName || 'Estimado/a';
+        const bodyHtml = `<p>Estimado(a) <strong>${finalContactName}</strong>,</p>\n${convertToHtml(customBody)}`;
+        let template = CUSTOM_EMAIL_WRAPPER;
+        template = template.replace(/{{SUBJECT}}/g, customSubject);
+        template = template.replace(/{{CUSTOM_BODY}}/g, bodyHtml);
+        return template;
+      }
+
       let template = COMPANY_REGISTER_INVITATION;
-
-      // Replace template variables with form data or company data
       const finalContactName = templateData?.contactName || contactName || 'Estimado/a';
-
       template = template.replace(/{{Nombre del representante \/ Empresa}}/g, finalContactName);
       template = template.replace(/{{UNIVERSIDAD}}/g, 'Universidad Politécnica de Quintana Roo');
-
       return template;
     };
+
+    const emailSubject = isCustomEmail
+      ? customSubject
+      : 'Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO';
 
     // Send emails to all companies
     for (const company of companies) {
       try {
         const emailOptions = {
           to: company.email,
-          subject: 'Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO',
+          subject: emailSubject,
           html: prepareTemplate(company.name, company.contactName || ''),
-          text: `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${company.contactName || 'representante de ' + company.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+          text: isCustomEmail
+            ? `${customSubject}\n\nEstimado/a ${company.contactName || company.name},\n\n${customBody}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+            : `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${company.contactName || 'representante de ' + company.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
         };
 
         const result = await sendEmailDirect(emailOptions);
@@ -213,9 +236,11 @@ export async function POST(request: NextRequest) {
         try {
           const emailOptions = {
             to: customEmail.email,
-            subject: 'Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO',
+            subject: emailSubject,
             html: prepareTemplate(customEmail.name, customEmail.name),
-            text: `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${customEmail.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+            text: isCustomEmail
+              ? `${customSubject}\n\nEstimado/a ${customEmail.name},\n\n${customBody}\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
+              : `Invitación a registrarse en la Bolsa de Trabajo Universitaria de UPQROO\n\nEstimado/a ${customEmail.name},\n\nLa Universidad Politécnica de Quintana Roo le invita cordialmente a registrar su empresa en nuestra Bolsa de Trabajo Universitaria.\n\nSaludos cordiales,\nEquipo de Coordinación\nUniversidad Politécnica de Quintana Roo`
           };
 
           const result = await sendEmailDirect(emailOptions);
