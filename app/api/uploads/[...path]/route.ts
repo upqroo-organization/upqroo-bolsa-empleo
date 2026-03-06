@@ -86,7 +86,7 @@ export async function GET(
         break;
     }
 
-    return new NextResponse(fileBuffer as any, {
+    return new NextResponse(fileBuffer as unknown as BodyInit, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'private, max-age=3600', // Private cache for authenticated content
