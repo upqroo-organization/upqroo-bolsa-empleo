@@ -10,17 +10,26 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    // Check authentication - this general endpoint requires authentication
-    const session = await getServerSession(authOptions);
+    const { path: pathSegments } = await params;
     
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: 'No autorizado - Debes iniciar sesión para acceder a archivos' },
-        { status: 401 }
-      );
+    // Public directories that don't require authentication
+    const isPublicDirectory = 
+      pathSegments[0] === 'events' || 
+      pathSegments[0] === 'logos' || 
+      pathSegments[0] === 'job-images';
+
+    if (!isPublicDirectory) {
+      // Check authentication - this general endpoint requires authentication for non-public files
+      const session = await getServerSession(authOptions);
+      
+      if (!session?.user?.id) {
+        return NextResponse.json(
+          { error: 'No autorizado - Debes iniciar sesión para acceder a archivos' },
+          { status: 401 }
+        );
+      }
     }
 
-    const { path: pathSegments } = await params;
     const filePath = path.join(process.cwd(), 'uploads', ...pathSegments);
     
     // Security check: ensure the file is within the uploads directory
@@ -77,7 +86,7 @@ export async function GET(
         break;
     }
 
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(fileBuffer as any, {
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'private, max-age=3600', // Private cache for authenticated content
